@@ -1,0 +1,1557 @@
+
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  ** This notice applies to any and all portions of this file
+  * that are not between comment pairs USER CODE BEGIN and
+  * USER CODE END. Other portions of this file, whether 
+  * inserted by the user or by software development tools
+  * are owned by their respective copyright owners.
+  *
+  * COPYRIGHT(c) 2018 STMicroelectronics
+  *
+  * Redistribution and use in source and binary forms, with or without modification,
+  * are permitted provided that the following conditions are met:
+  *   1. Redistributions of source code must retain the above copyright notice,
+  *      this list of conditions and the following disclaimer.
+  *   2. Redistributions in binary form must reproduce the above copyright notice,
+  *      this list of conditions and the following disclaimer in the documentation
+  *      and/or other materials provided with the distribution.
+  *   3. Neither the name of STMicroelectronics nor the names of its contributors
+  *      may be used to endorse or promote products derived from this software
+  *      without specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *
+  ******************************************************************************
+  */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "stm32f1xx_hal.h"
+#include "dac.h"
+#include "dma.h"
+#include "rtc.h"
+#include "spi.h"
+#include "usart.h"
+#include "gpio.h"
+
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+/* Private variables ---------------------------------------------------------*/
+/* 开启DEBUG 串口3输出调试信息 */
+//#define DEBUG
+/* GPIO宏定义 */
+#define LED_LO(x)   (x == 1 ? HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET))
+#define LED_HI(x) (x == 1 ? HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET))
+#define LED_LS(x) (x == 1 ? HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET))
+#define LED_WASH(x) (x == 1 ? HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET))
+#define RELAY_WASH(x) (x == 1 ? HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET))
+#define RELAY_LO(x) (x == 1 ? HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET))
+#define RELAY_HI(x) (x == 1 ? HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET))
+#define BTN_CONFIG() HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14)
+#define BTN_CAL() HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)
+#define BTN_MODE() HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)
+#define BTN_RIGHT() HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)
+#define BTN_ENTER() HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8)
+
+static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40 };
+// CRC 低位字节值表
+static char auchCRCLo[] = { 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2,
+		0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD,
+		0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09, 0x08, 0xC8,
+		0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F,
+		0xDD, 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6,
+		0xD2, 0x12, 0x13, 0xD3, 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1,
+		0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7, 0x37, 0xF5, 0x35, 0x34, 0xF4,
+		0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A, 0x3B, 0xFB,
+		0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA,
+		0xEE, 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5,
+		0x27, 0xE7, 0xE6, 0x26, 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0,
+		0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2, 0x62, 0x66, 0xA6, 0xA7, 0x67,
+		0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F, 0x6E, 0xAE,
+		0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79,
+		0xBB, 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C,
+		0xB4, 0x74, 0x75, 0xB5, 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73,
+		0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91, 0x51, 0x93, 0x53, 0x52, 0x92,
+		0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C, 0x5D, 0x9D,
+		0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98,
+		0x88, 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F,
+		0x8D, 0x4D, 0x4C, 0x8C, 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86,
+		0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40 };
+
+//设置背景黑色
+uint8_t SetBackBlackCMD[8] = { 0xEE, 0x42, 0x00, 0x01, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//设置前景红色
+uint8_t SetForeRedCMD[8] = { 0xEE, 0x41, 0xF8, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//设置前景黑色
+uint8_t SetForeBlackCMD[8] = { 0xEE, 0x41, 0x00, 0x01, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//根据已设置背景色清屏
+uint8_t ClearBackBlackCMD[6] = { 0xEE, 0x01, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示主数字第1位														/ 数字位图片编号 /
+uint8_t ShowMainNum1CMD[13] = { 0xEE, 0x32, 0x01, 0x4E, 0x00, 0x6C, 0x00, 1,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示主数字第2位
+uint8_t ShowMainNum2CMD[13] = { 0xEE, 0x32, 0x01, 0x0D, 0x00, 0x6C, 0x00, 1,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示主数字第3位
+uint8_t ShowMainNum3CMD[13] = { 0xEE, 0x32, 0x00, 0xCC, 0x00, 0x6C, 0x00, 21,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示主数字第4位
+uint8_t ShowMainNum4CMD[13] = { 0xEE, 0x32, 0x00, 0x8B, 0x00, 0x6C, 0x00, 1,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示主数字第5位
+uint8_t ShowMainNum5CMD[13] = { 0xEE, 0x32, 0x00, 0x4A, 0x00, 0x6C, 0x00, 1,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示温度数字第1位
+uint8_t ShowTempNum1CMD[13] = { 0xEE, 0x32, 0x00, 0xB1, 0x00, 0x3A, 0x00, 0x46,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度数字第2位
+uint8_t ShowTempNum2CMD[13] = { 0xEE, 0x32, 0x00, 0x94, 0x00, 0x3A, 0x00, 0x46,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度数字第3位
+uint8_t ShowTempNum3CMD[13] = { 0xEE, 0x32, 0x00, 0x77, 0x00, 0x3A, 0x00, 0x45,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度数字第4位
+uint8_t ShowTempNum4CMD[13] = { 0xEE, 0x32, 0x00, 0x5A, 0x00, 0x3A, 0x00, 0x46,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示氧浓度单位
+uint8_t ShowMainUnitCMD[13] = { 0xEE, 0x32, 0x00, 0x0A, 0x00, 0xAA, 0x00, 0x1B,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度单位
+uint8_t ShowTempUnitCMD[13] = { 0xEE, 0x32, 0x00, 0x18, 0x00, 0x36, 0x00, 0x51,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示界面状态
+uint8_t ShowPageStatusCMD[13] = { 0xEE, 0x32, 0x01, 0x5A, 0x00, 0xE6, 0x00,
+		0x29, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示报警状态
+uint8_t ShowAlarmStatusCMD[13] = { 0xEE, 0x32, 0x00, 0xB0, 0x00, 0xE6, 0x00,
+		0x2B, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示清洗状态
+uint8_t ShowWashStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x0A, 0x00, 0xE6, 0x00,
+		0x44, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示电极状态文字
+uint8_t ShowElectrodeTextCMD[13] = { 0xEE, 0x32, 0x01, 0x5A, 0x00, 0x0A, 0x00,
+		45, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示电极状态
+uint8_t ShowElectrodeStatusCMD[13] = { 0xEE, 0x32, 0x01, 0x0A, 0x00, 0x0A, 0x00,
+		46, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示输出电流文字
+uint8_t ShowmATextCMD[13] = { 0xEE, 0x32, 0x00, 0x6A, 0x00, 0x0A, 0x00, 82,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示输出电流数字第1位
+uint8_t ShowmANum1CMD[13] = { 0xEE, 0x32, 0x00, 0x52, 0x00, 0x0C, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示输出电流数字第2位
+uint8_t ShowmANum2CMD[13] = { 0xEE, 0x32, 0x00, 0x41, 0x00, 0x0C, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示输出电流单位
+uint8_t ShowmAUnitCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x0A, 0x00, 25,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面选择条
+uint8_t ShowConfigSelect1CMD[13] = { 0xEE, 0x32, 0x00, 70, 0x00, 216, 0x00, 65,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigSelect2CMD[13] = { 0xEE, 0x32, 0x00, 70, 0x00, 168, 0x00, 65,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigSelect3CMD[13] = { 0xEE, 0x32, 0x00, 70, 0x00, 120, 0x00, 65,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigSelect4CMD[13] = { 0xEE, 0x32, 0x00, 70, 0x00, 68, 0x00, 65,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigSelect5CMD[13] = { 0xEE, 0x32, 0x00, 70, 0x00, 16, 0x00, 65,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigUnselect1CMD[14] = { 0xEE, 0x55, 0x00, 70, 0x00, 216, 0x01,
+		0xA3, 0x00, 0xDB, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigUnselect2CMD[14] = { 0xEE, 0x55, 0x00, 70, 0x00, 168, 0x01,
+		0xA3, 0x00, 0xAB, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigUnselect3CMD[14] = { 0xEE, 0x55, 0x00, 70, 0x00, 120, 0x01,
+		0xA3, 0x00, 0x7B, 0xFF, 0xFC, 0xFF, 0xFF };
+uint8_t ShowConfigUnselect4CMD[14] = { 0xEE, 0x55, 0x00, 70, 0x00, 68, 0x01,
+		0xA3, 0x00, 0x47, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面1
+uint8_t ShowConfPage1CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 53,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面2
+uint8_t ShowConfigPage2CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 54,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面3
+uint8_t ShowConfigPage3CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 55,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面4
+uint8_t ShowConfigPage4CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 56,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示设置界面5
+uint8_t ShowConfigPage5CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 57,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示单位设置
+uint8_t ShowConfUnitCMD[13] = { 0xEE, 0x32, 0x00, 130, 0x00, 176, 0x00, 27,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示盐度设置数字1
+uint8_t ShowConfSalinityNum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 132, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示盐度设置数字2
+uint8_t ShowConfSalinityNum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 132, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示盐度设置数字3-小数点
+uint8_t ShowConfSalinityNum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 132, 0x00,
+		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示盐度设置数字4
+uint8_t ShowConfSalinityNum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 132, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度设置数字1
+uint8_t ShowConfTempNum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 82, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度设置数字2
+uint8_t ShowConfTempNum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 82, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度设置数字3-小数点
+uint8_t ShowConfTempNum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 82, 0x00, 30,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度设置数字4
+uint8_t ShowConfTempNum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 82, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度设置单位
+uint8_t ShowConfTempUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 82, 0x00, 81,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示当前温度数字1
+uint8_t ShowConfTempNowNum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示当前温度数字2
+uint8_t ShowConfTempNowNum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示当前温度数字3-小数点
+uint8_t ShowConfTempNowNum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 32, 0x00,
+		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示当前温度数字4
+uint8_t ShowConfTempNowNum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示当前温度设置单位
+uint8_t ShowConfTempNowUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 32, 0x00, 81,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字1
+uint8_t ShowConf4mANum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 176, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字2
+uint8_t ShowConf4mANum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 176, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字3-小数点
+uint8_t ShowConf4mANum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 176, 0x00, 30,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字4
+uint8_t ShowConf4mANum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 176, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置单位
+uint8_t ShowConf4mAUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 176, 0x00, 27,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字1
+uint8_t ShowConf20mANum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 132, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字2
+uint8_t ShowConf20mANum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 132, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字3-小数点
+uint8_t ShowConf20mANum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 132, 0x00, 30,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字4
+uint8_t ShowConf20mANum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 132, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置单位
+uint8_t ShowConf20mAUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 132, 0x00, 27,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA温度设置数字1
+uint8_t ShowConf4mATempNum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 82, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA温度设置数字2
+uint8_t ShowConf4mATempNum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 82, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA温度设置数字3-小数点
+uint8_t ShowConf4mATempNum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 82, 0x00,
+		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA温度设置数字4
+uint8_t ShowConf4mATempNum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 82, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA温度设置单位
+uint8_t ShowConf4mATempUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 82, 0x00, 81,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA温度设置数字1
+uint8_t ShowConf20mATempNum1CMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA温度设置数字2
+uint8_t ShowConf20mATempNum2CMD[13] = { 0xEE, 0x32, 0x00, 190, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA温度设置数字3-小数点
+uint8_t ShowConf20mATempNum3CMD[13] = { 0xEE, 0x32, 0x00, 170, 0x00, 32, 0x00,
+		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA温度设置数字4
+uint8_t ShowConf20mATempNum4CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 32, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA温度设置单位
+uint8_t ShowConf20mATempUnitCMD[13] = { 0xEE, 0x32, 0x00, 80, 0x00, 32, 0x00,
+		81, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示高点报警状态
+uint8_t ShowConfUpLimitAutoCMD[13] = { 0xEE, 0x32, 0x00, 210, 0x00, 132, 0x00,
+		51, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//获取传感器数据
+uint8_t GetSensor[8] = { 0x03, 0x03, 0x00, 0x00, 0x00, 0x0A, 0xC4, 0x2F };
+
+//是否需要刷新标志位
+uint8_t refreshFlag = 0;
+
+//进入设置标志位
+uint8_t configFlag = 0;
+
+//传感器接收数据
+//todo 后期确定长度
+uint8_t sensorRevBuf[100];
+
+float f_PPM;
+float f_Temp;
+float f_k;
+
+float f_PPM_Uplimit = 15;
+float f_PPM_Downlimit = 5;
+
+//继电器标志位
+uint8_t Relay_Flag = 1;			//0:低位报警 | 1:正常 | 2:高位报警
+uint8_t Relay_WASH_Flag = 0;	//0:不清洗 | 1:清洗
+
+//按钮时间标志位
+long Button_Conf_Flag = 0;
+long Button_Cal_Flag = 0;
+
+//获取传感器数据时间标志位
+long Sensor_Time = 0;
+//传感器状态标志位
+uint8_t Sensor_Status = 0;
+uint8_t Sensor_Status_IN = 0;
+
+//flash保存参数
+typedef struct {
+	uint8_t unit;
+	float salinity;
+	float temp;
+	float ppm4mA;
+	float ppm20mA;
+	float temp4mA;
+	float temp20mA;
+	uint8_t uplimitauto;
+	float uplimit;
+	float uplimitdelay;
+	uint8_t lowlimitauto;
+	float lowlimit;
+	float lowlimitdelay;
+
+} SAVEDATA;
+SAVEDATA savedata;
+SAVEDATA tempdata;
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+
+/* USER CODE BEGIN PFP */
+/* Private function prototypes -----------------------------------------------*/
+void readConfig(void);
+void application(void);
+void LCD_Update(void);
+void ImA_Update(void);
+void Relay_Update(void);
+void LCD_Init(void);
+void Enter_Conf_Page1(void);
+void Enter_Conf_Page2(void);
+void Enter_Conf_Page3(void);
+void Enter_Conf_Page4(void);
+void Enter_Conf_Page5(void);
+void Change_Conf_Unit(uint8_t unit);
+void Change_Conf_Salinity(float salinity);
+void Change_Conf_Temp(float temp);
+void Change_Conf_Temp_Now(float temp);
+void Change_Conf_ppm4mA(float ppm4mA);
+void Change_Conf_ppm20mA(float ppm20mA);
+void Change_Conf_temp4mA(float temp4mA);
+void Change_Conf_temp20mA(float temp20mA);
+void Select_Next(uint8_t Selection);
+void Conf_UI(void);
+void UART_RxIDLECallback(UART_HandleTypeDef* uartHandle);
+unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen);
+void change_float_big_485rom(unsigned int j);
+void Button_Scan(void);
+/* USER CODE END PFP */
+
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  *
+  * @retval None
+  */
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration----------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_USART1_UART_Init();
+  MX_DAC_Init();
+  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
+  MX_SPI2_Init();
+  MX_RTC_Init();
+  /* USER CODE BEGIN 2 */
+  /* 读取EEPROM */
+  	readConfig();
+
+  	//3s启动LOGO延时
+  	HAL_Delay(3000);
+  	//初始化主界面
+  	LCD_Init();
+
+  	//测试用
+  #ifdef DEBUG
+  //	MX_TIM3_Init(10, 0);
+  //	MX_TIM4_Init(10, 5);
+  //	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+  //	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+  //	HAL_Delay(1000);
+  //	MX_TIM3_Init(0);
+  //	MX_TIM4_Init(0);
+  //	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+  //	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+  //	HAL_Delay(1000);
+
+  	LED_LO(1);
+  	RELAY_LO(1);
+  	HAL_Delay(2000);
+  	RELAY_LO(0);
+  	LED_LO(0);
+
+  	LED_HI(1);
+  	RELAY_HI(1);
+  	HAL_Delay(2000);
+  	RELAY_HI(0);
+  	LED_HI(0);
+
+  	LED_WASH(1);
+  	RELAY_WASH(1);
+  	HAL_Delay(2000);
+  	RELAY_WASH(0);
+  	LED_WASH(0);
+
+  	LED_LS(1);
+  	HAL_Delay(2000);
+  	LED_LS(0);
+
+  //	Enter_Conf_Page1();
+  //	while (1)
+  //			;
+  #endif
+
+  	/* main 函数 while(1) 前，启动一次 DMA 接收 */
+  	if (HAL_UART_Receive_DMA(&huart2, (uint8_t *) sensorRevBuf,
+  			sizeof(sensorRevBuf)) != HAL_OK) {
+  		Error_Handler();
+  	}
+  	/* 开启串口空闲中断 */
+  	__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  application();
+  /* USER CODE END WHILE */
+
+  /* USER CODE BEGIN 3 */
+
+  }
+  /* USER CODE END 3 */
+
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV2;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure the Systick interrupt time 
+    */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+    /**Configure the Systick 
+    */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+/* USER CODE BEGIN 4 */
+
+/**
+ * @功能简介 : 从EEPROM读取用户配置
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void readConfig(void) {
+	//todo 后期添加
+	if (0) {
+		;
+	} else {
+		savedata.unit = 1;
+		savedata.salinity = 12;
+		savedata.temp = 34;
+		savedata.ppm4mA = 56;
+		savedata.ppm20mA = 78;
+		savedata.temp4mA = 91;
+		savedata.temp20mA = 23;
+	}
+}
+
+/**
+ * @功能简介 : 主程序循环
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void application(void) {
+	//todo 测试传感器后修改
+	/* 正常刷新数据 */
+	if (refreshFlag == 1 && configFlag == 0) {
+		/* 刷新4-20mA电流 */
+		ImA_Update();
+		/* 刷新继电器 */
+		Relay_Update();
+		/* 刷新界面 */
+		LCD_Update();
+		refreshFlag = 0;
+		Sensor_Status = 0;
+	}
+	/* 获取传感器数据 */
+	if (refreshFlag == 0 && configFlag == 0 && Sensor_Time == 250000) {
+		HAL_UART_Transmit(&huart2, GetSensor, sizeof(GetSensor), 0xFFFF);
+	}
+	/* 扫描按键 */
+	Button_Scan();
+
+	if (Sensor_Status == 0) {
+		if (Sensor_Status_IN == 0) {
+			ShowElectrodeStatusCMD[7] = 50;
+			HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD,
+					sizeof(ShowElectrodeStatusCMD), 0xFFFF);
+		}
+	}
+	if (Sensor_Status >= 99) {
+		Sensor_Status = 1;
+		if (Sensor_Status_IN == 1) {
+			ShowElectrodeStatusCMD[7] = 46;
+			HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD,
+					sizeof(ShowElectrodeStatusCMD), 0xFFFF);
+		}
+	}
+
+	if (Sensor_Time >= 500000) {
+		Sensor_Time = 0;
+	}
+	Sensor_Time++;
+	Sensor_Status++;
+}
+
+/**
+ * @功能简介 : 更新UI
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/08/03
+ */
+void LCD_Update(void) {
+	uint8_t u_10PPM, u_1PPM, u_01PPM, u_001PPM;
+	uint8_t u_10Temp, u_1Temp, u_01Temp;
+	uint8_t index = 1;
+	u_10PPM = f_PPM / 10;
+	u_1PPM = f_PPM - u_10PPM * f_PPM;
+	u_01PPM = (f_PPM - u_10PPM * f_PPM - u_1PPM) * 10;
+	u_001PPM = (f_PPM - u_10PPM * f_PPM - u_1PPM - 0.1 * u_01PPM) * 100;
+	if (f_PPM > f_PPM_Downlimit && f_PPM < f_PPM_Uplimit) {
+		index = 1;
+		ShowAlarmStatusCMD[7] = 43;
+		Relay_Flag = 1;
+	} else if (f_PPM < f_PPM_Downlimit) {
+		index = 11;
+		ShowAlarmStatusCMD[7] = 59;
+		Relay_Flag = 0;
+	} else if (f_PPM > f_PPM_Uplimit) {
+		index = 11;
+		ShowAlarmStatusCMD[7] = 66;
+		Relay_Flag = 2;
+	}
+
+	ShowMainNum1CMD[7] = u_10PPM + index;
+	ShowmANum1CMD[7] = u_10PPM + 31;
+	ShowMainNum2CMD[7] = u_1PPM + index;
+	ShowmANum2CMD[7] = u_1PPM + 31;
+	ShowMainNum3CMD[7] = (index == 1 ? 21 : 22);
+	ShowMainNum4CMD[7] = u_01PPM + index;
+	ShowMainNum5CMD[7] = u_001PPM + index;
+
+	u_10Temp = f_Temp / 10;
+	u_1Temp = f_Temp - u_10Temp * 10;
+	u_01Temp = (f_Temp - u_10Temp * 10 - u_1Temp) * 10;
+
+	ShowTempNum1CMD[7] = u_10Temp + 70;
+	ShowTempNum2CMD[7] = u_1Temp + 70;
+	ShowTempNum4CMD[7] = u_01Temp + 70;
+
+	HAL_UART_Transmit(&huart1, ShowMainNum1CMD, sizeof(ShowMainNum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum2CMD, sizeof(ShowMainNum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum3CMD, sizeof(ShowMainNum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum4CMD, sizeof(ShowMainNum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum5CMD, sizeof(ShowMainNum5CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum1CMD, sizeof(ShowTempNum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum2CMD, sizeof(ShowTempNum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum3CMD, sizeof(ShowTempNum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum4CMD, sizeof(ShowTempNum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowAlarmStatusCMD, sizeof(ShowAlarmStatusCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowWashStatusCMD, sizeof(ShowWashStatusCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmANum1CMD, sizeof(ShowmANum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmANum2CMD, sizeof(ShowmANum2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 根据传感器采集值更新PPM和温度的4-20mA电流信号
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/08/17
+ */
+void ImA_Update(void) {
+	MX_TIM3_Init(200, (int) (f_PPM * 5.814));
+	MX_TIM4_Init(100, (int) (f_Temp * 0.5814));
+
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+}
+
+/**
+ * @功能简介 : 根据传感器采集值更新继电器高低点报警、根据时间更新清洗继电器
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Relay_Update(void) {
+	switch (Relay_Flag) {
+	case 0:
+		RELAY_LO(1);
+		RELAY_HI(0);
+		break;
+	case 1:
+		RELAY_LO(0);
+		RELAY_HI(0);
+		break;
+	case 2:
+		RELAY_LO(0);
+		RELAY_HI(1);
+		break;
+	}
+	//todo 根据时间设定启动清洗继电器
+}
+
+/**
+ * @功能简介 : 初始化UI
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void LCD_Init(void) {
+	HAL_UART_Transmit(&huart1, SetBackBlackCMD, sizeof(SetBackBlackCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ClearBackBlackCMD, sizeof(ClearBackBlackCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum1CMD, sizeof(ShowMainNum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum2CMD, sizeof(ShowMainNum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum3CMD, sizeof(ShowMainNum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum4CMD, sizeof(ShowMainNum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowMainNum5CMD, sizeof(ShowMainNum5CMD),
+			0xFFFF);
+	switch (savedata.unit) {
+	case 0:
+		ShowMainUnitCMD[7] = 27;
+		break;
+	case 1:
+		ShowMainUnitCMD[7] = 28;
+		break;
+	case 2:
+		ShowMainUnitCMD[7] = 23;
+		break;
+	}
+	HAL_UART_Transmit(&huart1, ShowMainUnitCMD, sizeof(ShowMainUnitCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum1CMD, sizeof(ShowTempNum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum2CMD, sizeof(ShowTempNum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum3CMD, sizeof(ShowTempNum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempNum4CMD, sizeof(ShowTempNum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowTempUnitCMD, sizeof(ShowTempUnitCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowPageStatusCMD, sizeof(ShowPageStatusCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowAlarmStatusCMD, sizeof(ShowAlarmStatusCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowWashStatusCMD, sizeof(ShowWashStatusCMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowElectrodeTextCMD,
+			sizeof(ShowElectrodeTextCMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD,
+			sizeof(ShowElectrodeStatusCMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmATextCMD, sizeof(ShowmATextCMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmANum1CMD, sizeof(ShowmANum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmANum2CMD, sizeof(ShowmANum2CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowmAUnitCMD, sizeof(ShowmAUnitCMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 进入Config页面1
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Enter_Conf_Page1(void) {
+	HAL_UART_Transmit(&huart1, ShowConfPage1CMD, sizeof(ShowConfPage1CMD),
+			0xFFFF);
+	Change_Conf_Unit(savedata.unit);
+	Change_Conf_Salinity(savedata.salinity);
+	Change_Conf_Temp(savedata.temp);
+	HAL_UART_Transmit(&huart1, ShowConfTempUnitCMD, sizeof(ShowConfTempUnitCMD),
+			0xFFFF);
+	Change_Conf_Temp_Now(f_Temp);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowUnitCMD,
+			sizeof(ShowConfTempNowUnitCMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD,
+			sizeof(ShowConfigSelect1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD,
+			sizeof(ShowConfigSelect2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 进入Config页面2
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Enter_Conf_Page2(void) {
+	HAL_UART_Transmit(&huart1, ShowConfigPage2CMD, sizeof(ShowConfigPage2CMD),
+			0xFFFF);
+	Change_Conf_ppm4mA(tempdata.ppm4mA);
+	Change_Conf_ppm20mA(tempdata.ppm20mA);
+	Change_Conf_temp4mA(tempdata.temp4mA);
+	Change_Conf_temp20mA(tempdata.temp20mA);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD,
+			sizeof(ShowConfigSelect1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD,
+			sizeof(ShowConfigSelect2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 进入Config页面3
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Enter_Conf_Page3(void) {
+	HAL_UART_Transmit(&huart1, ShowConfigPage3CMD, sizeof(ShowConfigPage3CMD),
+			0xFFFF);
+	Change_Conf_ppm4mA(tempdata.ppm4mA);
+	Change_Conf_ppm20mA(tempdata.ppm20mA);
+	Change_Conf_temp4mA(tempdata.temp4mA);
+	Change_Conf_temp20mA(tempdata.temp20mA);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD,
+			sizeof(ShowConfigSelect1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD,
+			sizeof(ShowConfigSelect2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 进入Config页面4
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Enter_Conf_Page4(void) {
+	HAL_UART_Transmit(&huart1, ShowConfigPage4CMD, sizeof(ShowConfigPage4CMD),
+			0xFFFF);
+	Change_Conf_ppm4mA(tempdata.ppm4mA);
+	Change_Conf_ppm20mA(tempdata.ppm20mA);
+	Change_Conf_temp4mA(tempdata.temp4mA);
+	Change_Conf_temp20mA(tempdata.temp20mA);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD,
+			sizeof(ShowConfigSelect1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD,
+			sizeof(ShowConfigSelect2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 进入Config页面5
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Enter_Conf_Page5(void) {
+	HAL_UART_Transmit(&huart1, ShowConfigPage5CMD, sizeof(ShowConfigPage5CMD),
+			0xFFFF);
+	Change_Conf_ppm4mA(tempdata.ppm4mA);
+	Change_Conf_ppm20mA(tempdata.ppm20mA);
+	Change_Conf_temp4mA(tempdata.temp4mA);
+	Change_Conf_temp20mA(tempdata.temp20mA);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD,
+			sizeof(ShowConfigSelect1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD,
+			sizeof(ShowConfigSelect2CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的单位设置
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_Unit(uint8_t unit) {
+	switch (unit) {
+	case 0:
+		ShowConfUnitCMD[7] = 27;
+		break;
+	case 1:
+		ShowConfUnitCMD[7] = 28;
+		break;
+	case 2:
+		ShowConfUnitCMD[7] = 23;
+		break;
+	default:
+		break;
+	}
+	HAL_UART_Transmit(&huart1, ShowConfUnitCMD, sizeof(ShowConfUnitCMD),
+			0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的盐度补偿系数
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_Salinity(float salinity) {
+	ShowConfSalinityNum1CMD[7] = salinity / 10;
+	ShowConfSalinityNum2CMD[7] = salinity - ShowConfSalinityNum1CMD[7] * 10;
+	ShowConfSalinityNum4CMD[7] = 31
+			+ (salinity - ShowConfSalinityNum1CMD[7] * 10
+					- ShowConfSalinityNum2CMD[7]) * 10;
+	ShowConfSalinityNum2CMD[7] += 31;
+	ShowConfSalinityNum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConfSalinityNum1CMD,
+			sizeof(ShowConfSalinityNum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfSalinityNum2CMD,
+			sizeof(ShowConfSalinityNum2CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfSalinityNum3CMD,
+			sizeof(ShowConfSalinityNum3CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfSalinityNum4CMD,
+			sizeof(ShowConfSalinityNum4CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的温度补偿系数
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_Temp(float temp) {
+	ShowConfTempNum1CMD[7] = temp / 10;
+	ShowConfTempNum2CMD[7] = temp - ShowConfTempNum1CMD[7] * 10;
+	ShowConfTempNum4CMD[7] = 31
+			+ (temp - ShowConfTempNum1CMD[7] * 10 - ShowConfTempNum2CMD[7])
+					* 10;
+	ShowConfTempNum2CMD[7] += 31;
+	ShowConfTempNum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConfTempNum1CMD, sizeof(ShowConfTempNum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum2CMD, sizeof(ShowConfTempNum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum3CMD, sizeof(ShowConfTempNum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum4CMD, sizeof(ShowConfTempNum4CMD),
+			0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的当前温度
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_Temp_Now(float temp) {
+	ShowConfTempNowNum1CMD[7] = temp / 10;
+	ShowConfTempNowNum2CMD[7] = temp - ShowConfTempNowNum1CMD[7] * 10;
+	ShowConfTempNowNum4CMD[7] =
+			31
+					+ (temp - ShowConfTempNowNum1CMD[7] * 10
+							- ShowConfTempNowNum2CMD[7]) * 10;
+	ShowConfTempNowNum2CMD[7] += 31;
+	ShowConfTempNowNum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum1CMD,
+			sizeof(ShowConfTempNowNum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum2CMD,
+			sizeof(ShowConfTempNowNum2CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum3CMD,
+			sizeof(ShowConfTempNowNum3CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum4CMD,
+			sizeof(ShowConfTempNowNum4CMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的4mA对应溶氧值
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_ppm4mA(float ppm4mA) {
+	ShowConf4mANum1CMD[7] = ppm4mA / 10;
+	ShowConf4mANum2CMD[7] = ppm4mA - ShowConf4mANum1CMD[7] * 10;
+	ShowConf4mANum4CMD[7] = 31
+			+ (ppm4mA - ShowConf4mANum1CMD[7] * 10 - ShowConf4mANum2CMD[7])
+					* 10;
+	ShowConf4mANum2CMD[7] += 31;
+	ShowConf4mANum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD, sizeof(ShowConf4mANum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, sizeof(ShowConf4mANum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum3CMD, sizeof(ShowConf4mANum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum4CMD, sizeof(ShowConf4mANum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mAUnitCMD, sizeof(ShowConf4mAUnitCMD),
+			0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的20mA对应溶氧值
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_ppm20mA(float ppm20mA) {
+	ShowConf20mANum1CMD[7] = ppm20mA / 10;
+	ShowConf20mANum2CMD[7] = ppm20mA - ShowConf20mANum1CMD[7] * 10;
+	ShowConf20mANum4CMD[7] = 31
+			+ (ppm20mA - ShowConf20mANum1CMD[7] * 10 - ShowConf20mANum2CMD[7])
+					* 10;
+	ShowConf20mANum2CMD[7] += 31;
+	ShowConf20mANum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, sizeof(ShowConf20mANum1CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD, sizeof(ShowConf20mANum3CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD, sizeof(ShowConf20mANum4CMD),
+			0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, sizeof(ShowConf20mAUnitCMD),
+			0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的4mA对应温度值
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_temp4mA(float temp4mA) {
+	ShowConf4mATempNum1CMD[7] = temp4mA / 10;
+	ShowConf4mATempNum2CMD[7] = temp4mA - ShowConf4mATempNum1CMD[7] * 10;
+	ShowConf4mATempNum4CMD[7] = 31
+			+ (temp4mA - ShowConf4mATempNum1CMD[7] * 10
+					- ShowConf4mATempNum2CMD[7]) * 10;
+	ShowConf4mATempNum2CMD[7] += 31;
+	ShowConf4mATempNum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum1CMD,
+			sizeof(ShowConf4mATempNum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum2CMD,
+			sizeof(ShowConf4mATempNum2CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum3CMD,
+			sizeof(ShowConf4mATempNum3CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum4CMD,
+			sizeof(ShowConf4mATempNum4CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempUnitCMD,
+			sizeof(ShowConf4mATempUnitCMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 修改设置界面的20mA对应温度值
+ * @入口参数 : 单位索引号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Change_Conf_temp20mA(float temp20mA) {
+	ShowConf20mATempNum1CMD[7] = temp20mA / 10;
+	ShowConf20mATempNum2CMD[7] = temp20mA - ShowConf20mATempNum1CMD[7] * 10;
+	ShowConf20mATempNum4CMD[7] = 31
+			+ (temp20mA - ShowConf20mATempNum1CMD[7] * 10
+					- ShowConf20mATempNum2CMD[7]) * 10;
+	ShowConf20mATempNum2CMD[7] += 31;
+	ShowConf20mATempNum1CMD[7] += 31;
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum1CMD,
+			sizeof(ShowConf20mATempNum1CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum2CMD,
+			sizeof(ShowConf20mATempNum2CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum3CMD,
+			sizeof(ShowConf20mATempNum3CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum4CMD,
+			sizeof(ShowConf20mATempNum4CMD), 0xFFFF);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempUnitCMD,
+			sizeof(ShowConf20mATempUnitCMD), 0xFFFF);
+}
+
+/**
+ * @功能简介 : 从EEPROM读取用户配置
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Select_Next(uint8_t Selection) {
+	//设置前景黑色后填充长方形清除选择条
+	HAL_UART_Transmit(&huart1, SetForeBlackCMD, sizeof(SetForeBlackCMD),
+			0xFFFF);
+	switch (Selection) {
+	case 2:
+		//清除选择条1
+		HAL_UART_Transmit(&huart1, ShowConfigUnselect1CMD,
+				sizeof(ShowConfigUnselect1CMD), 0xFFFF);
+		//显示选择条3
+		HAL_UART_Transmit(&huart1, ShowConfigSelect3CMD,
+				sizeof(ShowConfigSelect3CMD), 0xFFFF);
+		break;
+	case 3:
+		//清除选择条2
+		HAL_UART_Transmit(&huart1, ShowConfigUnselect2CMD,
+				sizeof(ShowConfigUnselect2CMD), 0xFFFF);
+		//显示选择条4
+		HAL_UART_Transmit(&huart1, ShowConfigSelect4CMD,
+				sizeof(ShowConfigSelect4CMD), 0xFFFF);
+		break;
+	case 4:
+		//清除选择条3
+		HAL_UART_Transmit(&huart1, ShowConfigUnselect3CMD,
+				sizeof(ShowConfigUnselect3CMD), 0xFFFF);
+		//显示选择条5
+		HAL_UART_Transmit(&huart1, ShowConfigSelect5CMD,
+				sizeof(ShowConfigSelect5CMD), 0xFFFF);
+		break;
+	default:
+		break;
+	}
+}
+
+/**
+ * @功能简介 : Config界面函数
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Conf_UI(void) {
+	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
+	uint8_t BTN_TIME = 0;
+	memcpy(&tempdata, &savedata, sizeof(savedata));
+	while (configFlag) {
+		BTN_TIME = 0;
+		if (configCurrentPage == 1 && configLastPage != 1) {
+			Enter_Conf_Page1();
+			configLastPage = 1;
+			//屏蔽刚进入设置按键未释放
+			while (!BTN_MODE())
+				;
+			while (!BTN_CONFIG())
+				;
+		}
+		if (configCurrentPage == 2 && configLastPage != 2) {
+			Enter_Conf_Page2();
+			configLastPage = 2;
+		}
+		if (configCurrentPage == 3 && configLastPage != 3) {
+			Enter_Conf_Page3();
+			configLastPage = 3;
+		}
+		if (configCurrentPage == 4 && configLastPage != 4) {
+			Enter_Conf_Page4();
+			configLastPage = 4;
+		}
+		if (configCurrentPage == 5 && configLastPage != 5) {
+			Enter_Conf_Page5();
+			configLastPage = 5;
+		}
+		//按下Right键
+		while (!BTN_RIGHT()) {
+			//长按、短按延时优化
+			if (BTN_TIME < 6) {
+				HAL_Delay(200);
+			} else
+				HAL_Delay(50);
+			switch (configCurrentPage) {
+			case 1:
+				switch (CurrentSelect) {
+				//修改单位设置
+				case 1:
+					tempdata.unit++;
+					if (tempdata.unit > 2) {
+						tempdata.unit = 0;
+					}
+					Change_Conf_Unit(tempdata.unit);
+					break;
+					//盐度修正系数
+				case 2:
+					tempdata.salinity += 0.1;
+					if (tempdata.salinity > 45) {
+						tempdata.salinity = 0;
+					}
+					Change_Conf_Salinity(tempdata.salinity);
+					break;
+					//温度修正系数
+				case 3:
+					tempdata.temp += 0.1;
+					if (tempdata.temp > 50) {
+						tempdata.temp = 0;
+					}
+					Change_Conf_Temp(tempdata.temp);
+					break;
+				default:
+					break;
+				}
+				break;
+			case 2:
+				switch (CurrentSelect) {
+				//修改4mA对应溶氧值
+				case 1:
+					tempdata.ppm4mA += 0.1;
+					if (tempdata.ppm4mA > 20
+							|| tempdata.ppm4mA > tempdata.ppm20mA) {
+						tempdata.ppm4mA = 0;
+					}
+					Change_Conf_ppm4mA(tempdata.ppm4mA);
+					break;
+					//修改20mA对应溶氧值
+				case 2:
+					tempdata.ppm20mA += 0.1;
+					if (tempdata.ppm20mA > 20) {
+						tempdata.ppm20mA = tempdata.ppm4mA + 0.1;
+					}
+					Change_Conf_ppm20mA(tempdata.ppm20mA);
+					break;
+					//修改4mA对应温度值
+				case 3:
+					tempdata.temp4mA += 0.1;
+					if (tempdata.temp4mA > 50
+							|| tempdata.temp4mA > tempdata.temp20mA) {
+						tempdata.temp4mA = 0;
+					}
+					Change_Conf_temp4mA(tempdata.temp4mA);
+					break;
+					//修改20mA对应温度值
+				case 4:
+					tempdata.temp20mA += 0.1;
+					if (tempdata.temp20mA > 50) {
+						tempdata.temp20mA = tempdata.temp4mA + 0.1;
+					}
+					Change_Conf_temp20mA(tempdata.temp20mA);
+					break;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			BTN_TIME++;
+			if (BTN_TIME > 100) {
+				BTN_TIME = 0;
+			}
+		}
+		//按下Enter键，保存当前值并选中下一条
+		if (!BTN_ENTER()) {
+			HAL_Delay(100);
+			if (!BTN_ENTER()) {
+				//todo 保存当前值
+				CurrentSelect++;
+				if (configCurrentPage == 1 && CurrentSelect == 4) {
+					CurrentSelect++;
+				}
+				//每页四个设置，超出跳转下一页，超出页数跳回首页
+				if (CurrentSelect > 4) {
+					CurrentSelect = 1;
+					configCurrentPage++;
+					if (configCurrentPage > 5) {
+						configCurrentPage = 1;
+					}
+				}
+				Select_Next(CurrentSelect);
+				while (!BTN_ENTER())
+					;
+			}
+		}
+
+		//按下Conf键，返回主界面
+		if (!BTN_CONFIG()) {
+			HAL_Delay(100);
+			if (!BTN_CONFIG()) {
+				configFlag = 0;
+				while (!BTN_CONFIG())
+					;
+			}
+		}
+	}
+	/* 推出设置后恢复主界面 */
+	LCD_Init();
+}
+
+/**
+ * @功能简介 : 串口空闲中断服务函数
+ * @入口参数 : uartHandle：串口号
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void UART_RxIDLECallback(UART_HandleTypeDef* uartHandle) {
+	if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET) {
+
+		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
+		HAL_UART_DMAStop(&huart2);
+
+		unsigned char buffer[8];
+		unsigned short crc;
+
+		crc = CRC16(sensorRevBuf, 23);
+		//  buffer[6]=crc&0xff;
+		//  buffer[7]=(crc&0xff00)>>8;
+		//  modscan 是校验码高位在前，低位在后
+		buffer[7] = crc & 0xff;
+		buffer[6] = (crc & 0xff00) >> 8;
+
+		// 判断地址与crc校验
+		if ((sensorRevBuf[0] == 0x03)
+				&& (sensorRevBuf[1] == 0x03)     //读取命令
+				&& (sensorRevBuf[23] == buffer[6])
+				&& (sensorRevBuf[24] == buffer[7])) { // 成功后组合数据 计算 CRC
+			// 获取数据
+
+			change_float_big_485rom(5);
+			change_float_big_485rom(13);
+			change_float_big_485rom(17);
+			memcpy((&f_PPM), &sensorRevBuf[5], 4);
+			memcpy((&f_Temp), &sensorRevBuf[13], 4);
+			memcpy((&f_k), &sensorRevBuf[17], 4);
+			if (f_PPM > 20) {
+				f_PPM = 20;
+			}
+			if (f_PPM < 0) {
+				f_PPM = 0;
+			}
+			if (f_Temp > 99) {
+				f_Temp = 99;
+			}
+			if (f_Temp < 0) {
+				f_Temp = 0;
+			}
+		}
+		memset(sensorRevBuf, 0xFF, sizeof(sensorRevBuf));
+		if (HAL_UART_Receive_DMA(&huart2, (uint8_t *) sensorRevBuf,
+				sizeof(sensorRevBuf)) != HAL_OK) {
+			Error_Handler();
+		}
+		/* 开启串口空闲中断 */
+		__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+		/* 已连接蓝牙收到设置命令，保存数据到flash */
+		refreshFlag = 1;
+	}
+}
+
+unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen) {
+	unsigned char uchCRCHi = 0xFF; /* 高CRC字节初始化 */
+	unsigned char uchCRCLo = 0xFF; /* 低CRC 字节初始化 */
+	unsigned uIndex; /* CRC循环中的索引 */
+	while (usDataLen--) /* 传输消息缓冲区 */
+	{
+		uIndex = uchCRCHi ^ *puchMsg++; /* 计算CRC */
+		uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
+		uchCRCLo = auchCRCLo[uIndex];
+	}
+	return (uchCRCHi << 8 | uchCRCLo);
+}
+void change_float_big_485rom(unsigned int j)  //修改浮点数在 rom 中的存储大小端
+{
+	char temp_c = 0;
+	temp_c = sensorRevBuf[j + 3];
+	sensorRevBuf[j + 3] = sensorRevBuf[j + 0];
+	sensorRevBuf[j + 0] = temp_c;
+
+	temp_c = sensorRevBuf[j + 2];
+	sensorRevBuf[j + 2] = sensorRevBuf[j + 1];
+	sensorRevBuf[j + 1] = temp_c;
+}
+/**
+ * @功能简介 : 外部中断服务函数
+ * @入口参数 : GPIO_Pin：引脚
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+//	/* 不用清除标志位,hal库已清除 */
+//	/* 延时去抖动 */
+//	HAL_Delay(20);
+//	/* BTN_Config */
+//	if (GPIO_Pin == GPIO_PIN_8) {
+//		if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == GPIO_PIN_RESET) {
+//			configFlag = 1;
+//		}
+//	}
+//	/* BTN_Cal */
+//	else if (GPIO_Pin == GPIO_PIN_0) {
+//
+//	}
+//	/* BTN_Mode */
+//	else if (GPIO_Pin == GPIO_PIN_4) {
+//
+//	}
+//	/* BTN_Right */
+//	else if (GPIO_Pin == GPIO_PIN_6) {
+//
+//	}
+//	/* BTN_Enter */
+//	else if (GPIO_Pin == GPIO_PIN_14) {
+//		if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET) {
+//			LCD_Init();
+//		}
+//	}
+//	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
+//}
+/**
+ * @功能简介 : 按钮查询服务函数
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void Button_Scan(void) {
+	if (!BTN_MODE()) {
+		if (!BTN_CAL()) {
+			Button_Cal_Flag++;
+			Button_Conf_Flag = 0;
+			if (Button_Cal_Flag > 600000) {
+				if (!BTN_ENTER()) {
+					if (Button_Cal_Flag > 1500000) {
+						//恢复出厂校准值
+						Button_Conf_Flag = 0;
+						Button_Cal_Flag = 0;
+					}
+				} else {
+					//进入校准
+					Button_Conf_Flag = 0;
+					Button_Cal_Flag = 0;
+				}
+			}
+		} else if (!BTN_CONFIG()) {
+			Button_Conf_Flag++;
+			Button_Cal_Flag = 0;
+			if (Button_Conf_Flag > 600000) {
+				if (!BTN_ENTER()) {
+					if (Button_Conf_Flag > 1500000) {
+						//恢复出厂校准值
+						Button_Conf_Flag = 0;
+						Button_Cal_Flag = 0;
+					}
+				} else {
+					//跳转设置界面
+					configFlag = 1;
+					Button_Conf_Flag = 0;
+					Button_Cal_Flag = 0;
+					Conf_UI();
+				}
+
+			}
+		}
+		//只按下Mode键，不计时
+		else {
+			Button_Conf_Flag = 0;
+			Button_Cal_Flag = 0;
+		}
+	} else {
+		Button_Conf_Flag = 0;
+		Button_Cal_Flag = 0;
+	}
+}
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  file: The file name as string.
+  * @param  line: The line in file as a number.
+  * @retval None
+  */
+void _Error_Handler(char *file, int line)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  while(1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t* file, uint32_t line)
+{ 
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
