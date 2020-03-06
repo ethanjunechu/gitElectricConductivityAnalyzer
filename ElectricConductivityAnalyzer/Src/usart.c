@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2020 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -58,6 +58,7 @@ DMA_HandleTypeDef hdma_usart3_rx;
 
 void MX_USART1_UART_Init(void)
 {
+
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -76,6 +77,7 @@ void MX_USART1_UART_Init(void)
 
 void MX_USART2_UART_Init(void)
 {
+
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 19200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
@@ -94,6 +96,7 @@ void MX_USART2_UART_Init(void)
 
 void MX_USART3_UART_Init(void)
 {
+
   huart3.Instance = USART3;
   huart3.Init.BaudRate = 9600;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
