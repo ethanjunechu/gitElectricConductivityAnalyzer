@@ -343,7 +343,7 @@ uint8_t ShowConfigPage7CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 93,
 uint8_t ShowConfigPage8CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 94,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示密码页面
-uint8_t ShowPassWPageCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 107,
+uint8_t ShowPassWPageCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 113,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示模式设置
 uint8_t ShowConfModeCMD[13] = { 0xEE, 0x32, 0x01, 32, 0x00, 62, 0x00, 109, 0x00,
@@ -753,7 +753,7 @@ typedef struct {
 	uint8_t brightness;
 	uint8_t caltype;
 	uint8_t airpressureunit;
-	float airpressure;
+	float cell;
 	float kdo;
 	float ktemp;
 	uint8_t interval;
@@ -859,7 +859,7 @@ void Change_Conf_Interval(uint8_t interval);
 void Change_Conf_PassW(uint8_t PassW);
 void Change_CalType(uint8_t caltype);
 void Change_AirPressureUnit(uint8_t unit);
-void Change_AirPressure(float airpressure);
+void Change_AirPressure(float cell);
 void Select_Next(uint8_t Selection);
 void Conf_UI(void);
 void Cal_UI(void);
@@ -1093,7 +1093,7 @@ void readConfig(void) {
 		savedata.brightness = *(__IO uint8_t*) (FLASHBASEADDR + 136);
 		savedata.caltype = *(__IO uint8_t*) (FLASHBASEADDR + 144);
 		savedata.airpressureunit = *(__IO uint8_t*) (FLASHBASEADDR + 152);
-		savedata.airpressure =
+		savedata.cell =
 				((float) (*(__IO int32_t*) (FLASHBASEADDR + 160))) / 1000;
 		savedata.kdo = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 168)))
 				/ 1000;
@@ -1128,7 +1128,7 @@ void readConfig(void) {
 		savedata.brightness = 10;
 		savedata.caltype = 0;
 		savedata.airpressureunit = 0;
-		savedata.airpressure = 1.01325;
+		savedata.cell = 1.01325;
 		savedata.kdo = 1;
 		savedata.ktemp = 1;
 		savedata.interval = 1;
@@ -1200,7 +1200,7 @@ void writeConfig(void) {
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 152),
 			savedata.airpressureunit);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 160),
-			(int32_t) (savedata.airpressure * 1000));
+			(int32_t) (savedata.cell * 1000));
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 168),
 			(int32_t) (savedata.kdo * 1000));
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 176),
@@ -1262,7 +1262,7 @@ void factoryConfig(uint8_t conf) {
 		ShowPageStatusCMD[7] = 96;
 		HAL_UART_Transmit(&huart1, ShowPageStatusCMD, 13, USARTSENDTIME);
 		savedata.airpressureunit = 0;
-		savedata.airpressure = 1.01325;
+		savedata.cell = 1.01325;
 		savedata.kdo = 1;
 		savedata.ktemp = 1;
 		savedata.bdo = 0;
@@ -1764,82 +1764,82 @@ void RTC_Update(void) {
 	//	uint8_t str[30]; // 字符串暂存
 	//	static uint8_t FirstDisplay = 1;
 
-		/* 获取当前时间 */
-		HAL_RTC_GetTime(&hrtc, &stimestructureget, RTC_FORMAT_BIN);
-	#ifdef DEBUG
+	/* 获取当前时间 */
+	HAL_RTC_GetTime(&hrtc, &stimestructureget, RTC_FORMAT_BIN);
+#ifdef DEBUG
 		uint8_t debugTemp10[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01, 0x02,
 				0x31, 0x30, 0xFF, 0xFC, 0xFF, 0xFF };
 		HAL_UART_Transmit(&huart1, debugTemp10, 14, USARTSENDTIME);
 	#endif
-		switch (ShowTimeNum3CMD[7]) {
-		case 90:
-			ShowTimeNum3CMD[7] = 105;
+	switch (ShowTimeNum3CMD[7]) {
+	case 90:
+		ShowTimeNum3CMD[7] = 105;
 
-			/* 显示时间 */
-			//	printf("%02d:%02d:%02d\n", stimestructureget.Hours,
-			//			stimestructureget.Minutes, stimestructureget.Seconds);
-			ShowTimeNum1CMD[7] = stimestructureget.Hours / 10;
-			ShowTimeNum2CMD[7] = stimestructureget.Hours - ShowTimeNum1CMD[7] * 10
-					+ 31;
-			ShowTimeNum1CMD[7] += 31;
+		/* 显示时间 */
+		//	printf("%02d:%02d:%02d\n", stimestructureget.Hours,
+		//			stimestructureget.Minutes, stimestructureget.Seconds);
+		ShowTimeNum1CMD[7] = stimestructureget.Hours / 10;
+		ShowTimeNum2CMD[7] = stimestructureget.Hours - ShowTimeNum1CMD[7] * 10
+				+ 31;
+		ShowTimeNum1CMD[7] += 31;
 
-			ShowTimeNum4CMD[7] = stimestructureget.Minutes / 10;
-			ShowTimeNum5CMD[7] = stimestructureget.Minutes - ShowTimeNum4CMD[7] * 10
-					+ 31;
-			ShowTimeNum4CMD[7] += 31;
-			break;
-		case 105:
-			ShowTimeNum3CMD[7] = 90;
-			//	if (FirstDisplay) {
-			//		GetChinaCalendarStr(sdatestructureget.Year + 2000,
-			//				sdatestructureget.Month, sdatestructureget.Date, str);
-			//		printf("今天农历：%s\n", str);
-			//
-			//		if (GetJieQiStr(sdatestructureget.Year + 2000, sdatestructureget.Month,
-			//				sdatestructureget.Date, str))
-			//			printf("今天农历：%s\n", str);
-			//
-			//		FirstDisplay = 0;
-			//	}
-			/* 显示日期*/
-			//	printf("当前时间为: %02d年(%s年)%02d月%02d日(星期%s)  ", 2000 + sdatestructureget.Year,
-			//			zodiac_sign[(2000 + sdatestructureget.Year - 3) % 12],
-			//			sdatestructureget.Month, sdatestructureget.Date,
-			//			WEEK_STR[sdatestructureget.WeekDay]);
-			/* 获取当前日期 */
-			HAL_RTC_GetDate(&hrtc, &sdatestructureget, RTC_FORMAT_BIN);
+		ShowTimeNum4CMD[7] = stimestructureget.Minutes / 10;
+		ShowTimeNum5CMD[7] = stimestructureget.Minutes - ShowTimeNum4CMD[7] * 10
+				+ 31;
+		ShowTimeNum4CMD[7] += 31;
+		break;
+	case 105:
+		ShowTimeNum3CMD[7] = 90;
+		//	if (FirstDisplay) {
+		//		GetChinaCalendarStr(sdatestructureget.Year + 2000,
+		//				sdatestructureget.Month, sdatestructureget.Date, str);
+		//		printf("今天农历：%s\n", str);
+		//
+		//		if (GetJieQiStr(sdatestructureget.Year + 2000, sdatestructureget.Month,
+		//				sdatestructureget.Date, str))
+		//			printf("今天农历：%s\n", str);
+		//
+		//		FirstDisplay = 0;
+		//	}
+		/* 显示日期*/
+		//	printf("当前时间为: %02d年(%s年)%02d月%02d日(星期%s)  ", 2000 + sdatestructureget.Year,
+		//			zodiac_sign[(2000 + sdatestructureget.Year - 3) % 12],
+		//			sdatestructureget.Month, sdatestructureget.Date,
+		//			WEEK_STR[sdatestructureget.WeekDay]);
+		/* 获取当前日期 */
+		HAL_RTC_GetDate(&hrtc, &sdatestructureget, RTC_FORMAT_BIN);
 
-			ShowDateNum3CMD[7] = sdatestructureget.Year / 10;
-			ShowDateNum4CMD[7] = sdatestructureget.Year - ShowDateNum3CMD[7] * 10
-					+ 31;
-			ShowDateNum3CMD[7] += 31;
+		ShowDateNum3CMD[7] = sdatestructureget.Year / 10;
+		ShowDateNum4CMD[7] = sdatestructureget.Year - ShowDateNum3CMD[7] * 10
+				+ 31;
+		ShowDateNum3CMD[7] += 31;
 
-			ShowDateNum6CMD[7] = sdatestructureget.Month / 10;
-			ShowDateNum7CMD[7] = sdatestructureget.Month - ShowDateNum6CMD[7] * 10
-					+ 31;
-			ShowDateNum6CMD[7] += 31;
+		ShowDateNum6CMD[7] = sdatestructureget.Month / 10;
+		ShowDateNum7CMD[7] = sdatestructureget.Month - ShowDateNum6CMD[7] * 10
+				+ 31;
+		ShowDateNum6CMD[7] += 31;
 
-			ShowDateNum9CMD[7] = sdatestructureget.Date / 10;
-			ShowDateNum10CMD[7] = sdatestructureget.Date - ShowDateNum9CMD[7] * 10
-					+ 31;
-			ShowDateNum9CMD[7] += 31;
-			break;
-		}
-		HAL_UART_Transmit(&huart1, ShowDateNum1CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum2CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum3CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum4CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum5CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum6CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum7CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum8CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum9CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowDateNum10CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowTimeNum1CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowTimeNum2CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowTimeNum3CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowTimeNum4CMD, 13, USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowTimeNum5CMD, 13, USARTSENDTIME);
+		ShowDateNum9CMD[7] = sdatestructureget.Date / 10;
+		ShowDateNum10CMD[7] = sdatestructureget.Date - ShowDateNum9CMD[7] * 10
+				+ 31;
+		ShowDateNum9CMD[7] += 31;
+		break;
+	}
+	HAL_UART_Transmit(&huart1, ShowDateNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum5CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum6CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum7CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum8CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum9CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowDateNum10CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowTimeNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowTimeNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowTimeNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowTimeNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowTimeNum5CMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -1939,7 +1939,7 @@ void getRs(void) {
 	 * µS/cm = (1000000 / Ω) / cm
 	 */
 	//TODO 测试电阻用
-	RangeSelect(2);
+	RangeSelect(9);
 	f_Rs = DA5933_Get_Rs();
 	/* 刷新标志位 */
 	refreshFlag = 1;
@@ -2146,19 +2146,19 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 	uint8_t a = 0, b = 0, c = 0, select = 0;
 	uint8_t ShowA[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00, 31, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
-	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 44, 0x00, 114, 0x00, 109, 0x00,
+	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 44, 0x00, 114, 0x00, 114, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 109, 0x00,
+	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 114, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
 	//显示密码界面选择条
 	uint8_t ShowPasWSelect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 109, 0x00,
-			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWSelect2CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 143, 0x00,
-			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWUnselect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 109, 0x00,
-			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWUnselect2CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 143, 0x00,
-			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 	HAL_UART_Transmit(&huart1, ShowPassWPageCMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
@@ -2262,16 +2262,16 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			switch (select) {
 			case 0:
 				ShowA[7] = 31 + a;
-				ShowB[7] = 109;
-				ShowC[7] = 109;
+				ShowB[7] = 114;
+				ShowC[7] = 114;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
 			case 1:
-				ShowA[7] = 109;
+				ShowA[7] = 114;
 				ShowB[7] = b + 31;
-				ShowC[7] = 109;
+				ShowC[7] = 114;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
@@ -2288,8 +2288,8 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				USARTSENDTIME);
 				break;
 			case 2:
-				ShowA[7] = 109;
-				ShowB[7] = 109;
+				ShowA[7] = 114;
+				ShowB[7] = 114;
 				ShowC[7] = c + 31;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
@@ -2338,7 +2338,7 @@ void Enter_Cal_Page1(void) {
 	tempdata.caltype = 0;
 	Change_CalType(tempdata.caltype);
 	Change_AirPressureUnit(tempdata.airpressureunit);
-	Change_AirPressure(tempdata.airpressure);
+	Change_AirPressure(tempdata.cell);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
@@ -2386,7 +2386,7 @@ void Enter_History_Page1(void) {
 		HAL_UART_Transmit(&huart1, Show10MRCMD, 20, USARTSENDTIME);
 		HAL_UART_Transmit(&huart1, Show5MRCMD, 19, USARTSENDTIME);
 		HAL_UART_Transmit(&huart1, Show0MRCMD, 19, USARTSENDTIME);
-	}else if (savedata.mode == 2) {
+	} else if (savedata.mode == 2) {
 		HAL_UART_Transmit(&huart1, Show700pptCMD, 19, USARTSENDTIME);
 		HAL_UART_Transmit(&huart1, Show525pptCMD, 19, USARTSENDTIME);
 		HAL_UART_Transmit(&huart1, Show350pptCMD, 19, USARTSENDTIME);
@@ -3454,11 +3454,11 @@ void Change_Conf_Seconds(uint8_t seconds) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_Interval(uint8_t interval) {
-	uint8_t CMD3[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 214, 0x00, 31, 0x00, 0xFF,
+	uint8_t CMD3[13] = { 0xEE, 0x32, 0x01, 24, 0x00, 164, 0x00, 31, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
-	uint8_t CMD4[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 214, 0x00, 31, 0x00, 0xFF,
+	uint8_t CMD4[13] = { 0xEE, 0x32, 0x01, 44, 0x00, 164, 0x00, 31, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
-	uint8_t CMD5[13] = { 0xEE, 0x32, 0x01, 114, 0x00, 210, 0x00, 85, 0x00, 0xFF,
+	uint8_t CMD5[13] = { 0xEE, 0x32, 0x01, 80, 0x00, 160, 0x00, 85, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
 	CMD3[7] = interval / 10;
 	CMD4[7] = interval - CMD3[7] * 10;
@@ -3501,9 +3501,6 @@ void Change_CalType(uint8_t caltype) {
 	case 1:
 		ShowCalTypeCMD[7] = 88;
 		break;
-	case 2:
-		ShowCalTypeCMD[7] = 106;
-		break;
 	default:
 		break;
 	}
@@ -3534,23 +3531,23 @@ void Change_AirPressureUnit(uint8_t unit) {
 }
 
 /**
- * @功能简介 : 修改本地大气压
- * @入口参数 : 大气压
+ * @功能简介 : 修改上一次系数校正值
+ * @入口参数 : 传感器系数
  * @出口参数 : 无
- * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
-void Change_AirPressure(float airpressure) {
+void Change_AirPressure(float cell) {
 	if (tempdata.airpressureunit == 0) {
 		ShowAirPressureNumUnitCMD[7] = 24;
-		ShowAirPressureNum1CMD[7] = airpressure;
+		ShowAirPressureNum1CMD[7] = cell;
 		ShowAirPressureNum2CMD[7] = 30;
-		ShowAirPressureNum3CMD[7] = (airpressure * 10
+		ShowAirPressureNum3CMD[7] = (cell * 10
 				- ShowAirPressureNum1CMD[7] * 10);
-		ShowAirPressureNum4CMD[7] = airpressure * 100
+		ShowAirPressureNum4CMD[7] = cell * 100
 				- ShowAirPressureNum1CMD[7] * 100
 				- ShowAirPressureNum3CMD[7] * 10;
 		ShowAirPressureNum5CMD[7] = 31
-				+ (airpressure * 1000 - ShowAirPressureNum1CMD[7] * 1000
+				+ (cell * 1000 - ShowAirPressureNum1CMD[7] * 1000
 						- ShowAirPressureNum3CMD[7] * 100
 						- ShowAirPressureNum4CMD[7] * 10);
 		ShowAirPressureNum4CMD[7] += 31;
@@ -3566,15 +3563,15 @@ void Change_AirPressure(float airpressure) {
 		ShowAirPressureNum5CMD[3] = 84;
 	} else if (tempdata.airpressureunit == 1) {
 		ShowAirPressureNumUnitCMD[7] = 29;
-		airpressure *= 1000;
-		ShowAirPressureNum1CMD[7] = airpressure / 1000;
-		ShowAirPressureNum2CMD[7] = (airpressure
+		cell *= 1000;
+		ShowAirPressureNum1CMD[7] = cell / 1000;
+		ShowAirPressureNum2CMD[7] = (cell
 				- ShowAirPressureNum1CMD[7] * 1000) / 100;
-		ShowAirPressureNum3CMD[7] = (airpressure
+		ShowAirPressureNum3CMD[7] = (cell
 				- ShowAirPressureNum1CMD[7] * 1000
 				- ShowAirPressureNum2CMD[7] * 100) / 10;
 		ShowAirPressureNum4CMD[7] = 31
-				+ (airpressure - ShowAirPressureNum1CMD[7] * 1000
+				+ (cell - ShowAirPressureNum1CMD[7] * 1000
 						- ShowAirPressureNum2CMD[7] * 100
 						- ShowAirPressureNum3CMD[7] * 10);
 		ShowAirPressureNum5CMD[7] = 91;
@@ -4593,7 +4590,7 @@ void Cal_UI(void) {
 				if (f_Temp_fixed > 50)
 					f_Temp_fixed = 50;
 				f_PPM_Cal = waterDO[(uint32_t) (f_Temp_fixed)]
-						* (tempdata.airpressure * 100000
+						* (tempdata.cell * 100000
 								- waterPerssure[(uint32_t) (f_Temp_fixed)])
 						/ (101325 - waterPerssure[(uint32_t) (f_Temp_fixed)]);
 				//显示温度
@@ -4863,15 +4860,15 @@ void Cal_UI(void) {
 						tempdata.airpressureunit = 0;
 					}
 					Change_AirPressureUnit(tempdata.airpressureunit);
-					Change_AirPressure(tempdata.airpressure);
+					Change_AirPressure(tempdata.cell);
 					break;
 				case 3:
 					//修改大气压
-					tempdata.airpressure += 0.001;
-					if (tempdata.airpressure > 1.5) {
-						tempdata.airpressure = 0.3;
+					tempdata.cell += 0.001;
+					if (tempdata.cell > 1.5) {
+						tempdata.cell = 0.3;
 					}
-					Change_AirPressure(tempdata.airpressure);
+					Change_AirPressure(tempdata.cell);
 					break;
 				default:
 					break;
@@ -4950,15 +4947,15 @@ void Cal_UI(void) {
 						tempdata.airpressureunit = 0;
 					}
 					Change_AirPressureUnit(tempdata.airpressureunit);
-					Change_AirPressure(tempdata.airpressure);
+					Change_AirPressure(tempdata.cell);
 					break;
 				case 3:
 					//修改大气压
-					tempdata.airpressure -= 0.001;
-					if (tempdata.airpressure < 0.3) {
-						tempdata.airpressure = 1.5;
+					tempdata.cell -= 0.001;
+					if (tempdata.cell < 0.3) {
+						tempdata.cell = 1.5;
 					}
-					Change_AirPressure(tempdata.airpressure);
+					Change_AirPressure(tempdata.cell);
 					break;
 				default:
 					break;
