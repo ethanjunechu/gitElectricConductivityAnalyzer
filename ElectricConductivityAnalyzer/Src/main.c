@@ -157,6 +157,9 @@ static long historyCNT = 0;
 static long historyStart = 0;
 static long historyEnd = 0;
 
+extern double R_Correction[8];
+uint8_t range = 0;
+
 //设置背景白色
 uint8_t SetBackWhiteCMD[8] = { 0xEE, 0x42, 0xFF, 0xFF, 0xFF, 0xFC, 0xFF, 0xFF };
 
@@ -585,27 +588,50 @@ uint8_t ShowCalPage2CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 86,
 //显示校正模式
 uint8_t ShowCalTypeCMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 64, 0x00, 87, 0x00,
 		0xFF, 0xFC, 0xFF, 0xFF };
-//显示校正大气压单位
-uint8_t ShowAirPressureUnitCMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 112, 0x00,
-		24, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压数字1
-uint8_t ShowAirPressureNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 164, 0x00,
-		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压数字2-小数点
-uint8_t ShowAirPressureNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 164, 0x00,
-		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压数字3
-uint8_t ShowAirPressureNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 164, 0x00,
-		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压数字4
-uint8_t ShowAirPressureNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 164, 0x00,
-		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压数字5
-uint8_t ShowAirPressureNum5CMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 164, 0x00,
-		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示大气压单位
-uint8_t ShowAirPressureNumUnitCMD[13] = { 0xEE, 0x32, 0x01, 114, 0x00, 164,
-		0x00, 24, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示上次传感器系数数字0
+uint8_t ShowLastCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字1
+uint8_t ShowLastCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字2-小数点
+uint8_t ShowLastCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 30,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字3
+uint8_t ShowLastCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字4
+uint8_t ShowLastCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字5
+uint8_t ShowLastCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字6
+uint8_t ShowLastCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
+//显示预设传感器系数数字0
+uint8_t ShowPreCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字1
+uint8_t ShowPreCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字2-小数点
+uint8_t ShowPreCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 164, 0x00, 30,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字03
+uint8_t ShowPreCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字4
+uint8_t ShowPreCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字5
+uint8_t ShowPreCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字6
+uint8_t ShowPreCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 164, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示正在校正状态
 uint8_t ShowCalingStatusCMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 110, 0x00, 44,
@@ -711,9 +737,6 @@ float f_Temp;
 float f_Temp_fixed;
 float f_k;
 
-//float f_PPM_Uplimit = 20;
-//float f_PPM_Downlimit = 0;
-
 //继电器标志位
 uint8_t Relay_Flag = 1;			//0:低位报警 | 1:正常 | 2:高位报警
 uint8_t Relay_Flag_Low = 0;
@@ -801,6 +824,8 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+extern void Fre_To_Hex(float fre, uint8_t *buf);
+void startCalc(void);
 void readConfig(void);
 void writeConfig(void);
 void application(void);
@@ -858,8 +883,8 @@ void Change_Conf_Seconds(uint8_t seconds);
 void Change_Conf_Interval(uint8_t interval);
 void Change_Conf_PassW(uint8_t PassW);
 void Change_CalType(uint8_t caltype);
-void Change_AirPressureUnit(uint8_t unit);
-void Change_AirPressure(float cell);
+void Change_LastCell(float cell);
+void Change_PreCell(float cell);
 void Select_Next(uint8_t Selection);
 void Conf_UI(void);
 void Cal_UI(void);
@@ -960,6 +985,8 @@ int main(void) {
 	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, savedata.MIN);
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 
+	/* 开机校准 */
+	startCalc();
 	/* 预转换获取电导，保证开机有数据 */
 	getRs();
 	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
@@ -1055,6 +1082,56 @@ void SystemClock_Config(void) {
 /* USER CODE BEGIN 4 */
 
 /**
+ * @功能简介 : 开机自动校准
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2018/01/03
+ */
+void startCalc(void) {
+	double ma1 = 0, ma2 = 0;
+	double R_Ref[8] = { 100, 1000, 11800, 118000, 236000, 590000, 1180000,
+			2360000 };
+	uint8_t i = 0;
+	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
+	uint16_t buf = 0;
+	for (i = 0; i < 7; i++) {
+		RangeSelect(i + 8);
+
+		Fre_To_Hex(5000, SValue);
+		Fre_To_Hex(1, IValue);
+		NValue[0] = 0;
+		NValue[1] = 8;
+#ifdef AD5933_MCLK_USE_OUT
+	  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
+	#else
+		buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_IN_MCLK;
+#endif
+		CValue[0] = buf >> 8;
+		CValue[1] = buf;
+
+		ma1 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
+
+		Fre_To_Hex(15000, SValue);
+		Fre_To_Hex(1, IValue);
+		NValue[0] = 0;
+		NValue[1] = 8;
+#ifdef AD5933_MCLK_USE_OUT
+			  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
+			#else
+		buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_IN_MCLK;
+#endif
+		CValue[0] = buf >> 8;
+		CValue[1] = buf;
+
+		ma2 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
+
+		R_Correction[i + 1] = 1
+				/ (ma1 + ((1 / 100) / ma2 - (1 / 100) / ma1) / 2);
+	}
+	/* 100欧用1K校准值 */
+	R_Correction[0] = R_Correction[1];
+}
+/**
  * @功能简介 : 从EEPROM读取用户配置
  * @入口参数 : 无
  * @出口参数 : 无
@@ -1093,8 +1170,8 @@ void readConfig(void) {
 		savedata.brightness = *(__IO uint8_t*) (FLASHBASEADDR + 136);
 		savedata.caltype = *(__IO uint8_t*) (FLASHBASEADDR + 144);
 		savedata.airpressureunit = *(__IO uint8_t*) (FLASHBASEADDR + 152);
-		savedata.cell =
-				((float) (*(__IO int32_t*) (FLASHBASEADDR + 160))) / 1000;
+		savedata.cell = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 160)))
+				/ 1000;
 		savedata.kdo = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 168)))
 				/ 1000;
 		savedata.ktemp = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 176)))
@@ -1262,7 +1339,7 @@ void factoryConfig(uint8_t conf) {
 		ShowPageStatusCMD[7] = 96;
 		HAL_UART_Transmit(&huart1, ShowPageStatusCMD, 13, USARTSENDTIME);
 		savedata.airpressureunit = 0;
-		savedata.cell = 1.01325;
+		savedata.cell = 12.34567;
 		savedata.kdo = 1;
 		savedata.ktemp = 1;
 		savedata.bdo = 0;
@@ -1939,7 +2016,31 @@ void getRs(void) {
 	 * µS/cm = (1000000 / Ω) / cm
 	 */
 	//TODO 测试电阻用
-	RangeSelect(9);
+	if (f_Rs_filter < 1) {
+		range = 0;
+	}
+	if (f_Rs_filter >= 1 && f_Rs_filter < 10) {
+		range = 1;
+	}
+	if (f_Rs_filter >= 10 && f_Rs_filter < 100) {
+		range = 2;
+	}
+	if (f_Rs_filter >= 100 && f_Rs_filter < 200) {
+		range = 3;
+	}
+	if (f_Rs_filter >= 200 && f_Rs_filter < 500) {
+		range = 4;
+	}
+	if (f_Rs_filter >= 500 && f_Rs_filter < 1000) {
+		range = 5;
+	}
+	if (f_Rs_filter >= 1000 && f_Rs_filter < 2000) {
+		range = 6;
+	}
+	if (f_Rs_filter >= 2000) {
+		range = 7;
+	}
+	RangeSelect(range);
 	f_Rs = DA5933_Get_Rs();
 	/* 刷新标志位 */
 	refreshFlag = 1;
@@ -2337,8 +2438,8 @@ void Enter_Cal_Page1(void) {
 	HAL_UART_Transmit(&huart1, ShowCalPage1CMD, 13, USARTSENDTIME);
 	tempdata.caltype = 0;
 	Change_CalType(tempdata.caltype);
-	Change_AirPressureUnit(tempdata.airpressureunit);
-	Change_AirPressure(tempdata.cell);
+	Change_LastCell(tempdata.cell);
+	Change_PreCell(12.3456);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
@@ -3508,98 +3609,95 @@ void Change_CalType(uint8_t caltype) {
 }
 
 /**
- * @功能简介 : 修改大气压
- * @入口参数 : 单位索引号
- * @出口参数 : 无
- * @历史版本 : V0.0.1 - Ethan - 2018/01/03
- */
-void Change_AirPressureUnit(uint8_t unit) {
-	switch (unit) {
-	case 0:
-		ShowAirPressureUnitCMD[7] = 24;
-		ShowAirPressureNumUnitCMD[7] = 24;
-		break;
-	case 1:
-		ShowAirPressureUnitCMD[7] = 29;
-		ShowAirPressureNumUnitCMD[7] = 29;
-		break;
-	default:
-		break;
-	}
-	HAL_UART_Transmit(&huart1, ShowAirPressureUnitCMD, 13,
-	USARTSENDTIME);
-}
-
-/**
  * @功能简介 : 修改上一次系数校正值
  * @入口参数 : 传感器系数
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
-void Change_AirPressure(float cell) {
-	if (tempdata.airpressureunit == 0) {
-		ShowAirPressureNumUnitCMD[7] = 24;
-		ShowAirPressureNum1CMD[7] = cell;
-		ShowAirPressureNum2CMD[7] = 30;
-		ShowAirPressureNum3CMD[7] = (cell * 10
-				- ShowAirPressureNum1CMD[7] * 10);
-		ShowAirPressureNum4CMD[7] = cell * 100
-				- ShowAirPressureNum1CMD[7] * 100
-				- ShowAirPressureNum3CMD[7] * 10;
-		ShowAirPressureNum5CMD[7] = 31
-				+ (cell * 1000 - ShowAirPressureNum1CMD[7] * 1000
-						- ShowAirPressureNum3CMD[7] * 100
-						- ShowAirPressureNum4CMD[7] * 10);
-		ShowAirPressureNum4CMD[7] += 31;
-		ShowAirPressureNum3CMD[7] += 31;
-		if (ShowAirPressureNum1CMD[7] != 0) {
-			ShowAirPressureNum1CMD[7] += 31;
-		} else
-			ShowAirPressureNum1CMD[7] = 91;
-		ShowAirPressureNum1CMD[3] = 14;
-		ShowAirPressureNum2CMD[3] = 33;
-		ShowAirPressureNum3CMD[3] = 46;
-		ShowAirPressureNum4CMD[3] = 65;
-		ShowAirPressureNum5CMD[3] = 84;
-	} else if (tempdata.airpressureunit == 1) {
-		ShowAirPressureNumUnitCMD[7] = 29;
-		cell *= 1000;
-		ShowAirPressureNum1CMD[7] = cell / 1000;
-		ShowAirPressureNum2CMD[7] = (cell
-				- ShowAirPressureNum1CMD[7] * 1000) / 100;
-		ShowAirPressureNum3CMD[7] = (cell
-				- ShowAirPressureNum1CMD[7] * 1000
-				- ShowAirPressureNum2CMD[7] * 100) / 10;
-		ShowAirPressureNum4CMD[7] = 31
-				+ (cell - ShowAirPressureNum1CMD[7] * 1000
-						- ShowAirPressureNum2CMD[7] * 100
-						- ShowAirPressureNum3CMD[7] * 10);
-		ShowAirPressureNum5CMD[7] = 91;
-		ShowAirPressureNum3CMD[7] += 31;
-		ShowAirPressureNum2CMD[7] += 31;
-		if (ShowAirPressureNum1CMD[7] != 0) {
-			ShowAirPressureNum1CMD[7] += 31;
-		} else
-			ShowAirPressureNum1CMD[7] = 91;
-		ShowAirPressureNum1CMD[3] = 14;
-		ShowAirPressureNum2CMD[3] = 33;
-		ShowAirPressureNum3CMD[3] = 52;
-		ShowAirPressureNum4CMD[3] = 71;
-		ShowAirPressureNum5CMD[3] = 90;
+void Change_LastCell(float cell) {
+	if (cell >= 10) {
+		ShowLastCellNum0CMD[7] = cell / 10;
+		cell -= ShowLastCellNum0CMD[7] * 10;
+		ShowLastCellNum0CMD[7] += 31;
+	} else {
+		ShowLastCellNum0CMD[7] = 91;
 	}
+	ShowLastCellNum1CMD[7] = cell;
+	ShowLastCellNum2CMD[7] = 30;
+	ShowLastCellNum3CMD[7] = (cell * 10 - ShowLastCellNum1CMD[7] * 10);
+	ShowLastCellNum4CMD[7] = cell * 100 - ShowLastCellNum1CMD[7] * 100
+			- ShowLastCellNum3CMD[7] * 10;
+	ShowLastCellNum5CMD[7] = cell * 1000 - ShowLastCellNum1CMD[7] * 1000
+			- ShowLastCellNum3CMD[7] * 100 - ShowLastCellNum4CMD[7] * 10;
+	ShowLastCellNum6CMD[7] = 31 + cell * 10000 - ShowLastCellNum1CMD[7] * 10000
+			- ShowLastCellNum3CMD[7] * 1000 - ShowLastCellNum4CMD[7] * 100
+			- ShowLastCellNum5CMD[7] * 10;
+	ShowLastCellNum5CMD[7] += 31;
+	ShowLastCellNum4CMD[7] += 31;
+	ShowLastCellNum3CMD[7] += 31;
+	ShowLastCellNum1CMD[7] += 31;
 
-	HAL_UART_Transmit(&huart1, ShowAirPressureNum1CMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum0CMD, 13,
 	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowAirPressureNum2CMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum1CMD, 13,
 	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowAirPressureNum3CMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum2CMD, 13,
 	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowAirPressureNum4CMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum3CMD, 13,
 	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowAirPressureNum5CMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum4CMD, 13,
 	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowAirPressureNumUnitCMD, 13,
+	HAL_UART_Transmit(&huart1, ShowLastCellNum5CMD, 13,
 	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowLastCellNum6CMD, 13,
+	USARTSENDTIME);
+}
+
+/**
+ * @功能简介 : 修改预设系数
+ * @入口参数 : 传感器系数
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2020/01/03
+ */
+void Change_PreCell(float cell) {
+	if (tempdata.caltype == 0) {
+		if (cell >= 10) {
+			ShowPreCellNum0CMD[7] = cell / 10;
+			cell -= ShowPreCellNum0CMD[7] * 10;
+			ShowPreCellNum0CMD[7] += 31;
+		} else {
+			ShowPreCellNum0CMD[7] = 91;
+		}
+		ShowPreCellNum1CMD[7] = cell;
+		ShowPreCellNum2CMD[7] = 30;
+		ShowPreCellNum3CMD[7] = (cell * 10 - ShowPreCellNum1CMD[7] * 10);
+		ShowPreCellNum4CMD[7] = cell * 100 - ShowPreCellNum1CMD[7] * 100
+				- ShowPreCellNum3CMD[7] * 10;
+		ShowPreCellNum5CMD[7] = cell * 1000 - ShowPreCellNum1CMD[7] * 1000
+				- ShowPreCellNum3CMD[7] * 100 - ShowPreCellNum4CMD[7] * 10;
+		ShowPreCellNum6CMD[7] = 31 + cell * 10000
+				- ShowPreCellNum1CMD[7] * 10000 - ShowPreCellNum3CMD[7] * 1000
+				- ShowPreCellNum4CMD[7] * 100 - ShowPreCellNum5CMD[7] * 10;
+		ShowPreCellNum5CMD[7] += 31;
+		ShowPreCellNum4CMD[7] += 31;
+		ShowPreCellNum3CMD[7] += 31;
+		ShowPreCellNum1CMD[7] += 31;
+
+		HAL_UART_Transmit(&huart1, ShowPreCellNum0CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum1CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum2CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum3CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum4CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum5CMD, 13,
+		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowPreCellNum6CMD, 13,
+		USARTSENDTIME);
+	}
 }
 
 /**
@@ -4859,8 +4957,8 @@ void Cal_UI(void) {
 					if (tempdata.airpressureunit > 1) {
 						tempdata.airpressureunit = 0;
 					}
-					Change_AirPressureUnit(tempdata.airpressureunit);
-					Change_AirPressure(tempdata.cell);
+					Change_LastCell(tempdata.airpressureunit);
+					Change_PreCell(tempdata.cell);
 					break;
 				case 3:
 					//修改大气压
@@ -4868,7 +4966,7 @@ void Cal_UI(void) {
 					if (tempdata.cell > 1.5) {
 						tempdata.cell = 0.3;
 					}
-					Change_AirPressure(tempdata.cell);
+					Change_PreCell(tempdata.cell);
 					break;
 				default:
 					break;
@@ -4946,8 +5044,8 @@ void Cal_UI(void) {
 					} else {
 						tempdata.airpressureunit = 0;
 					}
-					Change_AirPressureUnit(tempdata.airpressureunit);
-					Change_AirPressure(tempdata.cell);
+					Change_LastCell(tempdata.airpressureunit);
+					Change_PreCell(tempdata.cell);
 					break;
 				case 3:
 					//修改大气压
@@ -4955,7 +5053,7 @@ void Cal_UI(void) {
 					if (tempdata.cell < 0.3) {
 						tempdata.cell = 1.5;
 					}
-					Change_AirPressure(tempdata.cell);
+					Change_PreCell(tempdata.cell);
 					break;
 				default:
 					break;

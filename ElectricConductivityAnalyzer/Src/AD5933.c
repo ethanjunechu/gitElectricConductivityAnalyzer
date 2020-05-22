@@ -5,6 +5,9 @@
 #define AD5933_MCLK 16.776 //=536870912/MCLK;
 //#define	AD5933_MCLK_USE_OUT	1	//0内部时钟  1外部时钟
 #define AD5933_Correction 101615461.47044108 //10k
+
+double R_Correction[8] = { 0, 0, 101615461.47044108, 0, 0, 0, 0, 0 };
+extern uint8_t range;
 void Ini_I2c(void) //初始化I2C
 {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -97,7 +100,7 @@ void RangeSelect(uint8_t index) {
 		S5(0);
 		break;
 	case 7:
-		/* Y2, IY2 */
+		/* Y7, IY2 */
 		S0(1);
 		S1(1);
 		S2(1);
@@ -391,7 +394,7 @@ float Get_resistance(uint16_t num) {
 		navle = (navle + resistance[i]) / 2;
 	}
 
-	return (navle * AD5933_Correction);
+	return (navle * R_Correction[range]);
 }
 void Fre_To_Hex(float fre, uint8_t *buf) {
 	uint32_t dat;
@@ -537,8 +540,8 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 float DA5933_Get_Rs(void) {
 	float __attribute__ ((unused)) Rs, re, im;
 
-	AD5933_Sweep(10000, 1, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = Get_resistance(20);
+	AD5933_Sweep(10000, 1, 8, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+	Rs = Get_resistance(8);
 	re = Rs * cos(rads[0]);
 	im = Rs * sin(rads[0]);
 	return Rs;
