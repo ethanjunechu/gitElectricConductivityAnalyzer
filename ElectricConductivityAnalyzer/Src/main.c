@@ -104,6 +104,7 @@ static float waterDO[] = { 14.62, 14.22, 13.83, 13.46, 13.11, 12.77, 12.45,
 		12.14, 11.84, 11.56, 11.29, 11.03, 10.78, 10.54, 10.31, 10.08, 9.87,
 		9.66, 9.47, 9.28, 9.09, 8.91, 8.74, 8.58, 8.42, 8.26, 8.11, 7.97, 7.83,
 		7.69, 7.56, 7.43, 7.30, 7.18, 7.07, 6.95, 6.84, 6.73, 6.63, 6.53 };
+
 // CRC 高位字节值表
 static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
 		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
@@ -353,51 +354,45 @@ uint8_t ShowPassWPageCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 113,
 //显示模式设置
 uint8_t ShowConfModeCMD[13] = { 0xEE, 0x32, 0x01, 32, 0x00, 62, 0x00, 109, 0x00,
 		0xFF, 0xFC, 0xFF, 0xFF };
-////显示盐度设置数字1
-//uint8_t ShowConfSalinityNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00,
-//		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-////显示盐度设置数字2
-//uint8_t ShowConfSalinityNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 114, 0x00,
-//		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-////显示盐度设置数字3-小数点
-//uint8_t ShowConfSalinityNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 114, 0x00,
-//		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-////显示盐度设置数字4
-//uint8_t ShowConfSalinityNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00,
-//		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-////显示盐度设置单位
-//uint8_t ShowConfSalinityUnitCMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 109, 0x00,
-//		84, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示温度传感器选择
+uint8_t ShowConfTempModeCMD[13] = { 0xEE, 0x32, 0x01, 4, 0x00, 114, 0x00, 119,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示温度设置数字1
-uint8_t ShowConfTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00, 31,
+uint8_t ShowConfTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 164, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示温度设置数字2
-uint8_t ShowConfTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 114, 0x00, 31,
+uint8_t ShowConfTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 164, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示温度设置数字3-小数点
-uint8_t ShowConfTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 114, 0x00, 30,
+uint8_t ShowConfTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 164, 0x00, 30,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示温度设置数字4
-uint8_t ShowConfTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 31,
+uint8_t ShowConfTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 164, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示温度设置单位
-uint8_t ShowConfTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 112, 0x00, 81,
+uint8_t ShowConfTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 162, 0x00, 81,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示当前温度数字1
-uint8_t ShowConfTempNowNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 164, 0x00,
+uint8_t ShowConfTempNowNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 214, 0x00,
 		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示当前温度数字2
-uint8_t ShowConfTempNowNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 164, 0x00,
+uint8_t ShowConfTempNowNum2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 214, 0x00,
 		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示当前温度数字3-小数点
-uint8_t ShowConfTempNowNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 164, 0x00,
+uint8_t ShowConfTempNowNum3CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 214, 0x00,
 		30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示当前温度数字4
-uint8_t ShowConfTempNowNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 164, 0x00,
+uint8_t ShowConfTempNowNum4CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 214, 0x00,
 		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示当前温度设置单位
-uint8_t ShowConfTempNowUnitCMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 162, 0x00,
+uint8_t ShowConfTempNowUnitCMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 212, 0x00,
 		81, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字00
+uint8_t ShowConf4mANum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 62, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示4mA设置数字0
+uint8_t ShowConf4mANum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 62, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示4mA设置数字1
 uint8_t ShowConf4mANum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 62, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -415,6 +410,12 @@ uint8_t ShowConf4mANum5CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 62, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示4mA设置单位
 uint8_t ShowConf4mAUnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 58, 0x00, 27,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字00
+uint8_t ShowConf20mANum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 114, 0x00, 31,
+		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示20mA设置数字0
+uint8_t ShowConf20mANum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 114, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示20mA设置数字1
 uint8_t ShowConf20mANum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00, 31,
@@ -476,6 +477,12 @@ uint8_t ShowConfLimitDelayUnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 159,
 //显示高点报警状态
 uint8_t ShowConfUpLimitAutoCMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 62, 0x00, 51,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示高点报警设置数字00
+uint8_t ShowConfUpLimitNum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 114, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示高点报警设置数字0
+uint8_t ShowConfUpLimitNum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 114, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示高点报警设置数字1
 uint8_t ShowConfUpLimitNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00,
 		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -494,6 +501,12 @@ uint8_t ShowConfUpLimitNum5CMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 114, 0x00,
 //显示高点报警设置单位
 uint8_t ShowConfUpLimitUnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 109, 0x00,
 		27, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示高点报警延时时间数字00
+uint8_t ShowConfUpLimitDelayNum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 164,
+		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示高点报警延时时间数字0
+uint8_t ShowConfUpLimitDelayNum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 164,
+		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示高点报警延时时间数字1
 uint8_t ShowConfUpLimitDelayNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 164,
 		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -512,6 +525,12 @@ uint8_t ShowConfUpLimitDelayNum5CMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 164,
 //显示低点报警状态
 uint8_t ShowConfLowLimitAutoCMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 62, 0x00,
 		51, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示低点报警设置数字00
+uint8_t ShowConfLowLimitNum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 114, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示低点报警设置数字0
+uint8_t ShowConfLowLimitNum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 114, 0x00,
+		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示低点报警设置数字1
 uint8_t ShowConfLowLimitNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00,
 		31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -530,6 +549,12 @@ uint8_t ShowConfLowLimitNum5CMD[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 114, 0x00,
 //显示低点报警设置单位
 uint8_t ShowConfLowLimitUnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 109, 0x00,
 		27, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示低点报警延时时间数字00
+uint8_t ShowConfLowLimitDelayNum00CMD[13] = { 0xEE, 0x32, 0x00, 230, 0x00, 164,
+		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示低点报警延时时间数字0
+uint8_t ShowConfLowLimitDelayNum0CMD[13] = { 0xEE, 0x32, 0x00, 250, 0x00, 164,
+		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示低点报警延时时间数字1
 uint8_t ShowConfLowLimitDelayNum1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 164,
 		0x00, 31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -730,7 +755,7 @@ uint8_t sensorRevBuf[50];
 float f_Rs;
 //修正值
 float f_Rs_fixed[60];
-//滤波数组
+//滤波数组结果，已进行对应测量模式变换
 float f_Rs_filter;
 //滤波计数器
 uint8_t filterCNT = 0;
@@ -776,7 +801,7 @@ typedef struct {
 	uint8_t washdelaytime;
 	uint8_t filter;
 	uint8_t brightness;
-	uint8_t caltype;
+	uint8_t tempmode;
 	uint8_t airpressureunit;
 	float cell;
 	float kdo;
@@ -855,7 +880,7 @@ uint8_t Enter_PasW_Page(uint8_t lastPage);
 void Enter_Cal_Page1(void);
 void Enter_Cal_Page2(void);
 void Change_Conf_Unit(uint8_t mode);
-//void Change_Conf_Salinity(float salinity);
+void Change_Conf_TempMode(uint8_t tempmode);
 void Change_Conf_Temp(float temp);
 void Change_Conf_Temp_Now(float temp);
 void Change_Conf_TempFactorType(uint8_t TempFactorType);
@@ -1170,7 +1195,7 @@ void readConfig(void) {
 		savedata.washdelaytime = *(__IO uint8_t*) (FLASHBASEADDR + 120);
 		savedata.filter = *(__IO uint8_t*) (FLASHBASEADDR + 128);
 		savedata.brightness = *(__IO uint8_t*) (FLASHBASEADDR + 136);
-		savedata.caltype = *(__IO uint8_t*) (FLASHBASEADDR + 144);
+		savedata.tempmode = *(__IO uint8_t*) (FLASHBASEADDR + 144);
 		savedata.airpressureunit = *(__IO uint8_t*) (FLASHBASEADDR + 152);
 		savedata.cell = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 160)))
 				/ 1000;
@@ -1205,7 +1230,7 @@ void readConfig(void) {
 		savedata.washdelaytime = 24;
 		savedata.filter = 0;
 		savedata.brightness = 10;
-		savedata.caltype = 0;
+		savedata.tempmode = 0;
 		savedata.airpressureunit = 0;
 		savedata.cell = 1.01325;
 		savedata.kdo = 1;
@@ -1275,7 +1300,7 @@ void writeConfig(void) {
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 136),
 			savedata.brightness);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 144),
-			savedata.caltype);
+			savedata.tempmode);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 152),
 			savedata.airpressureunit);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 160),
@@ -1316,7 +1341,7 @@ void factoryConfig(uint8_t conf) {
 		savedata.temp4mA = 0;
 		savedata.temp20mA = 99.9;
 		savedata.uplimitauto = 1;
-		savedata.uplimit = 20;
+		savedata.uplimit = 200000;
 		savedata.uplimitdelay = 0.10;
 		savedata.lowlimitauto = 1;
 		savedata.lowlimit = 0;
@@ -1325,7 +1350,7 @@ void factoryConfig(uint8_t conf) {
 		savedata.washdelaytime = 24;
 		savedata.filter = 0;
 		savedata.brightness = 10;
-		savedata.caltype = 0;
+		savedata.tempmode = 0;
 		savedata.interval = 1;
 		savedata.MAX = ADMAX;
 		savedata.MIN = ADMIN;
@@ -1587,7 +1612,7 @@ void LCD_Update(void) {
 		ShowMainUnitCMD[7] = 29;
 		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
 		 **/
-		f_Rs_Show = 1 / f_Rs_filter;
+		f_Rs_Show = f_Rs_filter;
 		break;
 	case 2:
 		/* 盐度 */
@@ -2017,29 +2042,28 @@ void getRs(void) {
 	 * 电导率 = 1 * 距离 / (电阻 * 横截面积)
 	 * µS/cm = (1000000 / Ω) / cm
 	 */
-	//TODO 测试电阻用
-	if (f_Rs_filter < 1) {
+	if (f_Rs < 1000) {
 		range = 0;
 	}
-	if (f_Rs_filter >= 1 && f_Rs_filter < 10) {
+	if (f_Rs >= 1000 && f_Rs < 10000) {
 		range = 1;
 	}
-	if (f_Rs_filter >= 10 && f_Rs_filter < 100) {
+	if (f_Rs >= 10000 && f_Rs < 100000) {
 		range = 2;
 	}
-	if (f_Rs_filter >= 100 && f_Rs_filter < 200) {
+	if (f_Rs >= 100000 && f_Rs < 200000) {
 		range = 3;
 	}
-	if (f_Rs_filter >= 200 && f_Rs_filter < 500) {
+	if (f_Rs >= 200000 && f_Rs < 500000) {
 		range = 4;
 	}
-	if (f_Rs_filter >= 500 && f_Rs_filter < 1000) {
+	if (f_Rs >= 500000 && f_Rs < 1000000) {
 		range = 5;
 	}
-	if (f_Rs_filter >= 1000 && f_Rs_filter < 2000) {
+	if (f_Rs >= 1000000 && f_Rs < 2000000) {
 		range = 6;
 	}
-	if (f_Rs_filter >= 2000) {
+	if (f_Rs >= 2000000) {
 		range = 7;
 	}
 	RangeSelect(range);
@@ -2062,21 +2086,50 @@ void getRs(void) {
 //			}
 //	f_Rs_fixed[filterCNT] = savedata.kdo * (100 - savedata.tempfactor)
 //			* (f_Rs + savedata.bdo) / 100;
+	switch (savedata.mode) {
 
-	/* 换算成千欧 */
-	f_Rs_fixed[filterCNT] = f_Rs / 1000;
+	case 0:
+		/* change to μS/cm */
+		f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
 
-//	if (f_Rs_fixed[filterCNT] > 200000) {
-//		f_Rs_fixed[filterCNT] = 0;
-//		/* 刷新标志位 */
-//		refreshFlag = 0;
-//	}
-	if (f_Rs_fixed[filterCNT] <= 0) {
-		f_Rs_fixed[filterCNT] = 0;
-		/* 刷新标志位 */
-		refreshFlag = 0;
+		if (f_Rs_fixed[filterCNT] > 200000) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+
+		if (f_Rs_fixed[filterCNT] <= 0) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+		filterCNT++;
+		break;
+
+	case 1:
+		/* change to MΩ*cm */
+		f_Rs_fixed[filterCNT] = f_Rs / 100000;
+
+		if (f_Rs_fixed[filterCNT] > 20) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+
+		if (f_Rs_fixed[filterCNT] <= 0) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+		filterCNT++;
+		break;
+
+	case 2:
+		/* 盐度，该版本暂未支持 */
+		break;
+	default:
+		break;
 	}
-	filterCNT++;
 	if (f_Temp > 99) {
 		f_Temp = 99;
 	}
@@ -2106,15 +2159,17 @@ void getRs(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Enter_Conf_Page1(void) {
-	tempdata.temp = f_Temp_fixed;
 	HAL_UART_Transmit(&huart1, ShowConfPage1CMD, 13, USARTSENDTIME);
 	Change_Conf_Unit(tempdata.mode);
-//	Change_Conf_Salinity(tempdata.salinity);
+	Change_Conf_TempMode(tempdata.tempmode);
+	if (tempdata.tempmode != 2) {
+		tempdata.temp = f_Temp_fixed;
+		Change_Conf_Temp_Now(f_Temp);
+	} else
+		Change_Conf_Temp_Now(25);
 	Change_Conf_Temp(tempdata.temp);
 	HAL_UART_Transmit(&huart1, ShowConfTempUnitCMD, 13, USARTSENDTIME);
-	Change_Conf_Temp_Now(f_Temp);
-	HAL_UART_Transmit(&huart1, ShowConfTempNowUnitCMD, 13,
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowUnitCMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
@@ -2138,6 +2193,32 @@ void Enter_Conf_Page1_2(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Enter_Conf_Page2(void) {
+	switch (tempdata.mode) {
+	case 0:
+		if (tempdata.ppm4mA > 200000 || tempdata.ppm4mA >= tempdata.ppm20mA) {
+			tempdata.ppm4mA = 0;
+		}
+		if (tempdata.ppm20mA > 200000) {
+			tempdata.ppm20mA = 200000;
+		}
+		break;
+	case 1:
+		if (tempdata.ppm4mA > 20 || tempdata.ppm4mA >= tempdata.ppm20mA) {
+			tempdata.ppm4mA = 0;
+		}
+		if (tempdata.ppm20mA > 20) {
+			tempdata.ppm20mA = 20;
+		}
+		break;
+	case 2:
+		if (tempdata.ppm4mA > 70 || tempdata.ppm4mA >= tempdata.ppm20mA) {
+			tempdata.ppm4mA = 0;
+		}
+		if (tempdata.ppm20mA > 70) {
+			tempdata.ppm20mA = 70;
+		}
+		break;
+	}
 	HAL_UART_Transmit(&huart1, ShowConfigPage2CMD, 13, USARTSENDTIME);
 	Change_Conf_PPM4mA(tempdata.ppm4mA);
 	Change_Conf_ppm20mA(tempdata.ppm20mA);
@@ -2154,13 +2235,39 @@ void Enter_Conf_Page2(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Enter_Conf_Page3(void) {
+	switch (tempdata.mode) {
+	case 0:
+		if (tempdata.uplimit > 200000
+				|| tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.uplimit = 2000000;
+		}
+		if (tempdata.uplimitdelay > 200000) {
+			tempdata.uplimitdelay = 0;
+		}
+		break;
+	case 1:
+		if (tempdata.uplimit > 20 || tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.uplimit = 20;
+		}
+		if (tempdata.uplimitdelay > 20) {
+			tempdata.uplimitdelay = 0;
+		}
+		break;
+	case 2:
+		if (tempdata.uplimit > 70 || tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.uplimit = 70;
+		}
+		if (tempdata.uplimitdelay > 70) {
+			tempdata.uplimitdelay = 0;
+		}
+		break;
+	}
 	HAL_UART_Transmit(&huart1, ShowConfigPage3CMD, 13, USARTSENDTIME);
 	Change_Conf_UpLimitAuto(tempdata.uplimitauto);
 	Change_Conf_UpLimit(tempdata.uplimit);
 	Change_Conf_UpLimitDelay(tempdata.uplimitdelay);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
-
 }
 
 /**
@@ -2170,6 +2277,33 @@ void Enter_Conf_Page3(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Enter_Conf_Page4(void) {
+	switch (tempdata.mode) {
+	case 0:
+		if (tempdata.lowlimit > 200000
+				|| tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.lowlimit = 0;
+		}
+		if (tempdata.lowlimitdelay > 200000) {
+			tempdata.lowlimitdelay = 0;
+		}
+		break;
+	case 1:
+		if (tempdata.lowlimit > 20 || tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.lowlimit = 0;
+		}
+		if (tempdata.lowlimitdelay > 20) {
+			tempdata.lowlimitdelay = 0;
+		}
+		break;
+	case 2:
+		if (tempdata.lowlimit > 70 || tempdata.lowlimit >= tempdata.uplimit) {
+			tempdata.lowlimit = 0;
+		}
+		if (tempdata.lowlimitdelay > 70) {
+			tempdata.lowlimitdelay = 0;
+		}
+		break;
+	}
 	HAL_UART_Transmit(&huart1, ShowConfigPage4CMD, 13, USARTSENDTIME);
 	Change_Conf_LowLimitAuto(tempdata.lowlimitauto);
 	Change_Conf_LowLimit(tempdata.lowlimit);
@@ -2438,8 +2572,7 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
  */
 void Enter_Cal_Page1(void) {
 	HAL_UART_Transmit(&huart1, ShowCalPage1CMD, 13, USARTSENDTIME);
-	tempdata.caltype = 0;
-	Change_CalType(tempdata.caltype);
+	Change_CalType(0);
 	Change_LastCell(tempdata.cell);
 	Change_PreCell(12.3456);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
@@ -2599,33 +2732,21 @@ void Change_Conf_Unit(uint8_t mode) {
 }
 
 /**
- * @功能简介 : 修改设置界面的盐度补偿系数
+ * @功能简介 : 修改设置界面的温度传感器选择
  * @入口参数 : 单位索引号
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-//void Change_Conf_Salinity(float salinity) {
-//	ShowConfSalinityNum1CMD[7] = salinity / 10;
-//	ShowConfSalinityNum2CMD[7] = salinity - ShowConfSalinityNum1CMD[7] * 10;
-//	ShowConfSalinityNum4CMD[7] = 31
-//			+ (salinity - ShowConfSalinityNum1CMD[7] * 10
-//					- ShowConfSalinityNum2CMD[7]) * 10;
-//	ShowConfSalinityNum2CMD[7] += 31;
-//	if (ShowConfSalinityNum1CMD[7] != 0) {
-//		ShowConfSalinityNum1CMD[7] += 31;
-//	} else
-//		ShowConfSalinityNum1CMD[7] = 91;
-//	HAL_UART_Transmit(&huart1, ShowConfSalinityNum1CMD,
-//			sizeof(ShowConfSalinityNum1CMD), USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowConfSalinityNum2CMD,
-//			sizeof(ShowConfSalinityNum2CMD), USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowConfSalinityNum3CMD,
-//			sizeof(ShowConfSalinityNum3CMD), USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowConfSalinityNum4CMD,
-//			sizeof(ShowConfSalinityNum4CMD), USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowConfSalinityUnitCMD,
-//			sizeof(ShowConfSalinityUnitCMD), USARTSENDTIME);
-//}
+void Change_Conf_TempMode(uint8_t tempmode) {
+	if (tempdata.tempmode == 0)
+		ShowConfTempModeCMD[7] = 119;
+	else if (tempdata.tempmode == 1)
+		ShowConfTempModeCMD[7] = 118;
+	else if (tempdata.tempmode == 2)
+		ShowConfTempModeCMD[7] = 120;
+	HAL_UART_Transmit(&huart1, ShowConfTempModeCMD, sizeof(ShowConfTempModeCMD),
+	USARTSENDTIME);
+}
 /**
  * @功能简介 : 修改设置界面的温度补偿系数
  * @入口参数 : 单位索引号
@@ -2633,6 +2754,7 @@ void Change_Conf_Unit(uint8_t mode) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_Temp(float temp) {
+	temp += 0.05;
 	ShowConfTempNum1CMD[7] = temp / 10;
 	ShowConfTempNum2CMD[7] = temp - ShowConfTempNum1CMD[7] * 10;
 	ShowConfTempNum4CMD[7] = 31
@@ -2660,6 +2782,7 @@ void Change_Conf_Temp(float temp) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_Temp_Now(float temp) {
+	temp += 0.05;
 	ShowConfTempNowNum1CMD[7] = temp / 10;
 	ShowConfTempNowNum2CMD[7] = temp - ShowConfTempNowNum1CMD[7] * 10;
 	ShowConfTempNowNum4CMD[7] =
@@ -2697,6 +2820,11 @@ void Change_Conf_TempFactorType(uint8_t TempFactorType) {
 	}
 	HAL_UART_Transmit(&huart1, ShowConfTempFactorTypeCMD,
 			sizeof(ShowConfTempFactorTypeCMD), USARTSENDTIME);
+	/* clean */
+	ShowConf20mANum2CMD[7] = 122;
+	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
+	USARTSENDTIME);
+	Change_Conf_TempFactor(tempdata.tempfactor);
 }
 
 /**
@@ -2706,55 +2834,87 @@ void Change_Conf_TempFactorType(uint8_t TempFactorType) {
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
 void Change_Conf_TempFactor(float Factor) {
-	ShowConf20mANum1CMD[7] = Factor / 10;
-	ShowConf20mANum2CMD[7] = Factor - ShowConf20mANum1CMD[7] * 10;
-	ShowConf20mANum4CMD[7] = (Factor - ShowConf20mANum1CMD[7] * 10
-			- ShowConf20mANum2CMD[7]) * 10;
-	ShowConf20mANum5CMD[7] = 31
-			+ (Factor - ShowConf20mANum1CMD[7] * 10 - ShowConf20mANum2CMD[7]
-					- ShowConf20mANum4CMD[7] * 0.1) * 100;
-	ShowConf20mANum4CMD[7] += 31;
-	ShowConf20mANum2CMD[7] += 31;
-	if (ShowConf20mANum1CMD[7] != 0) {
-		ShowConf20mANum1CMD[7] += 31;
-	} else
-		ShowConf20mANum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConf20mANum3CMD[2] = 0x01;
-		ShowConf20mANum3CMD[3] = 64;
-		ShowConf20mANum4CMD[2] = 0x01;
-		ShowConf20mANum4CMD[3] = 54;
+	if (tempdata.tempfactortype == 0) {
+		ShowConf20mANum1CMD[7] = Factor / 10;
+		ShowConf20mANum2CMD[7] = Factor - ShowConf20mANum1CMD[7] * 10;
+		ShowConf20mANum4CMD[7] = (Factor - ShowConf20mANum1CMD[7] * 10
+				- ShowConf20mANum2CMD[7]) * 10;
+		ShowConf20mANum5CMD[7] = 31
+				+ (Factor - ShowConf20mANum1CMD[7] * 10 - ShowConf20mANum2CMD[7]
+						- ShowConf20mANum4CMD[7] * 0.1) * 100;
+		ShowConf20mANum4CMD[7] += 31;
+		ShowConf20mANum2CMD[7] += 31;
+		if (ShowConf20mANum1CMD[7] != 0) {
+			ShowConf20mANum1CMD[7] += 31;
+		} else
+			ShowConf20mANum1CMD[7] = 91;
+		HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD,
+				sizeof(ShowConf20mANum1CMD),
+				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD,
+				sizeof(ShowConf20mANum2CMD),
+				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD,
+				sizeof(ShowConf20mANum3CMD),
+				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD,
+				sizeof(ShowConf20mANum4CMD),
+				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD,
+				sizeof(ShowConf20mANum5CMD),
+				USARTSENDTIME);
+
+		ShowConf20mAUnitCMD[7] = 23;
+
+		HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD,
+				sizeof(ShowConf20mAUnitCMD),
+				USARTSENDTIME);
 	} else {
-		ShowConf20mANum3CMD[2] = 0x01;
-		ShowConf20mANum3CMD[3] = 54;
-		ShowConf20mANum4CMD[2] = 0x01;
-		ShowConf20mANum4CMD[3] = 64;
+		ShowConf20mANum2CMD[7] = 121;
+		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD,
+				sizeof(ShowConf20mANum2CMD),
+				USARTSENDTIME);
 	}
-	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, sizeof(ShowConf20mANum1CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD, sizeof(ShowConf20mANum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD, sizeof(ShowConf20mANum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD, sizeof(ShowConf20mANum5CMD),
-	USARTSENDTIME);
-
-	ShowConf20mAUnitCMD[7] = 23;
-
-	HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, sizeof(ShowConf20mAUnitCMD),
-	USARTSENDTIME);
 }
 
 /**
- * @功能简介 : 修改设置界面的4mA对应溶氧值
+ * @功能简介 : 修改设置界面的4mA对应电导值
  * @入口参数 : 单位索引号
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_PPM4mA(float ppm4mA) {
 	ppm4mA = ppm4mA + 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (ppm4mA < 10000) {
+			ShowConf4mAUnitCMD[7] = 27;
+		} else {
+			ShowConf4mAUnitCMD[7] = 28;
+			ppm4mA = ppm4mA / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConf4mAUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//ppm4mA = 10000 / ppm4mA;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConf4mAUnitCMD[7] = 84;
+		//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+		//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConf4mANum00CMD[7] = ppm4mA / 1000;
+	ppm4mA = ppm4mA - ShowConf4mANum00CMD[7] * 1000;
+	ShowConf4mANum0CMD[7] = ppm4mA / 100;
+	ppm4mA = ppm4mA - ShowConf4mANum0CMD[7] * 100;
 	ShowConf4mANum1CMD[7] = ppm4mA / 10;
 	ShowConf4mANum2CMD[7] = ppm4mA - ShowConf4mANum1CMD[7] * 10;
 	ShowConf4mANum4CMD[7] = (ppm4mA - ShowConf4mANum1CMD[7] * 10
@@ -2764,21 +2924,27 @@ void Change_Conf_PPM4mA(float ppm4mA) {
 					- ShowConf4mANum4CMD[7] * 0.1) * 100;
 	ShowConf4mANum4CMD[7] += 31;
 	ShowConf4mANum2CMD[7] += 31;
-	if (ShowConf4mANum1CMD[7] != 0) {
+	if (ShowConf4mANum00CMD[7] != 0) {
+		ShowConf4mANum00CMD[7] += 31;
+		ShowConf4mANum0CMD[7] += 31;
 		ShowConf4mANum1CMD[7] += 31;
-	} else
-		ShowConf4mANum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConf4mANum3CMD[2] = 0x01;
-		ShowConf4mANum3CMD[3] = 64;
-		ShowConf4mANum4CMD[2] = 0x01;
-		ShowConf4mANum4CMD[3] = 54;
 	} else {
-		ShowConf4mANum3CMD[2] = 0x01;
-		ShowConf4mANum3CMD[3] = 54;
-		ShowConf4mANum4CMD[2] = 0x01;
-		ShowConf4mANum4CMD[3] = 64;
+		ShowConf4mANum00CMD[7] = 91;
+		if (ShowConf4mANum0CMD[7] != 0) {
+			ShowConf4mANum0CMD[7] += 31;
+			ShowConf4mANum1CMD[7] += 31;
+		} else {
+			ShowConf4mANum0CMD[7] = 91;
+			if (ShowConf4mANum1CMD[7] != 0) {
+				ShowConf4mANum1CMD[7] += 31;
+			} else
+				ShowConf4mANum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConf4mANum00CMD, sizeof(ShowConf4mANum00CMD),
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum0CMD, sizeof(ShowConf4mANum0CMD),
+	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD, sizeof(ShowConf4mANum1CMD),
 	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, sizeof(ShowConf4mANum2CMD),
@@ -2789,31 +2955,48 @@ void Change_Conf_PPM4mA(float ppm4mA) {
 	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf4mANum5CMD, sizeof(ShowConf4mANum5CMD),
 	USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConf4mAUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConf4mAUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConf4mAUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
 	HAL_UART_Transmit(&huart1, ShowConf4mAUnitCMD, sizeof(ShowConf4mAUnitCMD),
 	USARTSENDTIME);
 }
 
 /**
- * @功能简介 : 修改设置界面的20mA对应溶氧值
+ * @功能简介 : 修改设置界面的20mA对应电导值
  * @入口参数 : 单位索引号
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_ppm20mA(float ppm20mA) {
 	ppm20mA = ppm20mA + 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (ppm20mA < 10000) {
+			ShowConf20mAUnitCMD[7] = 27;
+		} else {
+			ShowConf20mAUnitCMD[7] = 28;
+			ppm20mA = ppm20mA / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConf20mAUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//ppm20mA = 10000 / ppm20mA;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConf20mAUnitCMD[7] = 84;
+		//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+		//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConf20mANum00CMD[7] = ppm20mA / 1000;
+	ppm20mA = ppm20mA - ShowConf20mANum00CMD[7] * 1000;
+	ShowConf20mANum0CMD[7] = ppm20mA / 100;
+	ppm20mA = ppm20mA - ShowConf20mANum0CMD[7] * 100;
 	ShowConf20mANum1CMD[7] = ppm20mA / 10;
 	ShowConf20mANum2CMD[7] = ppm20mA - ShowConf20mANum1CMD[7] * 10;
 	ShowConf20mANum4CMD[7] = (ppm20mA - ShowConf20mANum1CMD[7] * 10
@@ -2823,21 +3006,27 @@ void Change_Conf_ppm20mA(float ppm20mA) {
 					- ShowConf20mANum4CMD[7] * 0.1) * 100;
 	ShowConf20mANum4CMD[7] += 31;
 	ShowConf20mANum2CMD[7] += 31;
-	if (ShowConf20mANum1CMD[7] != 0) {
+	if (ShowConf20mANum00CMD[7] != 0) {
+		ShowConf20mANum00CMD[7] += 31;
+		ShowConf20mANum0CMD[7] += 31;
 		ShowConf20mANum1CMD[7] += 31;
-	} else
-		ShowConf20mANum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConf20mANum3CMD[2] = 0x01;
-		ShowConf20mANum3CMD[3] = 64;
-		ShowConf20mANum4CMD[2] = 0x01;
-		ShowConf20mANum4CMD[3] = 54;
 	} else {
-		ShowConf20mANum3CMD[2] = 0x01;
-		ShowConf20mANum3CMD[3] = 54;
-		ShowConf20mANum4CMD[2] = 0x01;
-		ShowConf20mANum4CMD[3] = 64;
+		ShowConf20mANum00CMD[7] = 91;
+		if (ShowConf20mANum0CMD[7] != 0) {
+			ShowConf20mANum0CMD[7] += 31;
+			ShowConf20mANum1CMD[7] += 31;
+		} else {
+			ShowConf20mANum0CMD[7] = 91;
+			if (ShowConf20mANum1CMD[7] != 0) {
+				ShowConf20mANum1CMD[7] += 31;
+			} else
+				ShowConf20mANum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConf20mANum00CMD,
+			sizeof(ShowConf20mANum00CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum0CMD, sizeof(ShowConf20mANum0CMD),
+	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, sizeof(ShowConf20mANum1CMD),
 	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
@@ -2848,19 +3037,6 @@ void Change_Conf_ppm20mA(float ppm20mA) {
 	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD, sizeof(ShowConf20mANum5CMD),
 	USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConf20mAUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConf20mAUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConf20mAUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
 	HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, sizeof(ShowConf20mAUnitCMD),
 	USARTSENDTIME);
 }
@@ -2872,6 +3048,7 @@ void Change_Conf_ppm20mA(float ppm20mA) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_temp4mA(float temp4mA) {
+	temp4mA += 0.05;
 	ShowConf4mATempNum1CMD[7] = temp4mA / 10;
 	ShowConf4mATempNum2CMD[7] = temp4mA - ShowConf4mATempNum1CMD[7] * 10;
 	ShowConf4mATempNum4CMD[7] = 31
@@ -2901,6 +3078,7 @@ void Change_Conf_temp4mA(float temp4mA) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_temp20mA(float temp20mA) {
+	temp20mA += 0.05;
 	ShowConf20mATempNum1CMD[7] = temp20mA / 10;
 	ShowConf20mATempNum2CMD[7] = temp20mA - ShowConf20mATempNum1CMD[7] * 10;
 	ShowConf20mATempNum4CMD[7] = 31
@@ -3059,6 +3237,37 @@ void Change_Conf_UpLimitAuto(uint8_t uplimitauto) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_UpLimit(float uplimit) {
+	uplimit += 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (uplimit < 10000) {
+			ShowConfUpLimitUnitCMD[7] = 27;
+		} else {
+			ShowConfUpLimitUnitCMD[7] = 28;
+			uplimit = uplimit / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConfUpLimitUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//uplimit = 10000 / uplimit;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConfUpLimitUnitCMD[7] = 84;
+//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConfUpLimitNum00CMD[7] = uplimit / 1000;
+	uplimit = uplimit - ShowConfUpLimitNum00CMD[7] * 1000;
+	ShowConfUpLimitNum0CMD[7] = uplimit / 100;
+	uplimit = uplimit - ShowConfUpLimitNum0CMD[7] * 100;
 	ShowConfUpLimitNum1CMD[7] = uplimit / 10;
 	ShowConfUpLimitNum2CMD[7] = uplimit - ShowConfUpLimitNum1CMD[7] * 10;
 	ShowConfUpLimitNum4CMD[7] = (uplimit - ShowConfUpLimitNum1CMD[7] * 10
@@ -3068,52 +3277,39 @@ void Change_Conf_UpLimit(float uplimit) {
 			+ 31;
 	ShowConfUpLimitNum4CMD[7] += 31;
 	ShowConfUpLimitNum2CMD[7] += 31;
-	if (ShowConfUpLimitNum1CMD[7] != 0) {
+	if (ShowConfUpLimitNum00CMD[7] != 0) {
+		ShowConfUpLimitNum00CMD[7] += 31;
+		ShowConfUpLimitNum0CMD[7] += 31;
 		ShowConfUpLimitNum1CMD[7] += 31;
-	} else
-		ShowConfUpLimitNum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConfUpLimitNum3CMD[2] = 0x01;
-		ShowConfUpLimitNum3CMD[3] = 74;
-		ShowConfUpLimitNum4CMD[2] = 0x01;
-		ShowConfUpLimitNum4CMD[3] = 54;
 	} else {
-		ShowConfUpLimitNum3CMD[2] = 0x01;
-		ShowConfUpLimitNum3CMD[3] = 54;
-		ShowConfUpLimitNum4CMD[2] = 0x01;
-		ShowConfUpLimitNum4CMD[3] = 74;
+		ShowConfUpLimitNum00CMD[7] = 91;
+		if (ShowConfUpLimitNum0CMD[7] != 0) {
+			ShowConfUpLimitNum0CMD[7] += 31;
+			ShowConfUpLimitNum1CMD[7] += 31;
+		} else {
+			ShowConfUpLimitNum0CMD[7] = 91;
+			if (ShowConfUpLimitNum1CMD[7] != 0) {
+				ShowConfUpLimitNum1CMD[7] += 31;
+			} else
+				ShowConfUpLimitNum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum00CMD,
+			sizeof(ShowConfUpLimitNum00CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum0CMD,
+			sizeof(ShowConfUpLimitNum0CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum1CMD,
-			sizeof(ShowConfUpLimitNum1CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfUpLimitNum1CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum2CMD,
-			sizeof(ShowConfUpLimitNum2CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfUpLimitNum2CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum3CMD,
-			sizeof(ShowConfUpLimitNum3CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfUpLimitNum3CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum4CMD,
-			sizeof(ShowConfUpLimitNum4CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfUpLimitNum4CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum5CMD,
-			sizeof(ShowConfUpLimitNum4CMD),
-			USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConfUpLimitUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConfUpLimitUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConfUpLimitUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
+			sizeof(ShowConfUpLimitNum4CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitUnitCMD,
-			sizeof(ShowConfUpLimitUnitCMD),
-			USARTSENDTIME);
+			sizeof(ShowConfUpLimitUnitCMD), USARTSENDTIME);
 }
 
 /**
@@ -3123,7 +3319,37 @@ void Change_Conf_UpLimit(float uplimit) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_UpLimitDelay(float delaytime) {
-
+	delaytime += 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (delaytime < 10000) {
+			ShowConfLimitDelayUnitCMD[7] = 27;
+		} else {
+			ShowConfLimitDelayUnitCMD[7] = 28;
+			delaytime = delaytime / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConfLimitDelayUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//delaytime = 10000 / delaytime;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConfLimitDelayUnitCMD[7] = 84;
+//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConfUpLimitDelayNum00CMD[7] = delaytime / 1000;
+	delaytime = delaytime - ShowConfUpLimitDelayNum00CMD[7] * 1000;
+	ShowConfUpLimitDelayNum0CMD[7] = delaytime / 100;
+	delaytime = delaytime - ShowConfUpLimitDelayNum0CMD[7] * 100;
 	ShowConfUpLimitDelayNum1CMD[7] = delaytime / 10;
 	ShowConfUpLimitDelayNum2CMD[7] = delaytime
 			- ShowConfUpLimitDelayNum1CMD[7] * 10;
@@ -3136,21 +3362,27 @@ void Change_Conf_UpLimitDelay(float delaytime) {
 			- ShowConfUpLimitDelayNum4CMD[7] * 0.1) * 100 + 31;
 	ShowConfUpLimitDelayNum4CMD[7] += 31;
 	ShowConfUpLimitDelayNum2CMD[7] += 31;
-	if (ShowConfUpLimitDelayNum1CMD[7] != 0) {
+	if (ShowConfUpLimitDelayNum00CMD[7] != 0) {
+		ShowConfUpLimitDelayNum00CMD[7] += 31;
+		ShowConfUpLimitDelayNum0CMD[7] += 31;
 		ShowConfUpLimitDelayNum1CMD[7] += 31;
-	} else
-		ShowConfUpLimitDelayNum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConfUpLimitDelayNum3CMD[2] = 0x01;
-		ShowConfUpLimitDelayNum3CMD[3] = 74;
-		ShowConfUpLimitDelayNum4CMD[2] = 0x01;
-		ShowConfUpLimitDelayNum4CMD[3] = 54;
 	} else {
-		ShowConfUpLimitDelayNum3CMD[2] = 0x01;
-		ShowConfUpLimitDelayNum3CMD[3] = 54;
-		ShowConfUpLimitDelayNum4CMD[2] = 0x01;
-		ShowConfUpLimitDelayNum4CMD[3] = 74;
+		ShowConfUpLimitDelayNum00CMD[7] = 91;
+		if (ShowConfUpLimitDelayNum0CMD[7] != 0) {
+			ShowConfUpLimitDelayNum0CMD[7] += 31;
+			ShowConfUpLimitDelayNum1CMD[7] += 31;
+		} else {
+			ShowConfUpLimitDelayNum0CMD[7] = 91;
+			if (ShowConfUpLimitDelayNum1CMD[7] != 0) {
+				ShowConfUpLimitDelayNum1CMD[7] += 31;
+			} else
+				ShowConfUpLimitDelayNum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum00CMD,
+			sizeof(ShowConfUpLimitDelayNum00CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum0CMD,
+			sizeof(ShowConfUpLimitDelayNum0CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum1CMD,
 			sizeof(ShowConfUpLimitDelayNum1CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum2CMD,
@@ -3161,19 +3393,6 @@ void Change_Conf_UpLimitDelay(float delaytime) {
 			sizeof(ShowConfUpLimitDelayNum4CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum5CMD,
 			sizeof(ShowConfUpLimitDelayNum5CMD), USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConfLimitDelayUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConfLimitDelayUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConfLimitDelayUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
 	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD,
 			sizeof(ShowConfLimitDelayUnitCMD), USARTSENDTIME);
 }
@@ -3201,6 +3420,37 @@ void Change_Conf_LowLimitAuto(uint8_t lowlimitauto) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_LowLimit(float lowlimit) {
+	lowlimit += 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (lowlimit < 10000) {
+			ShowConfLowLimitUnitCMD[7] = 27;
+		} else {
+			ShowConfLowLimitUnitCMD[7] = 28;
+			lowlimit = lowlimit / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConfLowLimitUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//lowlimit = 10000 / lowlimit;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConfLowLimitUnitCMD[7] = 84;
+//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConfLowLimitNum00CMD[7] = lowlimit / 1000;
+	lowlimit = lowlimit - ShowConfLowLimitNum00CMD[7] * 1000;
+	ShowConfLowLimitNum0CMD[7] = lowlimit / 100;
+	lowlimit = lowlimit - ShowConfLowLimitNum0CMD[7] * 100;
 	ShowConfLowLimitNum1CMD[7] = lowlimit / 10;
 	ShowConfLowLimitNum2CMD[7] = lowlimit - ShowConfLowLimitNum1CMD[7] * 10;
 	ShowConfLowLimitNum4CMD[7] = (lowlimit - ShowConfLowLimitNum1CMD[7] * 10
@@ -3210,52 +3460,39 @@ void Change_Conf_LowLimit(float lowlimit) {
 			* 100 + 31;
 	ShowConfLowLimitNum4CMD[7] += 31;
 	ShowConfLowLimitNum2CMD[7] += 31;
-	if (ShowConfLowLimitNum1CMD[7] != 0) {
+	if (ShowConfLowLimitNum00CMD[7] != 0) {
+		ShowConfLowLimitNum00CMD[7] += 31;
+		ShowConfLowLimitNum0CMD[7] += 31;
 		ShowConfLowLimitNum1CMD[7] += 31;
-	} else
-		ShowConfLowLimitNum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConfLowLimitNum3CMD[2] = 0x01;
-		ShowConfLowLimitNum3CMD[3] = 74;
-		ShowConfLowLimitNum4CMD[2] = 0x01;
-		ShowConfLowLimitNum4CMD[3] = 54;
 	} else {
-		ShowConfLowLimitNum3CMD[2] = 0x01;
-		ShowConfLowLimitNum3CMD[3] = 54;
-		ShowConfLowLimitNum4CMD[2] = 0x01;
-		ShowConfLowLimitNum4CMD[3] = 74;
+		ShowConfLowLimitNum00CMD[7] = 91;
+		if (ShowConfLowLimitNum0CMD[7] != 0) {
+			ShowConfLowLimitNum0CMD[7] += 31;
+			ShowConfLowLimitNum1CMD[7] += 31;
+		} else {
+			ShowConfLowLimitNum0CMD[7] = 91;
+			if (ShowConfLowLimitNum1CMD[7] != 0) {
+				ShowConfLowLimitNum1CMD[7] += 31;
+			} else
+				ShowConfLowLimitNum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum00CMD,
+			sizeof(ShowConfLowLimitNum00CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum0CMD,
+			sizeof(ShowConfLowLimitNum0CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum1CMD,
-			sizeof(ShowConfLowLimitNum1CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfLowLimitNum1CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum2CMD,
-			sizeof(ShowConfLowLimitNum2CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfLowLimitNum2CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum3CMD,
-			sizeof(ShowConfLowLimitNum3CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfLowLimitNum3CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum4CMD,
-			sizeof(ShowConfLowLimitNum4CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfLowLimitNum4CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum5CMD,
-			sizeof(ShowConfLowLimitNum5CMD),
-			USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConfLowLimitUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConfLowLimitUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConfLowLimitUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
+			sizeof(ShowConfLowLimitNum5CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitUnitCMD,
-			sizeof(ShowConfLowLimitUnitCMD),
-			USARTSENDTIME);
+			sizeof(ShowConfLowLimitUnitCMD), USARTSENDTIME);
 }
 
 /**
@@ -3265,7 +3502,37 @@ void Change_Conf_LowLimit(float lowlimit) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void Change_Conf_LowLimitDelay(float delaytime) {
-
+	delaytime += 0.005;
+	switch (tempdata.mode) {
+	case 0:
+		/* 电导率 */
+		if (delaytime < 10000) {
+			ShowConfLimitDelayUnitCMD[7] = 27;
+		} else {
+			ShowConfLimitDelayUnitCMD[7] = 28;
+			delaytime = delaytime / 1000;
+		}
+		break;
+	case 1:
+		/* 电阻率 */
+		ShowConfLimitDelayUnitCMD[7] = 29;
+		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
+		 **/
+		//delaytime = 10000 / delaytime;
+		break;
+	case 2:
+		/* 盐度 */
+		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
+		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
+		ShowConfLimitDelayUnitCMD[7] = 84;
+//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+//				- 6171.9) * 1000000;
+		break;
+	}
+	ShowConfLowLimitDelayNum00CMD[7] = delaytime / 1000;
+	delaytime = delaytime - ShowConfLowLimitDelayNum00CMD[7] * 1000;
+	ShowConfLowLimitDelayNum0CMD[7] = delaytime / 100;
+	delaytime = delaytime - ShowConfLowLimitDelayNum0CMD[7] * 100;
 	ShowConfLowLimitDelayNum1CMD[7] = delaytime / 10;
 	ShowConfLowLimitDelayNum2CMD[7] = delaytime
 			- ShowConfLowLimitDelayNum1CMD[7] * 10;
@@ -3278,21 +3545,27 @@ void Change_Conf_LowLimitDelay(float delaytime) {
 			- ShowConfLowLimitDelayNum4CMD[7] * 0.1) * 100 + 31;
 	ShowConfLowLimitDelayNum4CMD[7] += 31;
 	ShowConfLowLimitDelayNum2CMD[7] += 31;
-	if (ShowConfLowLimitDelayNum1CMD[7] != 0) {
+	if (ShowConfLowLimitDelayNum00CMD[7] != 0) {
+		ShowConfLowLimitDelayNum00CMD[7] += 31;
+		ShowConfLowLimitDelayNum0CMD[7] += 31;
 		ShowConfLowLimitDelayNum1CMD[7] += 31;
-	} else
-		ShowConfLowLimitDelayNum1CMD[7] = 91;
-	if (tempdata.mode == 2) {
-		ShowConfLowLimitDelayNum3CMD[2] = 0x01;
-		ShowConfLowLimitDelayNum3CMD[3] = 74;
-		ShowConfLowLimitDelayNum4CMD[2] = 0x01;
-		ShowConfLowLimitDelayNum4CMD[3] = 54;
 	} else {
-		ShowConfLowLimitDelayNum3CMD[2] = 0x01;
-		ShowConfLowLimitDelayNum3CMD[3] = 54;
-		ShowConfLowLimitDelayNum4CMD[2] = 0x01;
-		ShowConfLowLimitDelayNum4CMD[3] = 74;
+		ShowConfLowLimitDelayNum00CMD[7] = 91;
+		if (ShowConfLowLimitDelayNum0CMD[7] != 0) {
+			ShowConfLowLimitDelayNum0CMD[7] += 31;
+			ShowConfLowLimitDelayNum1CMD[7] += 31;
+		} else {
+			ShowConfLowLimitDelayNum0CMD[7] = 91;
+			if (ShowConfLowLimitDelayNum1CMD[7] != 0) {
+				ShowConfLowLimitDelayNum1CMD[7] += 31;
+			} else
+				ShowConfLowLimitDelayNum1CMD[7] = 91;
+		}
 	}
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum00CMD,
+			sizeof(ShowConfLowLimitDelayNum00CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum0CMD,
+			sizeof(ShowConfLowLimitDelayNum0CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum1CMD,
 			sizeof(ShowConfLowLimitDelayNum1CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum2CMD,
@@ -3303,19 +3576,6 @@ void Change_Conf_LowLimitDelay(float delaytime) {
 			sizeof(ShowConfLowLimitDelayNum4CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum5CMD,
 			sizeof(ShowConfLowLimitDelayNum5CMD), USARTSENDTIME);
-	switch (tempdata.mode) {
-	case 0:
-		ShowConfLimitDelayUnitCMD[7] = 27;
-		break;
-	case 1:
-		ShowConfLimitDelayUnitCMD[7] = 28;
-		break;
-	case 2:
-		ShowConfLimitDelayUnitCMD[7] = 23;
-		break;
-	default:
-		break;
-	}
 	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD,
 			sizeof(ShowConfLimitDelayUnitCMD), USARTSENDTIME);
 }
@@ -3381,14 +3641,11 @@ void Change_Conf_Filter(uint8_t filter) {
 	} else
 		ShowConfFilterNum1CMD[7] = 91;
 	HAL_UART_Transmit(&huart1, ShowConfFilterNum1CMD,
-			sizeof(ShowConfFilterNum1CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfFilterNum1CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfFilterNum2CMD,
-			sizeof(ShowConfFilterNum2CMD),
-			USARTSENDTIME);
+			sizeof(ShowConfFilterNum2CMD), USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfFilterUnitCMD,
-			sizeof(ShowConfFilterUnitCMD),
-			USARTSENDTIME);
+			sizeof(ShowConfFilterUnitCMD), USARTSENDTIME);
 }
 
 /**
@@ -3662,44 +3919,42 @@ void Change_LastCell(float cell) {
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
 void Change_PreCell(float cell) {
-	if (tempdata.caltype == 0) {
-		if (cell >= 10) {
-			ShowPreCellNum0CMD[7] = cell / 10;
-			cell -= ShowPreCellNum0CMD[7] * 10;
-			ShowPreCellNum0CMD[7] += 31;
-		} else {
-			ShowPreCellNum0CMD[7] = 91;
-		}
-		ShowPreCellNum1CMD[7] = cell;
-		ShowPreCellNum2CMD[7] = 30;
-		ShowPreCellNum3CMD[7] = (cell * 10 - ShowPreCellNum1CMD[7] * 10);
-		ShowPreCellNum4CMD[7] = cell * 100 - ShowPreCellNum1CMD[7] * 100
-				- ShowPreCellNum3CMD[7] * 10;
-		ShowPreCellNum5CMD[7] = cell * 1000 - ShowPreCellNum1CMD[7] * 1000
-				- ShowPreCellNum3CMD[7] * 100 - ShowPreCellNum4CMD[7] * 10;
-		ShowPreCellNum6CMD[7] = 31 + cell * 10000
-				- ShowPreCellNum1CMD[7] * 10000 - ShowPreCellNum3CMD[7] * 1000
-				- ShowPreCellNum4CMD[7] * 100 - ShowPreCellNum5CMD[7] * 10;
-		ShowPreCellNum5CMD[7] += 31;
-		ShowPreCellNum4CMD[7] += 31;
-		ShowPreCellNum3CMD[7] += 31;
-		ShowPreCellNum1CMD[7] += 31;
-
-		HAL_UART_Transmit(&huart1, ShowPreCellNum0CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum1CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum2CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum3CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum4CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum5CMD, 13,
-		USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowPreCellNum6CMD, 13,
-		USARTSENDTIME);
+	if (cell >= 10) {
+		ShowPreCellNum0CMD[7] = cell / 10;
+		cell -= ShowPreCellNum0CMD[7] * 10;
+		ShowPreCellNum0CMD[7] += 31;
+	} else {
+		ShowPreCellNum0CMD[7] = 91;
 	}
+	ShowPreCellNum1CMD[7] = cell;
+	ShowPreCellNum2CMD[7] = 30;
+	ShowPreCellNum3CMD[7] = (cell * 10 - ShowPreCellNum1CMD[7] * 10);
+	ShowPreCellNum4CMD[7] = cell * 100 - ShowPreCellNum1CMD[7] * 100
+			- ShowPreCellNum3CMD[7] * 10;
+	ShowPreCellNum5CMD[7] = cell * 1000 - ShowPreCellNum1CMD[7] * 1000
+			- ShowPreCellNum3CMD[7] * 100 - ShowPreCellNum4CMD[7] * 10;
+	ShowPreCellNum6CMD[7] = 31 + cell * 10000 - ShowPreCellNum1CMD[7] * 10000
+			- ShowPreCellNum3CMD[7] * 1000 - ShowPreCellNum4CMD[7] * 100
+			- ShowPreCellNum5CMD[7] * 10;
+	ShowPreCellNum5CMD[7] += 31;
+	ShowPreCellNum4CMD[7] += 31;
+	ShowPreCellNum3CMD[7] += 31;
+	ShowPreCellNum1CMD[7] += 31;
+
+	HAL_UART_Transmit(&huart1, ShowPreCellNum0CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum1CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum2CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum3CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum4CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum5CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowPreCellNum6CMD, 13,
+	USARTSENDTIME);
 }
 
 /**
@@ -3797,7 +4052,7 @@ void Select_Next(uint8_t Selection) {
  */
 void Conf_UI(void) {
 	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
-	uint8_t BTN_TIME = 0;
+	uint32_t BTN_TIME = 0;
 	uint32_t i = 0;
 	memcpy(&tempdata, &savedata, sizeof(savedata));
 	memcpy(&sdateconfstructureget, &sdatestructureget,
@@ -3879,19 +4134,27 @@ void Conf_UI(void) {
 					}
 					Change_Conf_Unit(tempdata.mode);
 					break;
-//				case 2:
-//					//盐度修正系数
-//					tempdata.salinity += 0.1;
-//					if (tempdata.salinity > 45) {
-//						tempdata.salinity = 0;
-//					}
-//					Change_Conf_Salinity(tempdata.salinity);
-//					break;
 				case 2:
+					//温度传感器选择
+					if (tempdata.tempmode == 2) {
+						tempdata.tempmode = 0;
+					} else
+						tempdata.tempmode += 1;
+					Change_Conf_TempMode(tempdata.tempmode);
+					if (tempdata.tempmode == 2) {
+						Change_Conf_Temp(25);
+						Change_Conf_Temp_Now(25);
+					} else {
+						Change_Conf_Temp(f_Temp_fixed);
+						Change_Conf_Temp_Now(f_Temp);
+					}
+					break;
+				case 3:
 					//温度修正系数
-					tempdata.temp += 0.1;
+					tempdata.temp += (0.1 * (BTN_TIME / 10 + 1));
 					if (tempdata.temp > 50) {
 						tempdata.temp = 0;
+						BTN_TIME = 0;
 					}
 					if (f_Temp != 0) {
 						tempdata.ktemp = tempdata.temp / f_Temp;
@@ -3906,36 +4169,86 @@ void Conf_UI(void) {
 			case 2:
 				switch (CurrentSelect) {
 				case 1:
-					//修改4mA对应溶氧值
-					tempdata.ppm4mA += 0.01;
-					if (tempdata.ppm4mA > 20
-							|| tempdata.ppm4mA >= tempdata.ppm20mA) {
-						tempdata.ppm4mA = 0;
+					//修改4mA对应电导值
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.ppm4mA < 10000) {
+							tempdata.ppm4mA += (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.ppm4mA += (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.ppm4mA > 200000
+								|| tempdata.ppm4mA >= tempdata.ppm20mA) {
+							tempdata.ppm4mA = 0;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.ppm4mA += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm4mA > 20
+								|| tempdata.ppm4mA >= tempdata.ppm20mA) {
+							tempdata.ppm4mA = 0;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.ppm4mA += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm4mA > 70
+								|| tempdata.ppm4mA >= tempdata.ppm20mA) {
+							tempdata.ppm4mA = 0;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_PPM4mA(tempdata.ppm4mA);
 					break;
 				case 2:
-					//修改20mA对应溶氧值
-					tempdata.ppm20mA += 0.01;
-					if (tempdata.ppm20mA > 20) {
-						tempdata.ppm20mA = tempdata.ppm4mA + 0.01;
+					//修改20mA对应电导值
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.ppm20mA < 10000) {
+							tempdata.ppm20mA += (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.ppm20mA += (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.ppm20mA > 200000) {
+							tempdata.ppm20mA = tempdata.ppm4mA + 0.01;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.ppm20mA += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm20mA > 20) {
+							tempdata.ppm20mA = tempdata.ppm4mA + 0.01;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.ppm20mA += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm20mA > 70) {
+							tempdata.ppm20mA = tempdata.ppm4mA + 0.01;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_ppm20mA(tempdata.ppm20mA);
 					break;
 				case 3:
 					//修改4mA对应温度值
-					tempdata.temp4mA += 0.1;
+					tempdata.temp4mA += (0.1 * (BTN_TIME / 10 + 1));
 					if (tempdata.temp4mA > 99.9
 							|| tempdata.temp4mA >= tempdata.temp20mA) {
 						tempdata.temp4mA = 0;
+						BTN_TIME = 0;
 					}
 					Change_Conf_temp4mA(tempdata.temp4mA);
 					break;
 				case 4:
 					//修改20mA对应温度值
-					tempdata.temp20mA += 0.1;
+					tempdata.temp20mA += (0.1 * (BTN_TIME / 10 + 1));
 					if (tempdata.temp20mA > 99.9) {
 						tempdata.temp20mA = tempdata.temp4mA + 0.1;
+						BTN_TIME = 0;
 					}
 					Change_Conf_temp20mA(tempdata.temp20mA);
 					break;
@@ -3955,18 +4268,46 @@ void Conf_UI(void) {
 					break;
 				case 2:
 					//修改高点报警值
-					tempdata.uplimit += 0.01;
-					if (tempdata.uplimit > 20) {
-						tempdata.uplimit = tempdata.lowlimit + 0.02;
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.uplimit < 10000) {
+							tempdata.uplimit += (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.uplimit += (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.uplimit > 200000) {
+							tempdata.uplimit = tempdata.lowlimit + 0.02;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.uplimit += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.uplimit > 20) {
+							tempdata.uplimit = tempdata.lowlimit + 0.02;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.uplimit += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.uplimit > 70) {
+							tempdata.uplimit = tempdata.lowlimit + 0.02;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_UpLimit(tempdata.uplimit);
 					break;
 				case 3:
 					//修改高点报警值延时区间
-					tempdata.uplimitdelay += 0.01;
+					if (tempdata.uplimitdelay < 10000) {
+						tempdata.uplimitdelay += (0.01 * (BTN_TIME / 10 + 1));
+					} else {
+						tempdata.uplimitdelay += (10 * (BTN_TIME / 10 + 1));
+					}
 					if (tempdata.uplimitdelay
 							> (tempdata.uplimit - tempdata.lowlimit)) {
 						tempdata.uplimitdelay = 0;
+						BTN_TIME = 0;
 					}
 					Change_Conf_UpLimitDelay(tempdata.uplimitdelay);
 					break;
@@ -3986,18 +4327,46 @@ void Conf_UI(void) {
 					break;
 				case 2:
 					//修改低点报警值
-					tempdata.lowlimit += 0.01;
-					if (tempdata.lowlimit >= tempdata.uplimit) {
-						tempdata.lowlimit = 0;
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.lowlimit < 10000) {
+							tempdata.lowlimit += (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.lowlimit += (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.lowlimit >= tempdata.uplimit) {
+							tempdata.lowlimit = 0;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.lowlimit += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.lowlimit >= tempdata.uplimit) {
+							tempdata.lowlimit = 0;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.lowlimit += (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.lowlimit >= tempdata.uplimit) {
+							tempdata.lowlimit = 0;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_LowLimit(tempdata.lowlimit);
 					break;
 				case 3:
 					//修改低点报警值延时区间
-					tempdata.lowlimitdelay += 0.01;
+					if (tempdata.lowlimitdelay < 10000) {
+						tempdata.lowlimitdelay += (0.01 * (BTN_TIME / 10 + 1));
+					} else {
+						tempdata.lowlimitdelay += (10 * (BTN_TIME / 10 + 1));
+					}
 					if (tempdata.lowlimitdelay
 							> (tempdata.uplimit - tempdata.lowlimit)) {
 						tempdata.lowlimitdelay = 0;
+						BTN_TIME = 0;
 					}
 					Change_Conf_LowLimitDelay(tempdata.lowlimitdelay);
 					break;
@@ -4144,7 +4513,7 @@ void Conf_UI(void) {
 				case 2:
 					//修改分
 					stimeconfstructureget.Minutes += 1;
-					if (stimeconfstructureget.Minutes > 60) {
+					if (stimeconfstructureget.Minutes > 59) {
 						stimeconfstructureget.Minutes = 0;
 					}
 					Change_Conf_Minutes(stimeconfstructureget.Minutes);
@@ -4152,7 +4521,7 @@ void Conf_UI(void) {
 				case 3:
 					//修改秒
 					stimeconfstructureget.Seconds += 1;
-					if (stimeconfstructureget.Seconds > 60) {
+					if (stimeconfstructureget.Seconds > 59) {
 						stimeconfstructureget.Seconds = 0;
 					}
 					Change_Conf_Seconds(stimeconfstructureget.Seconds);
@@ -4188,8 +4557,8 @@ void Conf_UI(void) {
 				break;
 			}
 			BTN_TIME++;
-			if (BTN_TIME > 100) {
-				BTN_TIME = 100;
+			if (BTN_TIME > 100000) {
+				BTN_TIME = 100000;
 			}
 		}	//End 按下right键
 
@@ -4214,19 +4583,27 @@ void Conf_UI(void) {
 					}
 					Change_Conf_Unit(tempdata.mode);
 					break;
-//				case 2:
-//					//盐度修正系数
-//					tempdata.salinity -= 0.1;
-//					if (tempdata.salinity < 0) {
-//						tempdata.salinity = 45;
-//					}
-//					Change_Conf_Salinity(tempdata.salinity);
-//					break;
 				case 2:
+					//温度传感器选择
+					if (tempdata.tempmode == 0) {
+						tempdata.tempmode = 2;
+					} else
+						tempdata.tempmode -= 1;
+					Change_Conf_TempMode(tempdata.tempmode);
+					if (tempdata.tempmode == 2) {
+						Change_Conf_Temp(25);
+						Change_Conf_Temp_Now(25);
+					} else {
+						Change_Conf_Temp(f_Temp_fixed);
+						Change_Conf_Temp_Now(f_Temp);
+					}
+					break;
+				case 3:
 					//温度修正系数
 					tempdata.temp -= 0.1;
 					if (tempdata.temp < 0) {
 						tempdata.temp = 50;
+						BTN_TIME = 0;
 					}
 					if (f_Temp != 0) {
 						tempdata.ktemp = tempdata.temp / f_Temp;
@@ -4241,36 +4618,86 @@ void Conf_UI(void) {
 			case 2:
 				switch (CurrentSelect) {
 				case 1:
-					//修改4mA对应溶氧值
-					tempdata.ppm4mA -= 0.01;
-					if (tempdata.ppm4mA < 0) {
-						tempdata.ppm4mA = tempdata.ppm20mA - 0.01;
+					//修改4mA对应电导值
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.ppm4mA < 10000) {
+							tempdata.ppm4mA -= (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.ppm4mA -= (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.ppm4mA < 0) {
+							tempdata.ppm4mA = tempdata.ppm20mA - 0.01;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.ppm4mA -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm4mA < 0) {
+							tempdata.ppm4mA = tempdata.ppm20mA - 0.01;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.ppm4mA -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm4mA < 0) {
+							tempdata.ppm4mA = tempdata.ppm20mA - 0.01;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_PPM4mA(tempdata.ppm4mA);
 					break;
 				case 2:
-					//修改20mA对应溶氧值
-					tempdata.ppm20mA -= 0.01;
-					if (tempdata.ppm20mA <= tempdata.ppm4mA
-							|| tempdata.ppm20mA < 0) {
-						tempdata.ppm20mA = 20;
+					//修改20mA对应电导值
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.ppm20mA < 10000) {
+							tempdata.ppm20mA -= (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.ppm20mA -= (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.ppm20mA <= tempdata.ppm4mA
+								|| tempdata.ppm20mA < 0) {
+							tempdata.ppm20mA = 200000;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.ppm20mA -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm20mA <= tempdata.ppm4mA
+								|| tempdata.ppm20mA < 0) {
+							tempdata.ppm20mA = 20;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.ppm20mA -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.ppm20mA <= tempdata.ppm4mA
+								|| tempdata.ppm20mA < 0) {
+							tempdata.ppm20mA = 70;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_ppm20mA(tempdata.ppm20mA);
 					break;
 				case 3:
 					//修改4mA对应温度值
-					tempdata.temp4mA -= 0.1;
+					tempdata.temp4mA -= (0.1 * (BTN_TIME / 10 + 1));
 					if (tempdata.temp4mA < 0) {
 						tempdata.temp4mA = tempdata.temp20mA - 0.1;
+						BTN_TIME = 0;
 					}
 					Change_Conf_temp4mA(tempdata.temp4mA);
 					break;
 				case 4:
 					//修改20mA对应温度值
-					tempdata.temp20mA -= 0.1;
+					tempdata.temp20mA -= (0.1 * (BTN_TIME / 10 + 1));
 					if (tempdata.temp20mA < 0
 							|| tempdata.temp20mA <= tempdata.temp4mA) {
 						tempdata.temp20mA = 99.9;
+						BTN_TIME = 0;
 					}
 					Change_Conf_temp20mA(tempdata.temp20mA);
 					break;
@@ -4290,19 +4717,49 @@ void Conf_UI(void) {
 					break;
 				case 2:
 					//修改高点报警值
-					tempdata.uplimit -= 0.01;
-					if (tempdata.uplimit < 0
-							|| tempdata.uplimit < tempdata.lowlimit) {
-						tempdata.uplimit = 20;
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.uplimit < 10000) {
+							tempdata.uplimit -= (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.uplimit -= (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.uplimit < 0
+								|| tempdata.uplimit < tempdata.lowlimit) {
+							tempdata.uplimit = 200000;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.uplimit -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.uplimit < 0
+								|| tempdata.uplimit < tempdata.lowlimit) {
+							tempdata.uplimit = 20;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.uplimit -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.uplimit < 0
+								|| tempdata.uplimit < tempdata.lowlimit) {
+							tempdata.uplimit = 70;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_UpLimit(tempdata.uplimit);
 					break;
 				case 3:
 					//修改高点报警值延时区间
-					tempdata.uplimitdelay -= 0.01;
+					if (tempdata.uplimitdelay < 10000) {
+						tempdata.uplimitdelay -= (0.01 * (BTN_TIME / 10 + 1));
+					} else {
+						tempdata.uplimitdelay -= (10 * (BTN_TIME / 10 + 1));
+					}
 					if (tempdata.uplimitdelay < 0) {
 						tempdata.uplimitdelay = tempdata.uplimit
 								- tempdata.lowlimit;
+						BTN_TIME = 0;
 					}
 					Change_Conf_UpLimitDelay(tempdata.uplimitdelay);
 					break;
@@ -4323,18 +4780,46 @@ void Conf_UI(void) {
 					break;
 				case 2:
 					//修改低点报警值
-					tempdata.lowlimit -= 0.01;
-					if (tempdata.lowlimit < 0) {
-						tempdata.lowlimit = tempdata.uplimit - 0.02;
+					switch (tempdata.mode) {
+					case 0:
+						if (tempdata.lowlimit < 10000) {
+							tempdata.lowlimit -= (0.01 * (BTN_TIME / 10 + 1));
+						} else {
+							tempdata.lowlimit -= (10 * (BTN_TIME / 10 + 1));
+						}
+						if (tempdata.lowlimit < 0) {
+							tempdata.lowlimit = tempdata.uplimit - 0.02;
+							BTN_TIME = 0;
+						}
+						break;
+					case 1:
+						tempdata.lowlimit -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.lowlimit < 0) {
+							tempdata.lowlimit = tempdata.uplimit - 0.02;
+							BTN_TIME = 0;
+						}
+						break;
+					case 2:
+						tempdata.lowlimit -= (0.01 * (BTN_TIME / 10 + 1));
+						if (tempdata.lowlimit < 0) {
+							tempdata.lowlimit = tempdata.uplimit - 0.02;
+							BTN_TIME = 0;
+						}
+						break;
 					}
 					Change_Conf_LowLimit(tempdata.lowlimit);
 					break;
 				case 3:
 					//修改低点报警值延时区间
-					tempdata.lowlimitdelay -= 0.01;
+					if (tempdata.lowlimitdelay < 10000) {
+						tempdata.lowlimitdelay -= (0.01 * (BTN_TIME / 10 + 1));
+					} else {
+						tempdata.lowlimitdelay -= (10 * (BTN_TIME / 10 + 1));
+					}
 					if (tempdata.lowlimitdelay < 0) {
 						tempdata.lowlimitdelay = tempdata.uplimit
 								- tempdata.lowlimit;
+						BTN_TIME = 0;
 					}
 					Change_Conf_LowLimitDelay(tempdata.lowlimitdelay);
 					break;
@@ -4482,7 +4967,7 @@ void Conf_UI(void) {
 				case 2:
 					//修改分
 					if (stimeconfstructureget.Minutes == 0) {
-						stimeconfstructureget.Minutes = 60;
+						stimeconfstructureget.Minutes = 59;
 					} else
 						stimeconfstructureget.Minutes -= 1;
 					Change_Conf_Minutes(stimeconfstructureget.Minutes);
@@ -4490,7 +4975,7 @@ void Conf_UI(void) {
 				case 3:
 					//修改秒
 					if (stimeconfstructureget.Seconds == 0) {
-						stimeconfstructureget.Seconds = 60;
+						stimeconfstructureget.Seconds = 59;
 					} else
 						stimeconfstructureget.Seconds -= 1;
 					Change_Conf_Seconds(stimeconfstructureget.Seconds);
@@ -4526,8 +5011,8 @@ void Conf_UI(void) {
 				break;
 			}
 			BTN_TIME++;
-			if (BTN_TIME > 100) {
-				BTN_TIME = 100;
+			if (BTN_TIME > 100000) {
+				BTN_TIME = 100000;
 			}
 		}	//end 按下mode键
 
@@ -4536,16 +5021,20 @@ void Conf_UI(void) {
 			HAL_Delay(100);
 			if (!BTN_ENTER()) {
 				CurrentSelect++;
-				if ((configCurrentPage == 1 || configCurrentPage == 8)
-						&& (CurrentSelect == 3)) {
+				if (configCurrentPage == 8 && CurrentSelect == 3) {
 					CurrentSelect += 2;
 				}
-//				if (configCurrentPage == 8 && CurrentSelect == 3) {
-//					CurrentSelect += 2;
-//				}
+				if (configCurrentPage == 8 && CurrentSelect == 2
+						&& tempdata.tempfactortype == 1) {
+					CurrentSelect += 3;
+				}
+				if (configCurrentPage == 1 && CurrentSelect == 3) {
+					tempdata.temp = 25;
+				}
 				//每页4个设置(第三、四、六页3个设置)，超出跳转下一页，超出页数跳回首页
 				if ((CurrentSelect > 3)
-						&& (configCurrentPage == 3 || configCurrentPage == 4
+						&& (configCurrentPage == 1 || configCurrentPage == 3
+								|| configCurrentPage == 4
 								|| configCurrentPage == 7
 								|| configCurrentPage == 9)) {
 					CurrentSelect++;
@@ -4628,6 +5117,7 @@ void Cal_UI(void) {
 	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
 	uint8_t BTN_TIME = 0;
 	uint8_t i;
+	uint8_t caltype = 0;
 	float f_PPM_Cal = 0;
 	//显示温度设置数字1
 	uint8_t ShowCalTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 108, 0x00, 12, 0x00,
@@ -4668,7 +5158,7 @@ void Cal_UI(void) {
 		}
 		/* 空气校准 */
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& tempdata.caltype == 0) {
+				&& caltype == 0) {
 			//显示正在校准文字
 			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
 			USARTSENDTIME);
@@ -4747,7 +5237,7 @@ void Cal_UI(void) {
 			}
 		}
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& tempdata.caltype == 0) {
+				&& caltype == 0) {
 			Change_Cal_PPM_Fixed(f_PPM_Cal);
 			if (f_Rs + tempdata.bdo != 0) {
 				tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
@@ -4756,7 +5246,7 @@ void Cal_UI(void) {
 
 		/* 过程校准 */
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& tempdata.caltype == 2) {
+				&& caltype == 2) {
 			//显示正在校准文字
 			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
 			USARTSENDTIME);
@@ -4837,7 +5327,7 @@ void Cal_UI(void) {
 			}
 		}
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& tempdata.caltype == 2) {
+				&& caltype == 2) {
 			Change_Cal_PPM_Fixed(f_PPM_Cal);
 			if (f_Rs + tempdata.bdo != 0) {
 				tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
@@ -4846,7 +5336,7 @@ void Cal_UI(void) {
 
 		/* 零点校准 */
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& tempdata.caltype == 1) {
+				&& caltype == 1) {
 			//显示正在校准文字
 			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
 			USARTSENDTIME);
@@ -4929,7 +5419,7 @@ void Cal_UI(void) {
 			}
 		}
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& tempdata.caltype == 1) {
+				&& caltype == 1) {
 			Change_Cal_PPM_Fixed(f_PPM_Cal);
 		}
 		//按下Right键
@@ -4947,11 +5437,11 @@ void Cal_UI(void) {
 				switch (CurrentSelect) {
 				case 1:
 					//修改校正模式
-					tempdata.caltype++;
-					if (tempdata.caltype > 2) {
-						tempdata.caltype = 0;
+					caltype++;
+					if (caltype > 2) {
+						caltype = 0;
 					}
-					Change_CalType(tempdata.caltype);
+					Change_CalType(caltype);
 					break;
 				case 2:
 					//修改大气压单位
@@ -4981,7 +5471,7 @@ void Cal_UI(void) {
 				case 2:
 					break;
 				case 3:
-					if ((tempdata.caltype == 0) || (tempdata.caltype == 2)) {
+					if ((caltype == 0) || (caltype == 2)) {
 						f_PPM_Cal = f_PPM_Cal + 0.01;
 						if (f_PPM_Cal > 20)
 							f_PPM_Cal = 20;
@@ -4989,7 +5479,7 @@ void Cal_UI(void) {
 						if (f_Rs + tempdata.bdo != 0)
 							tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
 					}
-					if (tempdata.caltype == 1) {
+					if (caltype == 1) {
 						f_PPM_Cal = f_PPM_Cal + 0.01;
 						if (f_PPM_Cal > 20)
 							f_PPM_Cal = 20;
@@ -5032,12 +5522,12 @@ void Cal_UI(void) {
 				switch (CurrentSelect) {
 				case 1:
 					//修改校正模式
-					if (tempdata.caltype == 0) {
-						tempdata.caltype = 2;
+					if (caltype == 0) {
+						caltype = 2;
 					} else {
-						tempdata.caltype--;
+						caltype--;
 					}
-					Change_CalType(tempdata.caltype);
+					Change_CalType(caltype);
 					break;
 				case 2:
 					//修改大气压单位
@@ -5068,7 +5558,7 @@ void Cal_UI(void) {
 				case 2:
 					break;
 				case 3:
-					if ((tempdata.caltype == 0) || (tempdata.caltype == 2)) {
+					if ((caltype == 0) || (caltype == 2)) {
 						f_PPM_Cal = f_PPM_Cal - 0.01;
 						if (f_PPM_Cal < 0)
 							f_PPM_Cal = 0;
@@ -5076,7 +5566,7 @@ void Cal_UI(void) {
 						if (f_Rs + tempdata.bdo != 0)
 							tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
 					}
-					if (tempdata.caltype == 1) {
+					if (caltype == 1) {
 						f_PPM_Cal = f_PPM_Cal - 0.01;
 						if (f_PPM_Cal < 0)
 							f_PPM_Cal = 0;
