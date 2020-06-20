@@ -958,13 +958,14 @@ int main(void) {
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 	MX_DMA_Init();
-	MX_USART1_UART_Init();
 	MX_DAC_Init();
-	MX_USART2_UART_Init();
-	MX_USART3_UART_Init();
 	MX_SPI2_Init();
 	MX_RTC_Init();
 //	MX_TIM4_Init();
+	MX_USART1_UART_Init();
+//	MX_USART2_UART_Init();
+//	MX_USART3_UART_Init();
+
 	/* USER CODE BEGIN 2 */
 
 	/* 检测数据是否保存在RTC备份寄存器1：如果已经保存就不需要运行日期和时间设置 */
@@ -1013,7 +1014,7 @@ int main(void) {
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 
 	/* 开机校准 */
-	startCalc();
+//	startCalc();
 	/* 预转换获取电导，保证开机有数据 */
 	getRs();
 	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
@@ -5706,85 +5707,85 @@ void DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void UART_RxIDLECallback(UART_HandleTypeDef *uartHandle) {
-	if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET) {
-
-		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
-		HAL_UART_DMAStop(&huart2);
-
-		unsigned char buffer[8];
-		unsigned short crc;
-		float temp;
-		crc = CRC16(sensorRevBuf, 23);
-		//  buffer[6]=crc&0xff;
-		//  buffer[7]=(crc&0xff00)>>8;
-		//  modscan 是校验码高位在前，低位在后
-		buffer[7] = crc & 0xff;
-		buffer[6] = (crc & 0xff00) >> 8;
-
-		// 判断地址与crc校验
-		if ((sensorRevBuf[0] == 0x03)
-				&& (sensorRevBuf[1] == 0x03)     //读取命令
-				&& (sensorRevBuf[23] == buffer[6])
-				&& (sensorRevBuf[24] == buffer[7])) { // 成功后组合数据 计算 CRC
-			// 获取数据
-			change_float_big_485rom(5);
-			change_float_big_485rom(13);
-			change_float_big_485rom(17);
-			memcpy((&f_Rs), &sensorRevBuf[5], 4);
-			memcpy((&f_Temp), &sensorRevBuf[13], 4);
-			memcpy((&f_k), &sensorRevBuf[17], 4);
-			result++;
-			if (result > 40) {
-				result = 0;
-			}
-//			if (f_Rs > 20) {
-//				f_Rs = 20;
+//	if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET) {
+//
+//		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
+//		HAL_UART_DMAStop(&huart2);
+//
+//		unsigned char buffer[8];
+//		unsigned short crc;
+//		float temp;
+//		crc = CRC16(sensorRevBuf, 23);
+//		//  buffer[6]=crc&0xff;
+//		//  buffer[7]=(crc&0xff00)>>8;
+//		//  modscan 是校验码高位在前，低位在后
+//		buffer[7] = crc & 0xff;
+//		buffer[6] = (crc & 0xff00) >> 8;
+//
+//		// 判断地址与crc校验
+//		if ((sensorRevBuf[0] == 0x03)
+//				&& (sensorRevBuf[1] == 0x03)     //读取命令
+//				&& (sensorRevBuf[23] == buffer[6])
+//				&& (sensorRevBuf[24] == buffer[7])) { // 成功后组合数据 计算 CRC
+//			// 获取数据
+//			change_float_big_485rom(5);
+//			change_float_big_485rom(13);
+//			change_float_big_485rom(17);
+//			memcpy((&f_Rs), &sensorRevBuf[5], 4);
+//			memcpy((&f_Temp), &sensorRevBuf[13], 4);
+//			memcpy((&f_k), &sensorRevBuf[17], 4);
+//			result++;
+//			if (result > 40) {
+//				result = 0;
 //			}
-//			if (f_Rs < 0) {
-//				f_Rs = 0;
+////			if (f_Rs > 20) {
+////				f_Rs = 20;
+////			}
+////			if (f_Rs < 0) {
+////				f_Rs = 0;
+////			}
+//			f_Rs_fixed[filterCNT] = savedata.kdo * (100 - savedata.tempfactor)
+//					* (f_Rs + savedata.bdo) / 100;
+//			if (f_Rs_fixed[filterCNT] > 20) {
+//				f_Rs_fixed[filterCNT] = 20;
 //			}
-			f_Rs_fixed[filterCNT] = savedata.kdo * (100 - savedata.tempfactor)
-					* (f_Rs + savedata.bdo) / 100;
-			if (f_Rs_fixed[filterCNT] > 20) {
-				f_Rs_fixed[filterCNT] = 20;
-			}
-			if (f_Rs_fixed[filterCNT] < 0) {
-				f_Rs_fixed[filterCNT] = 0;
-			}
-			filterCNT++;
-			if (f_Temp > 99) {
-				f_Temp = 99;
-			}
-			if (f_Temp < 0) {
-				f_Temp = 0;
-			}
-			f_Temp_fixed = f_Temp * savedata.ktemp;
-			if (filterCNT > savedata.filter) {
-				uint8_t i;
-				for (i = 0; i < savedata.filter; i++) {
-					for (filterCNT = 0; filterCNT < savedata.filter - i;
-							filterCNT++) {
-						if (f_Rs_fixed[filterCNT] > f_Rs_fixed[filterCNT + 1]) {
-							temp = f_Rs_fixed[filterCNT + 1];
-							f_Rs_fixed[filterCNT + 1] = f_Rs_fixed[filterCNT];
-							f_Rs_fixed[filterCNT] = temp;
-						}
-					}
-				}
-				f_Rs_filter = f_Rs_fixed[savedata.filter / 2];
-				filterCNT = 0;
-				/* 刷新标志位 */
-				refreshFlag = 1;
-			}
-		}
-		memset(sensorRevBuf, 0xFF, sizeof(sensorRevBuf));
-		if (HAL_UART_Receive_DMA(&huart2, (uint8_t*) sensorRevBuf,
-				sizeof(sensorRevBuf)) != HAL_OK) {
-//			Error_Handler();
-		}
-		/* 开启串口空闲中断 */
-		__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-	}
+//			if (f_Rs_fixed[filterCNT] < 0) {
+//				f_Rs_fixed[filterCNT] = 0;
+//			}
+//			filterCNT++;
+//			if (f_Temp > 99) {
+//				f_Temp = 99;
+//			}
+//			if (f_Temp < 0) {
+//				f_Temp = 0;
+//			}
+//			f_Temp_fixed = f_Temp * savedata.ktemp;
+//			if (filterCNT > savedata.filter) {
+//				uint8_t i;
+//				for (i = 0; i < savedata.filter; i++) {
+//					for (filterCNT = 0; filterCNT < savedata.filter - i;
+//							filterCNT++) {
+//						if (f_Rs_fixed[filterCNT] > f_Rs_fixed[filterCNT + 1]) {
+//							temp = f_Rs_fixed[filterCNT + 1];
+//							f_Rs_fixed[filterCNT + 1] = f_Rs_fixed[filterCNT];
+//							f_Rs_fixed[filterCNT] = temp;
+//						}
+//					}
+//				}
+//				f_Rs_filter = f_Rs_fixed[savedata.filter / 2];
+//				filterCNT = 0;
+//				/* 刷新标志位 */
+//				refreshFlag = 1;
+//			}
+//		}
+//		memset(sensorRevBuf, 0xFF, sizeof(sensorRevBuf));
+//		if (HAL_UART_Receive_DMA(&huart2, (uint8_t*) sensorRevBuf,
+//				sizeof(sensorRevBuf)) != HAL_OK) {
+////			Error_Handler();
+//		}
+//		/* 开启串口空闲中断 */
+//		__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+//	}
 }
 
 unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen) {
@@ -5863,7 +5864,15 @@ void Button_Scan(void) {
 				Button_Conf_Flag = 0;
 				Button_Cal_Flag = 0;
 				Button_Right_Flag = 0;
-				Cal_UI();
+				if (savedata.password == 1) {
+					if (Enter_PasW_Page(0) == 1) {
+						Cal_UI();
+					} else {
+						LCD_Init();
+					}
+				} else {
+					Cal_UI();
+				}
 			}
 		} else if (!BTN_CONFIG()) {
 			Button_Conf_Flag++;
@@ -5905,7 +5914,13 @@ void Button_Scan(void) {
 				Button_Conf_Flag = 0;
 				Button_Cal_Flag = 0;
 				Button_Right_Flag = 0;
-				factoryConfig(2);
+				if (savedata.password == 1) {
+					if (Enter_PasW_Page(0) == 1) {
+						factoryConfig(2);
+					}
+				} else {
+					factoryConfig(2);
+				}
 				LCD_Init();
 			}
 		} else if (!BTN_CONFIG()) {

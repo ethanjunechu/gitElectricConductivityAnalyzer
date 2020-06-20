@@ -66,7 +66,7 @@ RTC_HandleTypeDef hrtc;
 static void RTC_CalendarConfig(void) {
 	extern RTC_TimeTypeDef sTime;
 	extern RTC_DateTypeDef DateToUpdate;
-#if 1
+
 	/* 配置日期 */
 	/* 设置日期：2015年10月4日 星期日 */
 	DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
@@ -81,63 +81,7 @@ static void RTC_CalendarConfig(void) {
 	sTime.Minutes = 0x00;
 	sTime.Seconds = 0x00;
 	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-#else
-  __IO uint32_t Tmp_YY = 0xFF, Tmp_MM = 0xFF, Tmp_DD = 0xFF, Tmp_HH = 0xFF, Tmp_MI = 0xFF, Tmp_SS = 0xFF;
 
-  printf("=========================时间设置==================\n");
-  printf("请输入年份: 20\n");
-  while (Tmp_YY == 0xFF)
-  {
-    Tmp_YY = USART_Scanf(99);
-  }
-  printf("年份被设置为:  20%0.2d\n", Tmp_YY);
-
-  DateToUpdate.Year = Tmp_YY;
-  
-  printf("请输入月份:  \n");
-  while (Tmp_MM == 0xFF)
-  {
-    Tmp_MM = USART_Scanf(12);
-  }
-  printf("月份被设置为:  %d\n", Tmp_MM);
-
-  DateToUpdate.Month= Tmp_MM;
-
-  printf("请输入日期:  \n");
-  while (Tmp_DD == 0xFF)
-  {
-    Tmp_DD = USART_Scanf(31);
-  }
-  printf("日期被设置为:  %d\n", Tmp_DD);
-  DateToUpdate.Date= Tmp_DD;
-  HAL_RTC_SetDate(&hrtc,&DateToUpdate,RTC_FORMAT_BIN);
-  
-  printf("请输入时钟:  \n");
-  while (Tmp_HH == 0xFF)
-  {
-    Tmp_HH = USART_Scanf(23);
-  }
-  printf("时钟被设置为:  %d\n", Tmp_HH );
-  sTime.Hours= Tmp_HH;
-
-
-  printf("请输入分钟:  \n");
-  while (Tmp_MI == 0xFF)
-  {
-    Tmp_MI = USART_Scanf(59);
-  }
-  printf("分钟被设置为:  %d\n", Tmp_MI);
-  sTime.Minutes= Tmp_MI;
-
-  printf("请输入秒钟:  \n");
-  while (Tmp_SS == 0xFF)
-  {
-    Tmp_SS = USART_Scanf(59);
-  }
-  printf("秒钟被设置为:  %d\n", Tmp_SS);
-  sTime.Seconds= Tmp_SS;
-  HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
-#endif
 
 	/* 写入一个数值：0x32F1到RTC备份数据寄存器1 */
 	HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, 0x32F1);
