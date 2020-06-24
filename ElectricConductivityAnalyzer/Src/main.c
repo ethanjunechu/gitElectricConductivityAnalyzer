@@ -2579,6 +2579,7 @@ void Enter_Cal_Page1(void) {
  */
 void Enter_Cal_Page2(uint8_t calType) {
 	HAL_UART_Transmit(&huart1, ShowCalPage2CMD, 13, USARTSENDTIME);
+
 	switch (calType) {
 	case 0:
 		Change_LastCell(tempdata.fixedcell);
@@ -2591,6 +2592,7 @@ void Enter_Cal_Page2(uint8_t calType) {
 	case 2:
 		break;
 	}
+
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
