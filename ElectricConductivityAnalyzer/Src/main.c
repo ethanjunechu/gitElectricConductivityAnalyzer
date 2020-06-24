@@ -2720,7 +2720,6 @@ void Enter_History_Page1(void) {
 			temp2 -= 399;
 		}
 		if (historyCNT > 1) {
-
 			switch (savedata.mode) {
 			case 0:
 				DrawLine((465 - 399 * i / historyCNT),
