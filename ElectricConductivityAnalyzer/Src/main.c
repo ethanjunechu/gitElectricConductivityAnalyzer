@@ -2596,7 +2596,7 @@ void Enter_Cal_Page2(uint8_t calType) {
 }
 
 /**
- * @功能简介 : 进入History页面1
+ * @功能简介 : 进入History页面
  * @入口参数 : 无
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
