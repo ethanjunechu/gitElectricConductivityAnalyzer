@@ -1106,7 +1106,7 @@ void SystemClock_Config(void) {
  */
 void startCalc(void) {
 	double ma1 = 0, ma2 = 0;
-	double R_Ref[8] = { 100, 1000, 11800, 118000, 236000, 590000, 1180000,
+	double R_Ref[8] = { 118, 1180, 11800, 118000, 236000, 590000, 1180000,
 			2360000 };
 	uint8_t i = 0;
 	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
@@ -1212,7 +1212,7 @@ void readConfig(void) {
 		savedata.temp4mA = 0;
 		savedata.temp20mA = 99.9;
 		savedata.uplimitauto = 1;
-		savedata.uplimit = 20;
+		savedata.uplimit = 200000;
 		savedata.uplimitdelay = 0.10;
 		savedata.lowlimitauto = 1;
 		savedata.lowlimit = 0;
@@ -1328,7 +1328,7 @@ void factoryConfig(uint8_t conf) {
 		savedata.tempfactor = 2.0;
 		savedata.temp = 0;
 		savedata.ppm4mA = 0;
-		savedata.ppm20mA = 20;
+		savedata.ppm20mA = 200000;
 		savedata.temp4mA = 0;
 		savedata.temp20mA = 99.9;
 		savedata.uplimitauto = 1;
@@ -2177,6 +2177,10 @@ void Enter_Conf_Page1_2(void) {
 void Enter_Conf_Page2(void) {
 	switch (tempdata.mode) {
 	case 0:
+		if (savedata.mode != tempdata.mode) {
+			tempdata.ppm4mA = 0;
+			tempdata.ppm20mA = 200000;
+		}
 		if (tempdata.ppm4mA > 200000 || tempdata.ppm4mA >= tempdata.ppm20mA) {
 			tempdata.ppm4mA = 0;
 		}
@@ -2185,6 +2189,10 @@ void Enter_Conf_Page2(void) {
 		}
 		break;
 	case 1:
+		if (savedata.mode != tempdata.mode) {
+			tempdata.ppm4mA = 0;
+			tempdata.ppm20mA = 20;
+		}
 		if (tempdata.ppm4mA > 20 || tempdata.ppm4mA >= tempdata.ppm20mA) {
 			tempdata.ppm4mA = 0;
 		}
@@ -2193,6 +2201,10 @@ void Enter_Conf_Page2(void) {
 		}
 		break;
 	case 2:
+		if (savedata.mode != tempdata.mode) {
+			tempdata.ppm4mA = 0;
+			tempdata.ppm20mA = 70;
+		}
 		if (tempdata.ppm4mA > 70 || tempdata.ppm4mA >= tempdata.ppm20mA) {
 			tempdata.ppm4mA = 0;
 		}
@@ -2623,10 +2635,26 @@ void Enter_History_Page1(void) {
 	}
 	/* 显示报警线 */
 	HAL_UART_Transmit(&huart1, SetForeRedCMD, 8, USARTSENDTIME);
-	DrawLine(10, (260 - savedata.lowlimit * 10), 470,
-			(260 - savedata.lowlimit * 10));
-	DrawLine(10, (260 - savedata.uplimit * 10), 470,
-			(260 - savedata.uplimit * 10));
+	switch (savedata.mode) {
+	case 0:
+		DrawLine(10, (260 - savedata.lowlimit / 1000), 470,
+				(260 - savedata.lowlimit / 1000));
+		DrawLine(10, (260 - savedata.uplimit / 1000), 470,
+				(260 - savedata.uplimit / 1000));
+		break;
+	case 1:
+		DrawLine(10, (260 - savedata.lowlimit * 10), 470,
+				(260 - savedata.lowlimit * 10));
+		DrawLine(10, (260 - savedata.uplimit * 10), 470,
+				(260 - savedata.uplimit * 10));
+		break;
+	case 2:
+		DrawLine(10, (260 - savedata.lowlimit * 2.86), 470,
+				(260 - savedata.lowlimit * 2.86));
+		DrawLine(10, (260 - savedata.uplimit * 2.86), 470,
+				(260 - savedata.uplimit * 2.86));
+		break;
+	}
 	/* 显示最近溶解氧 */
 	HAL_UART_Transmit(&huart1, SetForeBlackCMD, 8, USARTSENDTIME);
 	ShowHistoryTime1CMD[10] = History_DATE[historyStart].Year / 10;
@@ -2692,10 +2720,27 @@ void Enter_History_Page1(void) {
 			temp2 -= 399;
 		}
 		if (historyCNT > 1) {
-			DrawLine((465 - 399 * i / historyCNT),
-					(260 - History_PPM[temp1] * 10),
-					(465 - 399 * (i + 1) / historyCNT),
-					(260 - History_PPM[temp2] * 10));
+
+			switch (savedata.mode) {
+			case 0:
+				DrawLine((465 - 399 * i / historyCNT),
+						(260 - History_PPM[temp1] / 1000),
+						(465 - 399 * (i + 1) / historyCNT),
+						(260 - History_PPM[temp2] / 1000));
+				break;
+			case 1:
+				DrawLine((465 - 399 * i / historyCNT),
+						(260 - History_PPM[temp1] * 10),
+						(465 - 399 * (i + 1) / historyCNT),
+						(260 - History_PPM[temp2] * 10));
+				break;
+			case 2:
+				DrawLine((465 - 399 * i / historyCNT),
+						(260 - History_PPM[temp1] * 2.86),
+						(465 - 399 * (i + 1) / historyCNT),
+						(260 - History_PPM[temp2] * 2.86));
+				break;
+			}
 		}
 	}
 }
@@ -5139,6 +5184,22 @@ void Conf_UI(void) {
 					HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR3, DateToUpdate.Year);
 					HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR4, DateToUpdate.Month);
 					HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR5, DateToUpdate.Date);
+
+					sTime.Minutes = 0;
+					sTime.Seconds = 0;
+					History_PPM[0] = f_Rs_filter;
+					History_PPM[1] = f_Rs_filter;
+					historyStart = 0;
+					historyCNT = 1;
+					historyEnd = 1;
+
+					memcpy(&History_DATE[0], &DateToUpdate,
+							sizeof(DateToUpdate));
+					memcpy(&History_TIME[0], &sTime, sizeof(sTime));
+					memcpy(&History_DATE[1], &DateToUpdate,
+							sizeof(DateToUpdate));
+					memcpy(&History_TIME[1], &sTime, sizeof(sTime));
+					eepromWriteSetting();
 				}
 				memcpy(&savedata, &tempdata, sizeof(savedata));
 				writeConfig();

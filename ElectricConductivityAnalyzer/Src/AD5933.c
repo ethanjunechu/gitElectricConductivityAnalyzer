@@ -540,8 +540,8 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 float DA5933_Get_Rs(void) {
 	float __attribute__ ((unused)) Rs, re, im;
 
-	AD5933_Sweep(10000, 1, 8, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = Get_resistance(8);
+	AD5933_Sweep(10000, 1, 12, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+	Rs = Get_resistance(12);
 	re = Rs * cos(rads[0]);
 	im = Rs * sin(rads[0]);
 	return Rs;
