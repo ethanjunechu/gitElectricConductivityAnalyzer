@@ -93,18 +93,6 @@ DAC_HandleTypeDef hdac;
 //校正次数宏定义——1次1s
 #define CAL_COUNT 10
 
-//不同温度下纯水的饱和蒸汽压力(0度-39度)
-static float waterPerssure[] = { 0.6112, 0.6571, 0.7060, 0.7582, 0.8135, 0.8726,
-		0.9354, 1.0021, 1.0730, 1.1482, 1.2282, 1.3130, 1.4028, 1.4980, 1.5989,
-		1.7057, 1.8188, 1.9383, 2.0644, 2.1982, 2.3392, 2.4881, 2.6452, 2.8109,
-		2.9856, 3.1698, 3.3637, 3.5679, 3.7828, 4.0089, 4.2467, 4.4966, 4.7563,
-		5.0351, 5.3247, 5.6286, 5.9475, 6.2819, 6.6324, 6.9997 };
-//氧在不同温度的水中饱和浓度表(0度-39度)
-static float waterDO[] = { 14.62, 14.22, 13.83, 13.46, 13.11, 12.77, 12.45,
-		12.14, 11.84, 11.56, 11.29, 11.03, 10.78, 10.54, 10.31, 10.08, 9.87,
-		9.66, 9.47, 9.28, 9.09, 8.91, 8.74, 8.58, 8.42, 8.26, 8.11, 7.97, 7.83,
-		7.69, 7.56, 7.43, 7.30, 7.18, 7.07, 6.95, 6.84, 6.73, 6.63, 6.53 };
-
 // CRC 高位字节值表
 static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
 		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
@@ -639,35 +627,35 @@ uint8_t ShowLastCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 114, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示预设传感器系数数字0
-uint8_t ShowPreCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字1
-uint8_t ShowPreCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字2-小数点
-uint8_t ShowPreCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 164, 0x00, 30,
+uint8_t ShowPreCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 64, 0x00, 30,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字03
-uint8_t ShowPreCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字4
-uint8_t ShowPreCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字5
-uint8_t ShowPreCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示预设传感器系数数字6
-uint8_t ShowPreCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 164, 0x00, 31,
+uint8_t ShowPreCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 64, 0x00, 31,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示正在校正状态
-uint8_t ShowCalingStatusCMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 110, 0x00, 44,
+uint8_t ShowCalingStatusCMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 159, 0x00, 44,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示校正完成状态1
-uint8_t ShowCalFinishStatus1CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 110, 0x00,
+uint8_t ShowCalFinishStatus1CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 159, 0x00,
 		63, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示校正完成状态2
-uint8_t ShowCalFinishStatus2CMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 110, 0x00,
+uint8_t ShowCalFinishStatus2CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 159, 0x00,
 		62, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示校正修正值单位
@@ -802,7 +790,7 @@ typedef struct {
 	uint8_t filter;
 	uint8_t brightness;
 	uint8_t tempmode;
-	uint8_t airpressureunit;
+	float fixedcell;
 	float cell;
 	float kdo;
 	float ktemp;
@@ -878,7 +866,7 @@ void Enter_Conf_Page7(void);
 void Enter_Conf_Page8(void);
 uint8_t Enter_PasW_Page(uint8_t lastPage);
 void Enter_Cal_Page1(void);
-void Enter_Cal_Page2(void);
+void Enter_Cal_Page2(uint8_t calType);
 void Change_Conf_Unit(uint8_t mode);
 void Change_Conf_TempMode(uint8_t tempmode);
 void Change_Conf_Temp(float temp);
@@ -909,9 +897,10 @@ void Change_Conf_Minutes(uint8_t minutes);
 void Change_Conf_Seconds(uint8_t seconds);
 void Change_Conf_Interval(uint8_t interval);
 void Change_Conf_PassW(uint8_t PassW);
-void Change_CalType(uint8_t caltype);
+void Change_CalType(uint8_t calType);
 void Change_LastCell(float cell);
 void Change_PreCell(float cell);
+void Change_Cal_Temp(void);
 void Select_Next(uint8_t Selection);
 void Conf_UI(void);
 void Cal_UI(void);
@@ -1014,7 +1003,7 @@ int main(void) {
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 
 	/* 开机校准 */
-//	startCalc();
+	startCalc();
 	/* 预转换获取电导，保证开机有数据 */
 	getRs();
 	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
@@ -1156,8 +1145,8 @@ void startCalc(void) {
 		R_Correction[i + 1] = 1
 				/ (ma1 + ((1 / 100) / ma2 - (1 / 100) / ma1) / 2);
 	}
-	/* 100欧用1K校准值 */
-	R_Correction[0] = R_Correction[1];
+	/* 100欧用1K校准值除以8 */
+	R_Correction[0] = R_Correction[1] / 8;
 }
 /**
  * @功能简介 : 从EEPROM读取用户配置
@@ -1197,9 +1186,10 @@ void readConfig(void) {
 		savedata.filter = *(__IO uint8_t*) (FLASHBASEADDR + 128);
 		savedata.brightness = *(__IO uint8_t*) (FLASHBASEADDR + 136);
 		savedata.tempmode = *(__IO uint8_t*) (FLASHBASEADDR + 144);
-		savedata.airpressureunit = *(__IO uint8_t*) (FLASHBASEADDR + 152);
+		savedata.fixedcell = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 152)))
+				/ 10000;
 		savedata.cell = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 160)))
-				/ 1000;
+				/ 10000;
 		savedata.kdo = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 168)))
 				/ 1000;
 		savedata.ktemp = ((float) (*(__IO int32_t*) (FLASHBASEADDR + 176)))
@@ -1232,8 +1222,8 @@ void readConfig(void) {
 		savedata.filter = 0;
 		savedata.brightness = 10;
 		savedata.tempmode = 0;
-		savedata.airpressureunit = 0;
-		savedata.cell = 1.01325;
+		savedata.fixedcell = 1.0000;
+		savedata.cell = 1.0000;
 		savedata.kdo = 1;
 		savedata.ktemp = 1;
 		savedata.interval = 1;
@@ -1302,10 +1292,10 @@ void writeConfig(void) {
 			savedata.brightness);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 144),
 			savedata.tempmode);
-	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 152),
-			savedata.airpressureunit);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 152),
+			(int32_t) (savedata.fixedcell * 10000));
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 160),
-			(int32_t) (savedata.cell * 1000));
+			(int32_t) (savedata.cell * 10000));
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 168),
 			(int32_t) (savedata.kdo * 1000));
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 176),
@@ -1357,23 +1347,23 @@ void factoryConfig(uint8_t conf) {
 		savedata.MIN = ADMIN;
 		savedata.password = 0;
 		savedata.tempfactortype = 0;
-		HAL_Delay(1500);
+		HAL_Delay(500);
 		writeConfig();
-		HAL_Delay(1500);
+		HAL_Delay(500);
 		ShowPageStatusCMD[7] = 97;
 		HAL_UART_Transmit(&huart1, ShowPageStatusCMD, 13, USARTSENDTIME);
 	}
 	if (conf == 2) {
 		ShowPageStatusCMD[7] = 96;
 		HAL_UART_Transmit(&huart1, ShowPageStatusCMD, 13, USARTSENDTIME);
-		savedata.airpressureunit = 0;
-		savedata.cell = 12.34567;
+		savedata.fixedcell = 1;
+		savedata.cell = 1;
 		savedata.kdo = 1;
 		savedata.ktemp = 1;
 		savedata.bdo = 0;
-		HAL_Delay(1500);
+		HAL_Delay(500);
 		writeConfig();
-		HAL_Delay(1500);
+		HAL_Delay(500);
 		ShowPageStatusCMD[7] = 97;
 		HAL_UART_Transmit(&huart1, ShowPageStatusCMD, 13, USARTSENDTIME);
 	}
@@ -1586,17 +1576,6 @@ void LCD_Update(void) {
 	if (f_mA > 20) {
 		f_mA = 20;
 	}
-	//TODO
-	/* 根据电导率切换单位 暂时屏蔽 */
-//	if (f_Rs_filter > 15000000) {
-//		printf("%fΩ%s", f_Rs_filter / 1000000, "\r\n");
-//	} else if (f_Rs_filter > 1000000) {
-//		printf("%03.03fMΩ%s", f_Rs_filter / 1000000, "\r\n");
-//	} else if (f_Rs_filter > 1000) {
-//		printf("%03.03fKΩ%s", Rs / 1000, "\r\n");
-//	} else if (f_Rs_filter) {
-//		printf("%03.03fΩ%s", f_Rs_filter, "\r\n");
-//	}
 	switch (savedata.mode) {
 	case 0:
 		/* 电导率 */
@@ -1620,8 +1599,9 @@ void LCD_Update(void) {
 		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
 		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
 		ShowMainUnitCMD[7] = 84;
-		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
-				- 6171.9) * 1000000;
+		f_Rs_Show = f_Rs_filter;
+//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
+//				- 6171.9) * 1000000;
 		break;
 	}
 	if (f_Rs_Show >= 1000) {
@@ -2091,7 +2071,8 @@ void getRs(void) {
 
 	case 0:
 		/* change to μS/cm */
-		f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
+		f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
+				/ f_Rs + savedata.bdo;
 
 		if (f_Rs_fixed[filterCNT] > 200000) {
 			f_Rs_fixed[filterCNT] = 0;
@@ -2109,14 +2090,14 @@ void getRs(void) {
 
 	case 1:
 		/* change to MΩ*cm */
-		f_Rs_fixed[filterCNT] = f_Rs / 100000;
+		f_Rs_fixed[filterCNT] = savedata.kdo
+				* (f_Rs / 100000 / savedata.fixedcell) + savedata.bdo;
 
 		if (f_Rs_fixed[filterCNT] > 20) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
 			refreshFlag = 0;
 		}
-
 		if (f_Rs_fixed[filterCNT] <= 0) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
@@ -2382,21 +2363,21 @@ void Enter_Conf_Page8(void) {
  */
 uint8_t Enter_PasW_Page(uint8_t lastPage) {
 	uint8_t a = 0, b = 0, c = 0, select = 0;
-	uint8_t ShowA[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 114, 0x00, 31, 0x00, 0xFF,
+	uint8_t ShowA[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 104, 0x00, 70, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
-	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 44, 0x00, 114, 0x00, 114, 0x00,
+	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 104, 0x00, 109, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 114, 0x00,
+	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 104, 0x00, 109, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
 	//显示密码界面选择条
-	uint8_t ShowPasWSelect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 109, 0x00,
-			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowPasWSelect2CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 143, 0x00,
-			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowPasWUnselect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 109, 0x00,
-			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowPasWUnselect2CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 143, 0x00,
-			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	uint8_t ShowPasWSelect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 144, 0x00,
+			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	uint8_t ShowPasWSelect2CMD[13] = { 0xEE, 0x32, 0x01, 25, 0x00, 144, 0x00,
+			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	uint8_t ShowPasWUnselect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 144, 0x00,
+			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	uint8_t ShowPasWUnselect2CMD[13] = { 0xEE, 0x32, 0x01, 25, 0x00, 144, 0x00,
+			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 	HAL_UART_Transmit(&huart1, ShowPassWPageCMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
@@ -2423,21 +2404,21 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				a++;
 				if (a == 10)
 					a = 0;
-				ShowA[7] = 31 + a;
+				ShowA[7] = 70 + a;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				break;
 			case 1:
 				b++;
 				if (b == 10)
 					b = 0;
-				ShowB[7] = 31 + b;
+				ShowB[7] = 70 + b;
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				break;
 			case 2:
 				c++;
 				if (c == 10)
 					c = 0;
-				ShowC[7] = 31 + c;
+				ShowC[7] = 70 + c;
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
 			default:
@@ -2450,21 +2431,21 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				a--;
 				if (a > 10)
 					a = 9;
-				ShowA[7] = 31 + a;
+				ShowA[7] = 70 + a;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				break;
 			case 1:
 				b--;
 				if (b > 10)
 					b = 9;
-				ShowB[7] = 31 + b;
+				ShowB[7] = 70 + b;
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				break;
 			case 2:
 				c--;
 				if (c > 10)
 					c = 9;
-				ShowC[7] = 31 + c;
+				ShowC[7] = 70 + c;
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
 			default:
@@ -2499,23 +2480,23 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			select++;
 			switch (select) {
 			case 0:
-				ShowA[7] = 31 + a;
-				ShowB[7] = 114;
-				ShowC[7] = 114;
+				ShowA[7] = 70 + a;
+				ShowB[7] = 109;
+				ShowC[7] = 109;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
 			case 1:
-				ShowA[7] = 114;
-				ShowB[7] = b + 31;
-				ShowC[7] = 114;
+				ShowA[7] = 109;
+				ShowB[7] = b + 70;
+				ShowC[7] = 109;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 
-				ShowPasWSelect1CMD[3] = 45;
-				ShowPasWSelect2CMD[3] = 45;
+				ShowPasWSelect1CMD[3] = 55;
+				ShowPasWSelect2CMD[3] = 65;
 				HAL_UART_Transmit(&huart1, ShowPasWUnselect1CMD, 13,
 				USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowPasWUnselect2CMD, 13,
@@ -2526,17 +2507,17 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				USARTSENDTIME);
 				break;
 			case 2:
-				ShowA[7] = 114;
-				ShowB[7] = 114;
-				ShowC[7] = c + 31;
+				ShowA[7] = 109;
+				ShowB[7] = 109;
+				ShowC[7] = c + 70;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 
-				ShowPasWSelect1CMD[3] = 75;
-				ShowPasWSelect2CMD[3] = 75;
-				ShowPasWUnselect1CMD[3] = 45;
-				ShowPasWUnselect2CMD[3] = 45;
+				ShowPasWSelect1CMD[3] = 95;
+				ShowPasWSelect2CMD[3] = 105;
+				ShowPasWUnselect1CMD[3] = 55;
+				ShowPasWUnselect2CMD[3] = 65;
 				HAL_UART_Transmit(&huart1, ShowPasWUnselect1CMD, 13,
 				USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowPasWUnselect2CMD, 13,
@@ -2574,8 +2555,6 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 void Enter_Cal_Page1(void) {
 	HAL_UART_Transmit(&huart1, ShowCalPage1CMD, 13, USARTSENDTIME);
 	Change_CalType(0);
-	Change_LastCell(tempdata.cell);
-	Change_PreCell(12.3456);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
@@ -2586,8 +2565,20 @@ void Enter_Cal_Page1(void) {
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-void Enter_Cal_Page2(void) {
+void Enter_Cal_Page2(uint8_t calType) {
 	HAL_UART_Transmit(&huart1, ShowCalPage2CMD, 13, USARTSENDTIME);
+	switch (calType) {
+	case 0:
+		Change_LastCell(tempdata.fixedcell);
+		Change_PreCell(tempdata.cell);
+		break;
+	case 1:
+		Change_Conf_PPM4mA(1413);
+		Change_Conf_ppm20mA(f_Rs_filter);
+		break;
+	case 2:
+		break;
+	}
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13, USARTSENDTIME);
 }
@@ -3854,13 +3845,19 @@ void Change_Conf_PassW(uint8_t PassW) {
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-void Change_CalType(uint8_t caltype) {
-	switch (caltype) {
+void Change_CalType(uint8_t calType) {
+	switch (calType) {
 	case 0:
 		ShowCalTypeCMD[7] = 87;
+		ShowCalPage2CMD[7] = 86;
 		break;
 	case 1:
 		ShowCalTypeCMD[7] = 88;
+		ShowCalPage2CMD[7] = 123;
+		break;
+	case 2:
+		ShowCalTypeCMD[7] = 106;
+		ShowCalPage2CMD[7] = 124;
 		break;
 	default:
 		break;
@@ -4004,6 +4001,52 @@ void Change_Cal_PPM_Fixed(float ppm) {
 	HAL_UART_Transmit(&huart1, ShowCalPPMFixedUnitCMD,
 			sizeof(ShowCalPPMFixedUnitCMD),
 			USARTSENDTIME);
+}
+
+/**
+ * @功能简介 : 校正界面显示温度
+ * @入口参数 : 无 - 自动调用全局温度
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2020/07/03
+ */
+void Change_Cal_Temp(void) {
+	//显示温度设置数字1
+	uint8_t ShowCalTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 108, 0x00, 12, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度设置数字2
+	uint8_t ShowCalTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 128, 0x00, 12, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度设置数字3-小数点
+	uint8_t ShowCalTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 148, 0x00, 12, 0x00,
+			30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度设置数字4
+	uint8_t ShowCalTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 160, 0x00, 12, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度设置单位
+	uint8_t ShowCalTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 180, 0x00, 10, 0x00,
+			81, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度
+	ShowCalTempNum1CMD[7] = f_Temp_fixed / 10;
+	ShowCalTempNum2CMD[7] = f_Temp_fixed - ShowCalTempNum1CMD[7] * 10;
+	ShowCalTempNum4CMD[7] =
+			31
+					+ (f_Temp_fixed - ShowCalTempNum1CMD[7] * 10
+							- ShowCalTempNum2CMD[7]) * 10;
+	ShowCalTempNum2CMD[7] += 31;
+	if (ShowCalTempNum1CMD[7] != 0) {
+		ShowCalTempNum1CMD[7] += 31;
+	} else
+		ShowCalTempNum1CMD[7] = 91;
+	HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD, sizeof(ShowCalTempNum1CMD),
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD, sizeof(ShowCalTempNum2CMD),
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD, sizeof(ShowCalTempNum3CMD),
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD, sizeof(ShowCalTempNum4CMD),
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD, sizeof(ShowCalTempUnitCMD),
+	USARTSENDTIME);
 }
 
 /**
@@ -5117,24 +5160,10 @@ void Conf_UI(void) {
 void Cal_UI(void) {
 	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
 	uint8_t BTN_TIME = 0;
-	uint8_t i;
-	uint8_t caltype = 0;
+	uint8_t i, std = 0, success = 2;
+	uint8_t calType = 0;
 	float f_PPM_Cal = 0;
-	//显示温度设置数字1
-	uint8_t ShowCalTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 108, 0x00, 12, 0x00,
-			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字2
-	uint8_t ShowCalTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 128, 0x00, 12, 0x00,
-			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字3-小数点
-	uint8_t ShowCalTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 148, 0x00, 12, 0x00,
-			30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字4
-	uint8_t ShowCalTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 160, 0x00, 12, 0x00,
-			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置单位
-	uint8_t ShowCalTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 180, 0x00, 10, 0x00,
-			81, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+
 	memcpy(&tempdata, &savedata, sizeof(savedata));
 	while (calFlag) {
 		BTN_TIME = 0;
@@ -5154,169 +5183,87 @@ void Cal_UI(void) {
 				;
 		}
 		if (configCurrentPage == 2 && configLastPage != 2) {
-			Enter_Cal_Page2();
+			Enter_Cal_Page2(calType);
+			//显示正在校准文字
+			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
+			USARTSENDTIME);
 			configLastPage = 2;
 		}
-		/* 空气校准 */
+		/* 传感器系数校正 */
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& caltype == 0) {
+				&& calType == 0) {
+			//显示温度
+			Change_Cal_Temp();
+			success = 1;
+		}
+
+		/* 偏移值校准 */
+		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
+				&& calType == 2) {
 			//显示正在校准文字
 			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
 			USARTSENDTIME);
-			CurrentSelect = 2;
-			Select_Next(CurrentSelect);
 			result = 0;
 			//显示正在校正的氧浓度值
 			for (i = 0; i < CAL_COUNT; i++) {
 				//显示正在校准闪烁
+				HAL_UART_Transmit(&huart1, ShowConfigUnselect1CMD, 13,
+				USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowConfigUnselect2CMD, 13,
 				USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowConfigUnselect3CMD, 13,
-				USARTSENDTIME);
 				/* 获取传感器数据 */
-				RS485_EN(1);
-				HAL_UART_Transmit(&huart2, GetSensor, 8, USARTSENDTIME);
-				RS485_EN(0);
-				HAL_Delay(500);
-				if (f_Temp_fixed > 50)
-					f_Temp_fixed = 50;
-				f_PPM_Cal = waterDO[(uint32_t) (f_Temp_fixed)]
-						* (tempdata.cell * 100000
-								- waterPerssure[(uint32_t) (f_Temp_fixed)])
-						/ (101325 - waterPerssure[(uint32_t) (f_Temp_fixed)]);
-				//显示温度
-				ShowCalTempNum1CMD[7] = f_Temp_fixed / 10;
-				ShowCalTempNum2CMD[7] = f_Temp_fixed
-						- ShowCalTempNum1CMD[7] * 10;
-				ShowCalTempNum4CMD[7] = 31
-						+ (f_Temp_fixed - ShowCalTempNum1CMD[7] * 10
-								- ShowCalTempNum2CMD[7]) * 10;
-				ShowCalTempNum2CMD[7] += 31;
-				if (ShowCalTempNum1CMD[7] != 0) {
-					ShowCalTempNum1CMD[7] += 31;
-				} else
-					ShowCalTempNum1CMD[7] = 91;
-				HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD,
-						sizeof(ShowCalTempNum1CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD,
-						sizeof(ShowCalTempNum2CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD,
-						sizeof(ShowCalTempNum3CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD,
-						sizeof(ShowCalTempNum4CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD,
-						sizeof(ShowCalTempUnitCMD),
-						USARTSENDTIME);
-
-				//显示校准值
-				Change_Conf_PPM4mA(f_PPM_Cal);
-
-				//显示正在校准闪烁
-				HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13,
-				USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowConfigSelect3CMD, 13,
-				USARTSENDTIME);
-				HAL_Delay(500);
-			}
-			//显示校准结果
-			if (result >= 10) {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
-				USARTSENDTIME);
-				CurrentSelect = 3;
-				Select_Next(CurrentSelect);
-			} else {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
-				USARTSENDTIME);
-				CurrentSelect = 3;
-				Select_Next(CurrentSelect);
-				CurrentSelect = 4;
-				Select_Next(CurrentSelect);
-			}
-		}
-		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& caltype == 0) {
-			Change_Cal_PPM_Fixed(f_PPM_Cal);
-			if (f_Rs + tempdata.bdo != 0) {
-				tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
-			}
-		}
-
-		/* 过程校准 */
-		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& caltype == 2) {
-			//显示正在校准文字
-			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
-			USARTSENDTIME);
-			CurrentSelect = 2;
-			Select_Next(CurrentSelect);
-			result = 0;
-			//显示正在校正的氧浓度值
-			for (i = 0; i < CAL_COUNT; i++) {
-				//显示正在校准闪烁
-				HAL_UART_Transmit(&huart1, ShowConfigUnselect2CMD, 13,
-				USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowConfigUnselect3CMD, 13,
-				USARTSENDTIME);
-				/* 获取传感器数据 */
-				RS485_EN(1);
-				HAL_UART_Transmit(&huart2, GetSensor, 8, USARTSENDTIME);
-				RS485_EN(0);
-				HAL_Delay(500);
+				getRs();
 				if (f_Temp_fixed > 50)
 					f_Temp_fixed = 50;
 				if (f_Rs < 0)
 					f_Rs = 0;
-				f_PPM_Cal = f_Rs + tempdata.bdo;
-				if (f_PPM_Cal < 0)
-					f_PPM_Cal = 0;
-				if (f_PPM_Cal > 20)
-					f_PPM_Cal = 20;
+				switch (tempdata.mode) {
+				case 0:
+					f_PPM_Cal = savedata.kdo * savedata.fixedcell * 1000000
+							/ f_Rs;
+					if (f_PPM_Cal < 0)
+						f_PPM_Cal = 0;
+					if (f_PPM_Cal > 200000)
+						f_PPM_Cal = 200000;
+					break;
+				case 1:
+					f_PPM_Cal = savedata.kdo
+							* (f_Rs / 100000 / savedata.fixedcell);
+					if (f_PPM_Cal < 0)
+						f_PPM_Cal = 0;
+					if (f_PPM_Cal > 20)
+						f_PPM_Cal = 20;
+					break;
+				case 2:
+					f_PPM_Cal = f_Rs;
+					if (f_PPM_Cal < 0)
+						f_PPM_Cal = 0;
+					if (f_PPM_Cal > 70)
+						f_PPM_Cal = 70;
+					break;
+				default:
+					break;
+				}
+
 				//显示温度
-				ShowCalTempNum1CMD[7] = f_Temp_fixed / 10;
-				ShowCalTempNum2CMD[7] = f_Temp_fixed
-						- ShowCalTempNum1CMD[7] * 10;
-				ShowCalTempNum4CMD[7] = 31
-						+ (f_Temp_fixed - ShowCalTempNum1CMD[7] * 10
-								- ShowCalTempNum2CMD[7]) * 10;
-				ShowCalTempNum2CMD[7] += 31;
-				if (ShowCalTempNum1CMD[7] != 0) {
-					ShowCalTempNum1CMD[7] += 31;
-				} else
-					ShowCalTempNum1CMD[7] = 91;
-				HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD,
-						sizeof(ShowCalTempNum1CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD,
-						sizeof(ShowCalTempNum2CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD,
-						sizeof(ShowCalTempNum3CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD,
-						sizeof(ShowCalTempNum4CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD,
-						sizeof(ShowCalTempUnitCMD),
-						USARTSENDTIME);
+				Change_Cal_Temp();
 				//显示校准值
 				Change_Conf_PPM4mA(f_PPM_Cal);
 				//显示正在校准闪烁
+				HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13,
+				USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13,
 				USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowConfigSelect3CMD, 13,
-				USARTSENDTIME);
-				HAL_Delay(500);
+				HAL_Delay(100);
 			}
 			//显示校准结果
-			if (result >= 10) {
+			if (result >= 5) {
 				HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
 				USARTSENDTIME);
-				tempdata.kdo = 1;
-				CurrentSelect = 3;
+				Change_Conf_ppm20mA(f_PPM_Cal);
+				success = 1;
+				tempdata.bdo = 0;
+				CurrentSelect = 2;
 				Select_Next(CurrentSelect);
 			} else {
 				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
@@ -5327,22 +5274,10 @@ void Cal_UI(void) {
 				Select_Next(CurrentSelect);
 			}
 		}
-		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& caltype == 2) {
-			Change_Cal_PPM_Fixed(f_PPM_Cal);
-			if (f_Rs + tempdata.bdo != 0) {
-				tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
-			}
-		}
 
-		/* 零点校准 */
-		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 1
-				&& caltype == 1) {
-			//显示正在校准文字
-			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
-			USARTSENDTIME);
-			CurrentSelect = 2;
-			Select_Next(CurrentSelect);
+		/* 斜率校正 */
+		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 2
+				&& calType == 1 && success == 2) {
 			result = 0;
 			//显示正在校正的氧浓度值
 			for (i = 0; i < CAL_COUNT; i++) {
@@ -5352,64 +5287,41 @@ void Cal_UI(void) {
 				HAL_UART_Transmit(&huart1, ShowConfigUnselect3CMD, 13,
 				USARTSENDTIME);
 				/* 获取传感器数据 */
-				RS485_EN(1);
-				HAL_UART_Transmit(&huart2, GetSensor, 8, USARTSENDTIME);
-				RS485_EN(0);
-				HAL_Delay(500);
+				getRs();
 				if (f_Temp_fixed > 50)
 					f_Temp_fixed = 50;
-				f_PPM_Cal = f_Rs * tempdata.kdo;
-				if (f_PPM_Cal < 0)
-					f_PPM_Cal = 0;
-				if (f_PPM_Cal > 20)
-					f_PPM_Cal = 20;
-				if (f_PPM_Cal > 1) {
-					result = 0;
-					break;
-				}
 				//显示温度
-				ShowCalTempNum1CMD[7] = f_Temp_fixed / 10;
-				ShowCalTempNum2CMD[7] = f_Temp_fixed
-						- ShowCalTempNum1CMD[7] * 10;
-				ShowCalTempNum4CMD[7] = 31
-						+ (f_Temp_fixed - ShowCalTempNum1CMD[7] * 10
-								- ShowCalTempNum2CMD[7]) * 10;
-				ShowCalTempNum2CMD[7] += 31;
-				if (ShowCalTempNum1CMD[7] != 0) {
-					ShowCalTempNum1CMD[7] += 31;
-				} else
-					ShowCalTempNum1CMD[7] = 91;
-				HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD,
-						sizeof(ShowCalTempNum1CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD,
-						sizeof(ShowCalTempNum2CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD,
-						sizeof(ShowCalTempNum3CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD,
-						sizeof(ShowCalTempNum4CMD),
-						USARTSENDTIME);
-				HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD,
-						sizeof(ShowCalTempUnitCMD),
-						USARTSENDTIME);
+				Change_Cal_Temp();
 				//显示校准值
-				Change_Conf_PPM4mA(f_PPM_Cal);
+				Change_Conf_ppm20mA(
+						tempdata.fixedcell * 1000000 / f_Rs + tempdata.bdo);
 				//显示正在校准闪烁
 				HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13,
 				USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowConfigSelect3CMD, 13,
 				USARTSENDTIME);
-				HAL_Delay(500);
+				HAL_Delay(100);
 			}
 			//显示校准结果
-			if (result >= 10) {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
-				USARTSENDTIME);
-				CurrentSelect = 3;
-				tempdata.bdo = 0;
-				Select_Next(CurrentSelect);
+			if (result >= 5) {
+				switch (std) {
+				case 0:
+					tempdata.kdo = (1413 - tempdata.bdo) * f_Rs
+							/ tempdata.fixedcell / 1000000;
+					break;
+				case 1:
+					tempdata.kdo = (84 - tempdata.bdo) * f_Rs
+							/ tempdata.fixedcell / 1000000;
+					break;
+				case 2:
+					tempdata.kdo = (12880 - tempdata.bdo) * f_Rs
+							/ tempdata.fixedcell / 1000000;
+					break;
+				}
+				f_PPM_Cal = tempdata.kdo * tempdata.fixedcell * 1000000 / f_Rs
+						+ tempdata.bdo;
+				Change_Conf_ppm20mA(f_PPM_Cal);
+				success = 1;
 			} else {
 				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
 				USARTSENDTIME);
@@ -5417,11 +5329,20 @@ void Cal_UI(void) {
 				Select_Next(CurrentSelect);
 				CurrentSelect = 4;
 				Select_Next(CurrentSelect);
+				success = 0;
 			}
 		}
-		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 3
-				&& caltype == 1) {
-			Change_Cal_PPM_Fixed(f_PPM_Cal);
+		if (configCurrentPage == 2 && configLastPage == 2
+				&& CurrentSelect == 3) {
+			if (success == 1) {
+				HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
+				USARTSENDTIME);
+			} else {
+				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
+				USARTSENDTIME);
+			}
+			CurrentSelect = 4;
+			Select_Next(CurrentSelect);
 		}
 		//按下Right键
 		while (!BTN_RIGHT()) {
@@ -5438,28 +5359,14 @@ void Cal_UI(void) {
 				switch (CurrentSelect) {
 				case 1:
 					//修改校正模式
-					caltype++;
-					if (caltype > 2) {
-						caltype = 0;
+					calType++;
+					if (calType > 2) {
+						calType = 0;
 					}
-					Change_CalType(caltype);
-					break;
-				case 2:
-					//修改大气压单位
-					tempdata.airpressureunit++;
-					if (tempdata.airpressureunit > 1) {
-						tempdata.airpressureunit = 0;
+					if (calType == 1 && tempdata.mode != 0) {
+						calType = 2;
 					}
-					Change_LastCell(tempdata.airpressureunit);
-					Change_PreCell(tempdata.cell);
-					break;
-				case 3:
-					//修改大气压
-					tempdata.cell += 0.001;
-					if (tempdata.cell > 1.5) {
-						tempdata.cell = 0.3;
-					}
-					Change_PreCell(tempdata.cell);
+					Change_CalType(calType);
 					break;
 				default:
 					break;
@@ -5468,33 +5375,131 @@ void Cal_UI(void) {
 			case 2:
 				switch (CurrentSelect) {
 				case 1:
+					switch (calType) {
+					case 0:
+						if (tempdata.cell < 0.1) {
+							tempdata.cell = 0.1;
+							tempdata.fixedcell = 0.1;
+						} else if (tempdata.cell < 1) {
+							tempdata.cell = 1;
+							tempdata.fixedcell = 1;
+							if (tempdata.mode == 1) {
+								tempdata.cell = 0.01;
+								tempdata.fixedcell = 0.01;
+							}
+							if (tempdata.mode == 2) {
+								tempdata.cell = 1;
+								tempdata.fixedcell = 1;
+							}
+						} else if (tempdata.cell < 10) {
+							tempdata.cell = 10;
+							tempdata.fixedcell = 10;
+							if (tempdata.mode == 2) {
+								tempdata.cell = 0.1;
+								tempdata.fixedcell = 0.1;
+							}
+						} else if (tempdata.cell >= 10) {
+							tempdata.cell = 0.01;
+							tempdata.fixedcell = 0.01;
+						}
+						Change_PreCell(tempdata.cell);
+						Change_LastCell(tempdata.fixedcell);
+						break;
+					case 1:
+						if (std == 0) {
+							std = 1;
+							Change_Conf_PPM4mA(84);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						} else if (std == 1) {
+							std = 2;
+							Change_Conf_PPM4mA(12880);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						} else if (std == 2) {
+							std = 0;
+							Change_Conf_PPM4mA(1413);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						}
+						break;
+					case 2:
+						break;
+					}
 					break;
 				case 2:
-					break;
-				case 3:
-					if ((caltype == 0) || (caltype == 2)) {
-						f_PPM_Cal = f_PPM_Cal + 0.01;
-						if (f_PPM_Cal > 20)
-							f_PPM_Cal = 20;
-						Change_Cal_PPM_Fixed(f_PPM_Cal);
-						if (f_Rs + tempdata.bdo != 0)
-							tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
+					if (calType == 0) {
+						if (tempdata.fixedcell < 10) {
+							tempdata.fixedcell += 0.0001;
+						} else if (tempdata.fixedcell >= 10) {
+							tempdata.fixedcell += 0.001;
+						}
+						if (tempdata.mode == 0 && tempdata.fixedcell > 19.99) {
+							tempdata.fixedcell = 19.99;
+						}
+						if (tempdata.mode == 1 && tempdata.fixedcell > 1) {
+							tempdata.fixedcell = 1;
+						}
+						if (tempdata.mode == 2 && tempdata.fixedcell > 1.5) {
+							tempdata.fixedcell = 1.5;
+						}
+						Change_LastCell(tempdata.fixedcell);
 					}
-					if (caltype == 1) {
-						f_PPM_Cal = f_PPM_Cal + 0.01;
-						if (f_PPM_Cal > 20)
-							f_PPM_Cal = 20;
-						Change_Cal_PPM_Fixed(f_PPM_Cal);
-						if (f_Rs + tempdata.bdo != 0)
-							tempdata.bdo = (f_PPM_Cal / tempdata.kdo) - f_Rs;
+					if (calType == 1 && success == 1) {
+						switch (std) {
+						case 0:
+							f_PPM_Cal += 0.01;
+							break;
+						case 1:
+							f_PPM_Cal += 0.01;
+							break;
+						case 2:
+							f_PPM_Cal += 10;
+							break;
+						default:
+							break;
+						}
+						if (f_PPM_Cal > 200000) {
+							f_PPM_Cal = 200000;
+						}
+						tempdata.kdo = (f_PPM_Cal - tempdata.bdo) * f_Rs
+								/ tempdata.fixedcell / 1000000;
+						Change_Conf_ppm20mA(f_PPM_Cal);
 					}
-					break;
-				case 4:
-//					tempdata.temp20mA += 0.1;
-//					if (tempdata.temp20mA > 50) {
-//						tempdata.temp20mA = tempdata.temp4mA + 0.1;
-//					}
-//					Change_Conf_temp20mA(tempdata.temp20mA);
+					if (calType == 2 && success == 1) {
+						switch (tempdata.mode) {
+						case 0:
+							if (f_PPM_Cal < 10000) {
+								f_PPM_Cal += 0.01;
+							} else {
+								f_PPM_Cal += 10;
+							}
+							if (f_PPM_Cal > 200000) {
+								f_PPM_Cal = 200000;
+							}
+							tempdata.bdo = f_PPM_Cal
+									- tempdata.kdo * tempdata.fixedcell
+											* 1000000 / f_Rs;
+							Change_Conf_ppm20mA(f_PPM_Cal);
+							break;
+						case 1:
+							f_PPM_Cal += 0.01;
+							if (f_PPM_Cal > 20) {
+								f_PPM_Cal = 20;
+							}
+							tempdata.bdo = f_PPM_Cal
+									- savedata.kdo
+											* (f_Rs / 100000
+													/ savedata.fixedcell);
+							Change_Conf_ppm20mA(f_PPM_Cal);
+							break;
+						case 2:
+							f_PPM_Cal += 0.01;
+							if (f_PPM_Cal > 70) {
+								f_PPM_Cal = 70;
+							}
+							break;
+						default:
+							break;
+						}
+					}
 					break;
 				default:
 					break;
@@ -5505,7 +5510,7 @@ void Cal_UI(void) {
 			}
 			BTN_TIME++;
 			if (BTN_TIME > 100) {
-				BTN_TIME = 0;
+				BTN_TIME = 100;
 			}
 		}	//end 按下Right键
 			//按下Right键
@@ -5523,30 +5528,15 @@ void Cal_UI(void) {
 				switch (CurrentSelect) {
 				case 1:
 					//修改校正模式
-					if (caltype == 0) {
-						caltype = 2;
+					if (calType == 0) {
+						calType = 2;
 					} else {
-						caltype--;
+						calType--;
 					}
-					Change_CalType(caltype);
-					break;
-				case 2:
-					//修改大气压单位
-					if (tempdata.airpressureunit == 0) {
-						tempdata.airpressureunit = 1;
-					} else {
-						tempdata.airpressureunit = 0;
+					if (calType == 1 && tempdata.mode != 0) {
+						calType = 0;
 					}
-					Change_LastCell(tempdata.airpressureunit);
-					Change_PreCell(tempdata.cell);
-					break;
-				case 3:
-					//修改大气压
-					tempdata.cell -= 0.001;
-					if (tempdata.cell < 0.3) {
-						tempdata.cell = 1.5;
-					}
-					Change_PreCell(tempdata.cell);
+					Change_CalType(calType);
 					break;
 				default:
 					break;
@@ -5555,33 +5545,124 @@ void Cal_UI(void) {
 			case 2:
 				switch (CurrentSelect) {
 				case 1:
+					switch (calType) {
+					case 0:
+						if (tempdata.cell < 0.1) {
+							tempdata.cell = 10;
+							tempdata.fixedcell = 10;
+							if (tempdata.mode != 0) {
+								tempdata.cell = 0.1;
+								tempdata.fixedcell = 0.1;
+							}
+						} else if (tempdata.cell < 1) {
+							tempdata.cell = 0.01;
+							tempdata.fixedcell = 0.01;
+						} else if (tempdata.cell < 10) {
+							tempdata.cell = 0.1;
+							tempdata.fixedcell = 0.1;
+						} else if (tempdata.cell >= 10) {
+							tempdata.cell = 1;
+							tempdata.fixedcell = 1;
+						}
+						Change_PreCell(tempdata.cell);
+						Change_LastCell(tempdata.fixedcell);
+						break;
+					case 1:
+						if (std == 0) {
+							std = 2;
+							Change_Conf_PPM4mA(1413);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						} else if (std == 1) {
+							std = 0;
+							Change_Conf_PPM4mA(84);
+							Change_Conf_ppm20mA(f_Rs_filter);
+
+						} else if (std == 2) {
+							std = 1;
+							Change_Conf_PPM4mA(12880);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						}
+						break;
+					case 2:
+						break;
+					}
 					break;
 				case 2:
-					break;
-				case 3:
-					if ((caltype == 0) || (caltype == 2)) {
-						f_PPM_Cal = f_PPM_Cal - 0.01;
-						if (f_PPM_Cal < 0)
-							f_PPM_Cal = 0;
-						Change_Cal_PPM_Fixed(f_PPM_Cal);
-						if (f_Rs + tempdata.bdo != 0)
-							tempdata.kdo = f_PPM_Cal / (f_Rs + tempdata.bdo);
+					if (calType == 0) {
+						if (tempdata.fixedcell < 10) {
+							tempdata.fixedcell -= 0.0001;
+						} else if (tempdata.fixedcell >= 10) {
+							tempdata.fixedcell -= 0.001;
+						}
+						if (tempdata.mode == 0 && tempdata.fixedcell < 0.0050) {
+							tempdata.fixedcell = 0.0050;
+						}
+						if (tempdata.mode == 1 && tempdata.fixedcell < 0.010) {
+							tempdata.fixedcell = 0.010;
+						}
+						if (tempdata.mode == 2 && tempdata.fixedcell < 0.40) {
+							tempdata.fixedcell = 0.40;
+						}
+						Change_LastCell(tempdata.fixedcell);
 					}
-					if (caltype == 1) {
-						f_PPM_Cal = f_PPM_Cal - 0.01;
-						if (f_PPM_Cal < 0)
-							f_PPM_Cal = 0;
-						Change_Cal_PPM_Fixed(f_PPM_Cal);
-						if (tempdata.kdo != 0)
-							tempdata.bdo = (f_PPM_Cal / tempdata.kdo) - f_Rs;
+					if (calType == 1 && success == 1) {
+						switch (std) {
+						case 0:
+							f_PPM_Cal -= 0.01;
+							break;
+						case 1:
+							f_PPM_Cal -= 0.01;
+							break;
+						case 2:
+							f_PPM_Cal -= 10;
+							break;
+						default:
+							break;
+						}
+						if (f_PPM_Cal < 1) {
+							f_PPM_Cal = 1;
+						}
+						tempdata.kdo = (f_PPM_Cal - tempdata.bdo) * f_Rs
+								/ tempdata.fixedcell / 1000000;
+						Change_Conf_ppm20mA(f_PPM_Cal);
 					}
-					break;
-				case 4:
-//					tempdata.temp20mA -= 0.1;
-//					if (tempdata.temp20mA < 0) {
-//						tempdata.temp20mA = 50;
-//					}
-//					Change_Conf_temp20mA(tempdata.temp20mA);
+					if (calType == 2 && success == 1) {
+						switch (tempdata.mode) {
+						case 0:
+							if (f_PPM_Cal < 10000) {
+								f_PPM_Cal -= 0.01;
+							} else {
+								f_PPM_Cal -= 10;
+							}
+							if (f_PPM_Cal < 0) {
+								f_PPM_Cal = 0;
+							}
+							tempdata.bdo = f_PPM_Cal
+									- tempdata.kdo * tempdata.fixedcell
+											* 1000000 / f_Rs;
+							Change_Conf_ppm20mA(f_PPM_Cal);
+							break;
+						case 1:
+							f_PPM_Cal -= 0.01;
+							if (f_PPM_Cal < 0) {
+								f_PPM_Cal = 0;
+							}
+							tempdata.bdo = f_PPM_Cal
+									- savedata.kdo
+											* (f_Rs / 100000
+													/ savedata.fixedcell);
+							Change_Conf_ppm20mA(f_PPM_Cal);
+							break;
+						case 2:
+							f_PPM_Cal -= 0.01;
+							if (f_PPM_Cal < 0) {
+								f_PPM_Cal = 0;
+							}
+							break;
+						default:
+							break;
+						}
+					}
 					break;
 				default:
 					break;
@@ -5600,12 +5681,18 @@ void Cal_UI(void) {
 			HAL_Delay(100);
 			if (!BTN_ENTER()) {
 				CurrentSelect++;
+				if (configCurrentPage == 1 && CurrentSelect == 2) {
+					Select_Next(CurrentSelect);
+					CurrentSelect++;
+					Select_Next(CurrentSelect);
+					CurrentSelect++;
+				}
 				//每页4个设置，超出跳转下一页，超出页数跳回首页
 				if (CurrentSelect > 4) {
 					CurrentSelect = 1;
 					configCurrentPage++;
 					if (configCurrentPage > 2) {
-						if (result >= 10) {
+						if (success == 1) {
 							memcpy(&savedata, &tempdata, sizeof(savedata));
 							writeConfig();
 						}
