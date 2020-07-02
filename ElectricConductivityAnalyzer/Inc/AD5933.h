@@ -5,7 +5,6 @@
 #include "delay.h"
 
 #include <math.h>
-#define uint unsigned int
 
 //IO方向设置
 #define SDA_IN();  {GPIO_InitTypeDef GPIO_InitStruct = { 0 };GPIO_InitStruct.Pin = GPIO_PIN_11;GPIO_InitStruct.Mode = GPIO_MODE_INPUT;GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);}
@@ -59,7 +58,7 @@ void START(void);
 void STOP(void);
 void SendByte(uint8_t txd); // 发送一个字节数据子函数
 uint8_t ReadByte(void);     //读一个字节数据
-void Write_Byte(char nAddr, uint nValue);
+void Write_Byte(char nAddr, unsigned int nValue);
 void SetPointer(char nAddr);
 int Rece_Byte(char nAddr);
 void Delay_ms(unsigned long nValue);

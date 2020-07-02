@@ -38,6 +38,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
+#include "adc.h"
 #include "dac.h"
 #include "dma.h"
 #include "rtc.h"
@@ -69,9 +70,12 @@
 #define ADMIN 770
 #define ADMAXCAL 99
 #define ADMINCAL 99
+/* 温度ADC */
+#define ADCMAX 4096
+#define ADCMIN 270
 /* 电极距离 | 横截面积 /cm ｜ cm2 */
-#define CELLLENGTH 1
-#define CELLAREA 1
+//#define CELLLENGTH 1
+//#define CELLAREA 1
 DAC_HandleTypeDef hdac;
 /* GPIO宏定义 */
 #define LED_LO(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_RESET))
@@ -89,6 +93,8 @@ DAC_HandleTypeDef hdac;
 #define BTN_RIGHT() 	HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_0)
 #define BTN_ENTER() 	HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1)
 #define RS485_EN(x) 	(x == 1 ? HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET))
+
+#define TP_CONTROL(x)	(x == 1 ? HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET))
 
 //校正次数宏定义——1次1s
 #define CAL_COUNT 10
@@ -140,6 +146,21 @@ static char auchCRCLo[] = { 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2,
 		0x8D, 0x4D, 0x4C, 0x8C, 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86,
 		0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40 };
 
+/* NTC30K阻值表 */
+float NTC30K[100] = { 98.2641, 93.373, 88.754, 84.3904, 80.2668, 76.3686,
+		72.6822, 69.195, 65.8951, 62.7716, 59.8139, 57.0124, 54.358, 51.8422,
+		49.4571, 47.1951, 45.0492, 43.0129, 41.08, 39.2447, 37.5016, 35.8455,
+		34.2717, 32.7756, 31.353, 30, 28.7127, 27.4877, 26.3215, 25.2112,
+		24.1536, 23.1461, 22.186, 21.2709, 20.3984, 19.5664, 18.7727, 18.0153,
+		17.2926, 16.6026, 15.9438, 15.3146, 14.7135, 14.1391, 13.5901, 13.0653,
+		12.5635, 12.0835, 11.6244, 11.185, 10.7645, 10.362, 9.9766, 9.6075,
+		9.2539, 8.9151, 8.5904, 8.2792, 7.9808, 7.6947, 7.4202, 7.1569, 6.9043,
+		6.6619, 6.4292, 6.2057, 5.9911, 5.785, 5.587, 5.3968, 5.214, 5.0382,
+		4.8693, 4.7068, 4.5505, 4.4002, 4.2556, 4.1165, 3.9825, 3.8536, 3.7294,
+		3.6099, 3.4947, 3.3838, 3.277, 3.174, 3.0747, 2.979, 2.8868, 2.7978,
+		2.712, 2.6293, 2.5494, 2.4724, 2.3981, 2.3263, 2.257, 2.1901, 2.1255,
+		2.0631 };
+
 /* 历史记录 */
 float History_PPM[400];
 RTC_TimeTypeDef History_TIME[400];
@@ -148,8 +169,11 @@ static long historyCNT = 0;
 static long historyStart = 0;
 static long historyEnd = 0;
 
+/* AD转换结果值 */
+uint32_t ADC_ConvertedValue[2];
+
 extern double R_Correction[8];
-uint8_t range = 0;
+uint8_t range = 1;
 
 //设置背景白色
 uint8_t SetBackWhiteCMD[8] = { 0xEE, 0x42, 0xFF, 0xFF, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -855,6 +879,7 @@ long calcTimeSpan(uint8_t datenowYear, uint8_t datenowMonth,
 		uint8_t timeoldSeconds);
 void LCD_Init(void);
 void getRs(void);
+void getTemp(void);
 void Enter_Conf_Page1(void);
 void Enter_Conf_Page1_2(void);
 void Enter_Conf_Page2(void);
@@ -948,6 +973,7 @@ int main(void) {
 	MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_DAC_Init();
+	MX_ADC1_Init();
 	MX_SPI2_Init();
 	MX_RTC_Init();
 //	MX_TIM4_Init();
@@ -977,7 +1003,7 @@ int main(void) {
 	memcpy(&stimewashstructureget, &stimestructureget,
 			sizeof(stimestructureget));
 	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
-	HAL_Delay(3000);
+//	HAL_Delay(3000);
 	/* 读取EEPROM */
 	readConfig();
 	eepromReadSetting();
@@ -1004,8 +1030,11 @@ int main(void) {
 
 	/* 开机校准 */
 	startCalc();
+	HAL_ADCEx_Calibration_Start(&hadc1);
+
 	/* 预转换获取电导，保证开机有数据 */
 	getRs();
+	getTemp();
 	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
 //	HAL_Delay(3000);
 //	/* 开机获取传感器数据 */
@@ -1106,15 +1135,14 @@ void SystemClock_Config(void) {
  */
 void startCalc(void) {
 	double ma1 = 0, ma2 = 0;
-	double R_Ref[8] = { 118, 1180, 11800, 118000, 236000, 590000, 1180000,
-			2360000 };
+	double R_Ref[8] = { 100, 1000, 10000, 100000, 200000, 500000, 1000000,
+			2000000 };
 	uint8_t i = 0;
 	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 	uint16_t buf = 0;
 	for (i = 0; i < 7; i++) {
 		RangeSelect(i + 8);
-
-		Fre_To_Hex(5000, SValue);
+		Fre_To_Hex(10000, SValue);
 		Fre_To_Hex(1, IValue);
 		NValue[0] = 0;
 		NValue[1] = 8;
@@ -1128,7 +1156,7 @@ void startCalc(void) {
 
 		ma1 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
 
-		Fre_To_Hex(15000, SValue);
+		Fre_To_Hex(10080, SValue);
 		Fre_To_Hex(1, IValue);
 		NValue[0] = 0;
 		NValue[1] = 8;
@@ -1143,11 +1171,10 @@ void startCalc(void) {
 		ma2 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
 
 		R_Correction[i + 1] = 1
-				/ (ma1 + ((1 / 100) / ma2 - (1 / 100) / ma1) / 2);
+				/ (ma1 + ((1 / 100) / (ma2) - (1 / 100) / ma1) / 2);
 	}
-	/* 100欧用1K校准值除以8 */
-	R_Correction[0] = R_Correction[1] / 8;
 }
+
 /**
  * @功能简介 : 从EEPROM读取用户配置
  * @入口参数 : 无
@@ -1387,10 +1414,14 @@ void application(void) {
 		Sensor_Status = 0;
 		/* 刷新界面 */
 		LCD_Update();
+		/* 扫描按键 */
+		Button_Scan();
 		/* 刷新4-20mA电流 */
 		ImA_Update();
 		/* 刷新继电器 */
 		Relay_Update();
+		/* 扫描按键 */
+		Button_Scan();
 	}
 	/* 获取传感器数据 */
 	if (refreshFlag == 0 && configFlag == 0 && Sensor_Time == 100000) {
@@ -1402,9 +1433,12 @@ void application(void) {
 		/* 显示更新时间和日期 */
 		RTC_Update();
 		getRs();
+		/* 扫描按键 */
+		Button_Scan();
+		getTemp();
+		/* 扫描按键 */
+		Button_Scan();
 	}
-	/* 扫描按键 */
-	Button_Scan();
 
 //	if (Sensor_Status == 0) {
 //		ShowElectrodeStatusCMD[7] = 50;
@@ -1432,7 +1466,8 @@ void application(void) {
 		/* 刷新继电器 */
 		Relay_Update();
 	}
-
+	/* 扫描按键 */
+	Button_Scan();
 	/* 备份时间 */
 	if (lastHours != stimestructureget.Hours) {
 #ifdef DEBUG
@@ -1516,7 +1551,8 @@ void application(void) {
 			}
 		}
 	}
-
+	/* 扫描按键 */
+	Button_Scan();
 	/* 延时报警 */
 	if (Relay_Flag == 0 && Relay_Flag_Low == 0) {
 		Relay_Flag_Low = 1;
@@ -1548,6 +1584,8 @@ void application(void) {
 	}
 	Sensor_Time++;
 	Sensor_Status++;
+	/* 扫描按键 */
+	Button_Scan();
 }
 
 /**
@@ -2008,6 +2046,71 @@ void LCD_Init(void) {
 
 	RTC_Update();
 }
+
+/**
+ * @功能简介 : 获取电导率
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2020/02/03
+ */
+void getTemp(void) {
+	if (savedata.tempmode == 0) {
+		TP_CONTROL(0);
+		/* 启动AD转换 */
+		for (uint8_t i = 0; i < 200; i++) {
+			HAL_ADC_Start(&hadc1);
+			HAL_ADC_PollForConversion(&hadc1, 0xffff);		//等待ADC转换完成
+			if (i % 2 == 0) {
+				ADC_ConvertedValue[0] += HAL_ADC_GetValue(&hadc1);
+			} else {
+				ADC_ConvertedValue[1] += HAL_ADC_GetValue(&hadc1);
+			}
+		}
+		f_Temp = (float) ((ADCMAX) * 76000 / (ADC_ConvertedValue[0] / 100)
+				- 76000) / 1000;
+		if (f_Temp < 2.0631) {
+			f_Temp = 99;
+		}
+		for (uint8_t i = 1; i < 100; i++) {
+			if (f_Temp > NTC30K[i]) {
+				f_Temp = i - 1
+						+ (NTC30K[i - 1] - f_Temp)
+								/ (NTC30K[i - 1] - NTC30K[i]);
+				break;
+			}
+		}
+	} else if (savedata.tempmode == 1) {
+		TP_CONTROL(1);
+		/* 启动AD转换 */
+		for (uint8_t i = 0; i < 200; i++) {
+			HAL_ADC_Start(&hadc1);
+			HAL_ADC_PollForConversion(&hadc1, 0xffff);		//等待ADC转换完成
+			if (i % 2 == 0) {
+				ADC_ConvertedValue[0] += HAL_ADC_GetValue(&hadc1);
+			} else {
+				ADC_ConvertedValue[1] += HAL_ADC_GetValue(&hadc1);
+			}
+		}
+		f_Temp = (float) 3000000
+				/ (3000 * (ADC_ConvertedValue[1] / 100) / ADCMAX / 5 + 1274)
+				- 1000;
+		f_Temp = (f_Temp - 1000) / 3.9;
+
+	} else if (savedata.tempmode == 3) {
+		f_Temp = savedata.temp;
+	}
+	ADC_ConvertedValue[0] = 0;
+	ADC_ConvertedValue[1] = 0;
+	HAL_ADC_Stop(&hadc1);
+	if (f_Temp > 60) {
+		f_Temp = 0;
+	}
+	if (f_Temp < 0) {
+		f_Temp = 0;
+	}
+	f_Temp_fixed = f_Temp * savedata.ktemp;
+}
+
 /**
  * @功能简介 : 获取电导率
  * @入口参数 : 无
@@ -2016,59 +2119,48 @@ void LCD_Init(void) {
  */
 void getRs(void) {
 	float temp;
-	/**
-	 * 电阻率 = (电阻 * 横截面积) / 距离
-	 * 电导率 = 1 / 电阻率 (µS/cm)
-	 * Ω * cm = (Ω * cm2) / cm
-	 * 电导率 = 1 * 距离 / (电阻 * 横截面积)
-	 * µS/cm = (1000000 / Ω) / cm
-	 */
 	if (f_Rs < 1000) {
 		range = 0;
-	}
-	if (f_Rs >= 1000 && f_Rs < 10000) {
+		RangeSelect(range);
+		f_Rs = 1.6 * DA5933_Get_Rs() - 200;
+	} else if (f_Rs >= 1000 && f_Rs < 10000) {
 		range = 1;
-	}
-	if (f_Rs >= 10000 && f_Rs < 100000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 10000 && f_Rs < 100000) {
 		range = 2;
-	}
-	if (f_Rs >= 100000 && f_Rs < 200000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 100000 && f_Rs < 200000) {
 		range = 3;
-	}
-	if (f_Rs >= 200000 && f_Rs < 500000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 200000 && f_Rs < 500000) {
 		range = 4;
-	}
-	if (f_Rs >= 500000 && f_Rs < 1000000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 500000 && f_Rs < 1000000) {
 		range = 5;
-	}
-	if (f_Rs >= 1000000 && f_Rs < 2000000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 1000000 && f_Rs < 2000000) {
 		range = 6;
-	}
-	if (f_Rs >= 2000000) {
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
+	} else if (f_Rs >= 2000000) {
 		range = 7;
+		RangeSelect(range);
+		f_Rs = DA5933_Get_Rs();
 	}
-	RangeSelect(range);
-	f_Rs = DA5933_Get_Rs();
+
 	/* 刷新标志位 */
 	refreshFlag = 1;
-	//TODO 电导率完整计算
-//	f_Rs = (CELLLENGTH * 1000000 / DA5933_Get_Rs()) / CELLAREA;
-	//TODO 修改温度获取
-//	memcpy((&f_Temp), &sensorRevBuf[13], 4);
+
 	result++;
 	if (result > 40) {
 		result = 0;
 	}
-//			if (f_Rs > 20) {
-//				f_Rs = 20;
-//			}
-//			if (f_Rs < 0) {
-//				f_Rs = 0;
-//			}
-//	f_Rs_fixed[filterCNT] = savedata.kdo * (100 - savedata.tempfactor)
-//			* (f_Rs + savedata.bdo) / 100;
 	switch (savedata.mode) {
-
 	case 0:
 		/* change to μS/cm */
 		f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
@@ -2087,7 +2179,6 @@ void getRs(void) {
 		}
 		filterCNT++;
 		break;
-
 	case 1:
 		/* change to MΩ*cm */
 		f_Rs_fixed[filterCNT] = savedata.kdo
@@ -2105,20 +2196,12 @@ void getRs(void) {
 		}
 		filterCNT++;
 		break;
-
 	case 2:
 		/* 盐度，该版本暂未支持 */
 		break;
 	default:
 		break;
 	}
-	if (f_Temp > 99) {
-		f_Temp = 99;
-	}
-	if (f_Temp < 0) {
-		f_Temp = 0;
-	}
-	f_Temp_fixed = f_Temp * savedata.ktemp;
 	if (filterCNT > savedata.filter) {
 		uint8_t i;
 		for (i = 0; i < savedata.filter; i++) {
@@ -2381,7 +2464,7 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 104, 0x00, 109, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
-	//显示密码界面选择条
+//显示密码界面选择条
 	uint8_t ShowPasWSelect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 144, 0x00,
 			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWSelect2CMD[13] = { 0xEE, 0x32, 0x01, 25, 0x00, 144, 0x00,
@@ -2397,7 +2480,7 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 	HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowPasWSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowPasWSelect2CMD, 13, USARTSENDTIME);
-	//屏蔽刚进入设置按键未释放
+//屏蔽刚进入设置按键未释放
 	while (!BTN_MODE())
 		;
 	while (!BTN_CONFIG())
@@ -3062,7 +3145,8 @@ void Change_Conf_ppm20mA(float ppm20mA) {
 		}
 	}
 	HAL_UART_Transmit(&huart1, ShowConf20mANum00CMD,
-			sizeof(ShowConf20mANum00CMD), USARTSENDTIME);
+			sizeof(ShowConf20mANum00CMD),
+			USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf20mANum0CMD, sizeof(ShowConf20mANum0CMD),
 	USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, sizeof(ShowConf20mANum1CMD),
@@ -3156,7 +3240,7 @@ void Change_Conf_ADMAX(float temp20mA) {
 			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ADMAX20mANum4CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 114, 0x00, 31,
 			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示单位
+//显示单位
 	uint8_t UnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 110, 0x00, 23, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
 	HAL_UART_Transmit(&huart1, SetBackWhiteCMD, 8, USARTSENDTIME);
@@ -3212,7 +3296,7 @@ void Change_Conf_ADMIN(float temp4mA) {
 			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowConf4mANum4CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 62, 0x00, 31,
 			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示单位
+//显示单位
 	uint8_t UnitCMD[13] = { 0xEE, 0x32, 0x01, 118, 0x00, 58, 0x00, 23, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
 	HAL_UART_Transmit(&huart1, SetBackWhiteCMD, 8, USARTSENDTIME);
@@ -3235,7 +3319,8 @@ void Change_Conf_ADMIN(float temp4mA) {
 		CMD[2] = 0x01;
 		CMD[3] = 24;
 		HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD,
-				sizeof(ShowConf4mANum1CMD), USARTSENDTIME);
+				sizeof(ShowConf4mANum1CMD),
+				USARTSENDTIME);
 	} else {
 		CMD[2] = 0x01;
 		CMD[3] = 44;
@@ -3679,11 +3764,14 @@ void Change_Conf_Filter(uint8_t filter) {
 	} else
 		ShowConfFilterNum1CMD[7] = 91;
 	HAL_UART_Transmit(&huart1, ShowConfFilterNum1CMD,
-			sizeof(ShowConfFilterNum1CMD), USARTSENDTIME);
+			sizeof(ShowConfFilterNum1CMD),
+			USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfFilterNum2CMD,
-			sizeof(ShowConfFilterNum2CMD), USARTSENDTIME);
+			sizeof(ShowConfFilterNum2CMD),
+			USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowConfFilterUnitCMD,
-			sizeof(ShowConfFilterUnitCMD), USARTSENDTIME);
+			sizeof(ShowConfFilterUnitCMD),
+			USARTSENDTIME);
 }
 
 /**
@@ -4056,22 +4144,22 @@ void Change_Cal_PPM_Fixed(float ppm) {
  * @历史版本 : V0.0.1 - Ethan - 2020/07/03
  */
 void Change_Cal_Temp(void) {
-	//显示温度设置数字1
+//显示温度设置数字1
 	uint8_t ShowCalTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 108, 0x00, 12, 0x00,
 			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字2
+//显示温度设置数字2
 	uint8_t ShowCalTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 128, 0x00, 12, 0x00,
 			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字3-小数点
+//显示温度设置数字3-小数点
 	uint8_t ShowCalTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 148, 0x00, 12, 0x00,
 			30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置数字4
+//显示温度设置数字4
 	uint8_t ShowCalTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 160, 0x00, 12, 0x00,
 			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度设置单位
+//显示温度设置单位
 	uint8_t ShowCalTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 180, 0x00, 10, 0x00,
 			81, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-	//显示温度
+//显示温度
 	ShowCalTempNum1CMD[7] = f_Temp_fixed / 10;
 	ShowCalTempNum2CMD[7] = f_Temp_fixed - ShowCalTempNum1CMD[7] * 10;
 	ShowCalTempNum4CMD[7] =
