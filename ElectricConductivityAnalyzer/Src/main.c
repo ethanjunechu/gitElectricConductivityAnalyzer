@@ -824,6 +824,8 @@ typedef struct {
 	float MAX;
 	uint8_t password;
 	uint8_t tempfactortype;
+	float MINADTEMP;
+	float MAXADTEMP;
 } SAVEDATA;
 SAVEDATA savedata;
 SAVEDATA tempdata;
@@ -878,18 +880,19 @@ long calcTimeSpan(uint8_t datenowYear, uint8_t datenowMonth,
 		uint8_t dateoldDate, uint8_t timeoldHours, uint8_t timeoldMinutes,
 		uint8_t timeoldSeconds);
 void LCD_Init(void);
-void getRs(void);
 void getTemp(void);
+void getRs(void);
+void ProcessData(void);
 void Enter_Conf_Page1(void);
 void Enter_Conf_Page1_2(void);
 void Enter_Conf_Page2(void);
 void Enter_Conf_Page3(void);
 void Enter_Conf_Page4(void);
 void Enter_Conf_Page5(void);
-void Enter_Conf_Page6(void);
+void Enter_Conf_Page6(uint8_t CalmA, uint8_t Password, uint8_t selectnum);
 void Enter_Conf_Page7(void);
 void Enter_Conf_Page8(void);
-uint8_t Enter_PasW_Page(uint8_t lastPage);
+uint8_t Enter_PasW_Page(uint8_t lastPage, uint8_t CalmA);
 void Enter_Cal_Page1(void);
 void Enter_Cal_Page2(uint8_t calType);
 void Change_Conf_Unit(uint8_t mode);
@@ -902,8 +905,8 @@ void Change_Conf_PPM4mA(float ppm4mA);
 void Change_Conf_ppm20mA(float ppm20mA);
 void Change_Conf_temp4mA(float temp4mA);
 void Change_Conf_temp20mA(float temp20mA);
-void Change_Conf_ADMAX(float temp20mA);
-void Change_Conf_ADMIN(float temp4mA);
+void Change_Conf_ADMAX(float temp20mA, uint8_t selectnum);
+void Change_Conf_ADMIN(float temp4mA, uint8_t selectnum);
 void Change_Conf_UpLimitAuto(uint8_t uplimitauto);
 void Change_Conf_UpLimit(float uplimit);
 void Change_Conf_UpLimitDelay(float delaytime);
@@ -978,8 +981,7 @@ int main(void) {
 	MX_RTC_Init();
 //	MX_TIM4_Init();
 	MX_USART1_UART_Init();
-//	MX_USART2_UART_Init();
-//	MX_USART3_UART_Init();
+	Ini_I2c();
 
 	/* USER CODE BEGIN 2 */
 
@@ -1134,44 +1136,52 @@ void SystemClock_Config(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void startCalc(void) {
-	double ma1 = 0, ma2 = 0;
-	double R_Ref[8] = { 100, 1000, 10000, 100000, 200000, 500000, 1000000,
-			2000000 };
-	uint8_t i = 0;
+	double ma1 = 0, ma2 = 0, temp = 0;
+	double R_Ref[7] = { 100, 200, 1000, 10000, 100000, 1000000, 10000000 };
+	uint8_t i = 0, j = 0;
 	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 	uint16_t buf = 0;
 	for (i = 0; i < 7; i++) {
-		RangeSelect(i + 8);
-		Fre_To_Hex(10000, SValue);
-		Fre_To_Hex(1, IValue);
-		NValue[0] = 0;
-		NValue[1] = 8;
+		RangeSelect(i + 7);
+		ma1 = 0;
+		ma2 = 0;
+		for (j = 0; j < 3; j++) {
+			Fre_To_Hex(9950, SValue);
+			Fre_To_Hex(1, IValue);
+			NValue[0] = 0;
+			NValue[1] = 8;
 #ifdef AD5933_MCLK_USE_OUT
 	  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
 	#else
-		buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_IN_MCLK;
+			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
+					| AD5933_IN_MCLK;
 #endif
-		CValue[0] = buf >> 8;
-		CValue[1] = buf;
+			CValue[0] = buf >> 8;
+			CValue[1] = buf;
 
-		ma1 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
+			ma1 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
 
-		Fre_To_Hex(10080, SValue);
-		Fre_To_Hex(1, IValue);
-		NValue[0] = 0;
-		NValue[1] = 8;
+			Fre_To_Hex(10050, SValue);
+			Fre_To_Hex(1, IValue);
+			NValue[0] = 0;
+			NValue[1] = 8;
 #ifdef AD5933_MCLK_USE_OUT
 			  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
 			#else
-		buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_IN_MCLK;
+			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
+					| AD5933_IN_MCLK;
 #endif
-		CValue[0] = buf >> 8;
-		CValue[1] = buf;
+			CValue[0] = buf >> 8;
+			CValue[1] = buf;
 
-		ma2 = (1 / R_Ref[i + 1]) / Scale_imp(SValue, IValue, NValue, CValue);
-
-		R_Correction[i + 1] = 1
-				/ (ma1 + ((1 / 100) / (ma2) - (1 / 100) / ma1) / 2);
+			ma2 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
+		}
+		temp = 1
+				/ ((ma1 / 3)
+						+ ((1 / 100) / (ma2 / 3) - (1 / 100) / (ma1 / 3)) / 2);
+		if (temp > 0) {
+			R_Correction[i] = temp;
+		}
 	}
 }
 
@@ -1260,6 +1270,8 @@ void readConfig(void) {
 		savedata.MIN = ADMIN;
 		savedata.password = 0;
 		savedata.tempfactortype = 0;
+		savedata.MAXADTEMP = ADMAX;
+		savedata.MINADTEMP = ADMIN;
 		writeConfig();
 	}
 }
@@ -1339,6 +1351,10 @@ void writeConfig(void) {
 			savedata.password);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (FLASHBASEADDR + 224),
 			savedata.tempfactortype);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 232),
+			(int32_t) (savedata.MAXADTEMP * 1000));
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (FLASHBASEADDR + 240),
+			(int32_t) (savedata.MINADTEMP * 1000));
 	HAL_FLASH_Lock();
 }
 /**
@@ -1370,8 +1386,8 @@ void factoryConfig(uint8_t conf) {
 		savedata.brightness = 10;
 		savedata.tempmode = 0;
 		savedata.interval = 1;
-		savedata.MAX = ADMAX;
-		savedata.MIN = ADMIN;
+//		savedata.MAX = ADMAX;
+//		savedata.MIN = ADMIN;
 		savedata.password = 0;
 		savedata.tempfactortype = 0;
 		HAL_Delay(500);
@@ -1418,6 +1434,8 @@ void application(void) {
 		Button_Scan();
 		/* 刷新4-20mA电流 */
 		ImA_Update();
+		/* 扫描按键 */
+		Button_Scan();
 		/* 刷新继电器 */
 		Relay_Update();
 		/* 扫描按键 */
@@ -1432,19 +1450,20 @@ void application(void) {
 #endif
 		/* 显示更新时间和日期 */
 		RTC_Update();
+		/* 获取阻抗 */
 		getRs();
 		/* 扫描按键 */
 		Button_Scan();
+		/* 获取温度 */
 		getTemp();
+		/* 扫描按键 */
+		Button_Scan();
+		/* 处理数据 */
+		ProcessData();
 		/* 扫描按键 */
 		Button_Scan();
 	}
 
-//	if (Sensor_Status == 0) {
-//		ShowElectrodeStatusCMD[7] = 50;
-//		HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD, 13,
-//		USARTSENDTIME);
-//	}
 	/* 电极未接 */
 	if (Sensor_Status >= 600000) {
 #ifdef DEBUG
@@ -1628,18 +1647,12 @@ void LCD_Update(void) {
 	case 1:
 		/* 电阻率 */
 		ShowMainUnitCMD[7] = 29;
-		/** 纯水电阻率10MΩ*cm，则相应的电导率为0.1μS/cm
-		 **/
 		f_Rs_Show = f_Rs_filter;
 		break;
 	case 2:
 		/* 盐度 */
-		/* 若盐度值（以NaCl计算）记为yNaCl（单位为PPm），电导率值记为x（单位为μs/cm），当前水温为t，则换算公式为: */
-		/* yNaCl=1.3888*x-0.02478*x*t-6171.9 */
 		ShowMainUnitCMD[7] = 84;
 		f_Rs_Show = f_Rs_filter;
-//		f_Rs_Show = (1.3888 * f_Rs_filter - 0.02478 * f_Rs_filter * f_Temp_fixed
-//				- 6171.9) * 1000000;
 		break;
 	}
 	if (f_Rs_Show >= 1000) {
@@ -1814,8 +1827,9 @@ void ImA_Update(void) {
 			- 20 * (savedata.MAX - savedata.MIN) / 16;
 	TempDAC = (16 * f_Temp_fixed / (savedata.temp20mA - savedata.temp4mA) + 20
 			- 16 * savedata.temp20mA / (savedata.temp20mA - savedata.temp4mA))
-			* (savedata.MAX - savedata.MIN) / 16 + savedata.MAX
-			- 20 * (savedata.MAX - savedata.MIN) / 16;
+			* (savedata.MAXADTEMP - savedata.MINADTEMP) / 16
+			+ savedata.MAXADTEMP
+			- 20 * (savedata.MAXADTEMP - savedata.MINADTEMP) / 16;
 
 	if (PPMDAC > savedata.MAX) {
 		PPMDAC = savedata.MAX;
@@ -1823,11 +1837,11 @@ void ImA_Update(void) {
 	if (PPMDAC < savedata.MIN) {
 		PPMDAC = savedata.MIN;
 	}
-	if (TempDAC > savedata.MAX) {
-		TempDAC = savedata.MAX;
+	if (TempDAC > savedata.MAXADTEMP) {
+		TempDAC = savedata.MAXADTEMP;
 	}
-	if (TempDAC < savedata.MIN) {
-		TempDAC = savedata.MIN;
+	if (TempDAC < savedata.MINADTEMP) {
+		TempDAC = savedata.MINADTEMP;
 	}
 	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, PPMDAC);
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
@@ -2118,44 +2132,78 @@ void getTemp(void) {
  * @历史版本 : V0.0.1 - Ethan - 2020/02/03
  */
 void getRs(void) {
-	float temp;
-	if (f_Rs < 1000) {
+	double A,B,C,D;
+	if (f_Rs < 100) {
+		A = 2367424146.70513;
+		B = -0.388909314573357;
+		C = 2.07838423690103E+18;
+		D = -948.435152784848;
 		range = 0;
 		RangeSelect(range);
-		f_Rs = 1.6 * DA5933_Get_Rs() - 200;
-	} else if (f_Rs >= 1000 && f_Rs < 10000) {
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 100 && f_Rs < 900) {
+		A = 40935424999406.6;
+		B = -0.90189531795727;
+		C = 347272469728688;
+		D = -272.934947363955;
 		range = 1;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 10000 && f_Rs < 100000) {
+		f_Rs = 1.5625 * DA5933_Get_Rs() - 203;
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 900 && f_Rs < 9900) {
+		A = 30740.6243793141;
+		B = -1.40993856464411;
+		C = 15591.6647859978;
+		D = 285.921768546588;
 		range = 2;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 100000 && f_Rs < 200000) {
+		f_Rs = 1.1463 * DA5933_Get_Rs() - 272.87;
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 9900 && f_Rs < 99900) {
+		A = 474032130888176;
+		B = -1.00603568163648;
+		C = 406202752588375;
+		D = 327.980666260545;
 		range = 3;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 200000 && f_Rs < 500000) {
+		f_Rs = 1.0212 * DA5933_Get_Rs() + 112.84;
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 99900 && f_Rs < 999900) {
+		A = 9.4441857296374E+17;
+		B = -1.61382070255075;
+		C = 18941495999895.4;
+		D = 63002.8241622625;
 		range = 4;
 		RangeSelect(range);
 		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 500000 && f_Rs < 1000000) {
+		f_Rs = 1E-06 * f_Rs * f_Rs + 0.399 * f_Rs + 60277;
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 999900 && f_Rs < 9999900) {
+		A = 6.87223483865145E+18;
+		B = -17.0352928287941;
+		C = 5842771.02860434;
+		D = 1001385.56012878;
 		range = 5;
 		RangeSelect(range);
 		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 1000000 && f_Rs < 2000000) {
+		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
+	} else if (f_Rs >= 9999900) {
 		range = 6;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
-	} else if (f_Rs >= 2000000) {
-		range = 7;
-		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
+		f_Rs = DA5933_Get_Rs()/40;
 	}
+}
 
+/**
+ * @功能简介 : 处理传感器数据
+ * @入口参数 : 无
+ * @出口参数 : 无
+ * @历史版本 : V0.0.1 - Ethan - 2020/02/03
+ */
+void ProcessData(void) {
+	float temp;
 	/* 刷新标志位 */
 	refreshFlag = 1;
-
 	result++;
 	if (result > 40) {
 		result = 0;
@@ -2166,7 +2214,7 @@ void getRs(void) {
 		f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
 				/ f_Rs + savedata.bdo;
 
-		if (f_Rs_fixed[filterCNT] > 200000) {
+		if (f_Rs_fixed[filterCNT] > 250000) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
 			refreshFlag = 0;
@@ -2184,7 +2232,7 @@ void getRs(void) {
 		f_Rs_fixed[filterCNT] = savedata.kdo
 				* (f_Rs / 100000 / savedata.fixedcell) + savedata.bdo;
 
-		if (f_Rs_fixed[filterCNT] > 20) {
+		if (f_Rs_fixed[filterCNT] > 25) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
 			refreshFlag = 0;
@@ -2197,14 +2245,28 @@ void getRs(void) {
 		filterCNT++;
 		break;
 	case 2:
-		/* 盐度，该版本暂未支持 */
+		/* change to PPT */
+		f_Rs_fixed[filterCNT] = savedata.kdo
+				* (8895.3 * pow(f_Rs, -1.521) / 100000 * savedata.fixedcell)
+				+ savedata.bdo;
+		if (f_Rs_fixed[filterCNT] > 70) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+		if (f_Rs_fixed[filterCNT] <= 0) {
+			f_Rs_fixed[filterCNT] = 0;
+			/* 刷新标志位 */
+			refreshFlag = 0;
+		}
+		filterCNT++;
 		break;
 	default:
 		break;
 	}
 	if (filterCNT > savedata.filter) {
 		uint8_t i;
-		for (i = 0; i < savedata.filter; i++) {
+		for (i = 0; i < savedata.filter / 10 + 3; i++) {
 			for (filterCNT = 0; filterCNT < savedata.filter - i; filterCNT++) {
 				if (f_Rs_fixed[filterCNT] > f_Rs_fixed[filterCNT + 1]) {
 					temp = f_Rs_fixed[filterCNT + 1];
@@ -2214,6 +2276,14 @@ void getRs(void) {
 			}
 		}
 		f_Rs_filter = f_Rs_fixed[savedata.filter / 2];
+		/* 温度补偿 */
+		if (f_Temp != 0) {
+			f_Rs_filter = f_Rs_filter
+					- (f_Temp_fixed - 25) * f_Rs_filter
+							* (savedata.tempfactor / 100
+									- (f_Temp_fixed - 25) * savedata.tempfactor
+											/ 5000);
+		}
 		filterCNT = 0;
 	}
 }
@@ -2411,10 +2481,35 @@ void Enter_Conf_Page5(void) {
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-void Enter_Conf_Page6(void) {
+void Enter_Conf_Page6(uint8_t CalmA, uint8_t Password, uint8_t selectnum) {
 	HAL_UART_Transmit(&huart1, ShowConfigPage6CMD, 13, USARTSENDTIME);
-	Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10);
-	Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10);
+	if (Password == 1) {
+		if (CalmA == 0) {
+			Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10, CalmA);
+			Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10, CalmA);
+			if (selectnum == 1) {
+				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
+						tempdata.MIN);
+				HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+			} else if (selectnum == 2) {
+				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
+						tempdata.MAX);
+				HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+			}
+		} else {
+			Change_Conf_ADMAX((tempdata.MAXADTEMP - ADMAX) / 10, CalmA);
+			Change_Conf_ADMIN((tempdata.MINADTEMP - ADMIN) / 10, CalmA);
+			if (selectnum == 1) {
+				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
+						tempdata.MINADTEMP);
+				HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+			} else if (selectnum == 2) {
+				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
+						tempdata.MAXADTEMP);
+				HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+			}
+		}
+	}
 	Change_Conf_Interval(tempdata.interval);
 	Change_Conf_PassW(tempdata.password);
 	HAL_UART_Transmit(&huart1, ShowConfigSelect1CMD, 13, USARTSENDTIME);
@@ -2452,32 +2547,35 @@ void Enter_Conf_Page8(void) {
 }
 /**
  * @功能简介 : 进入密码页面
- * @入口参数 : 无
+ * @入口参数 : 最后的页面 ｜ 第六个设置界面是电导还是温度？
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
-uint8_t Enter_PasW_Page(uint8_t lastPage) {
-	uint8_t a = 0, b = 0, c = 0, select = 0;
+uint8_t Enter_PasW_Page(uint8_t lastPage, uint8_t CalmA) {
+	uint8_t a = 0, b = 0, c = 0, d = 0, select = 0;
 	uint8_t ShowA[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 104, 0x00, 70, 0x00, 0xFF,
 			0xFC, 0xFF, 0xFF };
-	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 104, 0x00, 109, 0x00,
+	uint8_t ShowB[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 104, 0x00, 114, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
-	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 104, 0x00, 109, 0x00,
+	uint8_t ShowC[13] = { 0xEE, 0x32, 0x01, 94, 0x00, 104, 0x00, 114, 0x00,
+			0xFF, 0xFC, 0xFF, 0xFF };
+	uint8_t ShowD[13] = { 0xEE, 0x32, 0x01, 134, 0x00, 104, 0x00, 114, 0x00,
 			0xFF, 0xFC, 0xFF, 0xFF };
 //显示密码界面选择条
 	uint8_t ShowPasWSelect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 144, 0x00,
-			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWSelect2CMD[13] = { 0xEE, 0x32, 0x01, 25, 0x00, 144, 0x00,
-			110, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			115, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWUnselect1CMD[13] = { 0xEE, 0x32, 0x01, 15, 0x00, 144, 0x00,
-			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t ShowPasWUnselect2CMD[13] = { 0xEE, 0x32, 0x01, 25, 0x00, 144, 0x00,
-			111, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+			116, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 	HAL_UART_Transmit(&huart1, ShowPassWPageCMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowPasWSelect1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowPasWSelect2CMD, 13, USARTSENDTIME);
 //屏蔽刚进入设置按键未释放
@@ -2516,6 +2614,13 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				ShowC[7] = 70 + c;
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
+			case 3:
+				d++;
+				if (d == 10)
+					d = 0;
+				ShowD[7] = 70 + d;
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
+				break;
 			default:
 				break;
 			}
@@ -2543,6 +2648,13 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				ShowC[7] = 70 + c;
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
 				break;
+			case 3:
+				d--;
+				if (d > 10)
+					d = 9;
+				ShowD[7] = 70 + d;
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
+				break;
 			default:
 				break;
 			}
@@ -2551,7 +2663,19 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			while (!BTN_CAL())
 				;
 			if (lastPage == 1) {
-				Enter_Conf_Page6();
+				Enter_Conf_Page6(0, 0, 0);
+			}
+			if (lastPage == 2) {
+				Enter_Conf_Page6(0, 0, 0);
+				Select_Next(2);
+			}
+			if (lastPage == 3) {
+				Enter_Conf_Page6(0, 0, 0);
+				Select_Next(2);
+				Select_Next(3);
+			}
+			if (lastPage == 4) {
+				Enter_Conf_Page6(0, 0, 0);
 				Select_Next(2);
 				Select_Next(3);
 				Select_Next(4);
@@ -2562,7 +2686,19 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			while (!BTN_CONFIG())
 				;
 			if (lastPage == 1) {
-				Enter_Conf_Page6();
+				Enter_Conf_Page6(0, 0, 0);
+			}
+			if (lastPage == 2) {
+				Enter_Conf_Page6(0, 0, 0);
+				Select_Next(2);
+			}
+			if (lastPage == 3) {
+				Enter_Conf_Page6(0, 0, 0);
+				Select_Next(2);
+				Select_Next(3);
+			}
+			if (lastPage == 4) {
+				Enter_Conf_Page6(0, 0, 0);
 				Select_Next(2);
 				Select_Next(3);
 				Select_Next(4);
@@ -2576,20 +2712,23 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 			switch (select) {
 			case 0:
 				ShowA[7] = 70 + a;
-				ShowB[7] = 109;
-				ShowC[7] = 109;
+				ShowB[7] = 114;
+				ShowC[7] = 114;
+				ShowD[7] = 114;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
 				break;
 			case 1:
-				ShowA[7] = 109;
+				ShowA[7] = 114;
 				ShowB[7] = b + 70;
-				ShowC[7] = 109;
+				ShowC[7] = 114;
+				ShowD[7] = 114;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
-
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
 				ShowPasWSelect1CMD[3] = 55;
 				ShowPasWSelect2CMD[3] = 65;
 				HAL_UART_Transmit(&huart1, ShowPasWUnselect1CMD, 13,
@@ -2602,13 +2741,14 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				USARTSENDTIME);
 				break;
 			case 2:
-				ShowA[7] = 109;
-				ShowB[7] = 109;
+				ShowA[7] = 114;
+				ShowB[7] = 114;
 				ShowC[7] = c + 70;
+				ShowD[7] = 114;
 				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
 				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
-
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
 				ShowPasWSelect1CMD[3] = 95;
 				ShowPasWSelect2CMD[3] = 105;
 				ShowPasWUnselect1CMD[3] = 55;
@@ -2622,20 +2762,73 @@ uint8_t Enter_PasW_Page(uint8_t lastPage) {
 				HAL_UART_Transmit(&huart1, ShowPasWSelect2CMD, 13,
 				USARTSENDTIME);
 				break;
+			case 3:
+				ShowA[7] = 114;
+				ShowB[7] = 114;
+				ShowC[7] = 114;
+				ShowD[7] = d + 70;
+				HAL_UART_Transmit(&huart1, ShowA, 13, USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowB, 13, USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowC, 13, USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowD, 13, USARTSENDTIME);
+				ShowPasWSelect1CMD[3] = 135;
+				ShowPasWSelect2CMD[3] = 145;
+				ShowPasWUnselect1CMD[3] = 95;
+				ShowPasWUnselect2CMD[3] = 105;
+				HAL_UART_Transmit(&huart1, ShowPasWUnselect1CMD, 13,
+				USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowPasWUnselect2CMD, 13,
+				USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowPasWSelect1CMD, 13,
+				USARTSENDTIME);
+				HAL_UART_Transmit(&huart1, ShowPasWSelect2CMD, 13,
+				USARTSENDTIME);
+				break;
 			default:
 				break;
 			}
-			if (select == 3) {
-				if (lastPage == 1) {
-					Enter_Conf_Page6();
-					Select_Next(2);
-					Select_Next(3);
-					Select_Next(4);
-				}
-				if (a == 5 && b == 3 && c == 2) {
+			if (select == 4) {
+				if (a == 5 && b == 0 && c == 0 && d == 0) {
+					if (lastPage == 1) {
+						Enter_Conf_Page6(CalmA, 1, 1);
+					}
+					if (lastPage == 2) {
+						Enter_Conf_Page6(CalmA, 1, 2);
+						Select_Next(2);
+					}
+					if (lastPage == 3) {
+						Enter_Conf_Page6(CalmA, 1, 0);
+						Select_Next(2);
+						Select_Next(3);
+					}
+					if (lastPage == 4) {
+						Enter_Conf_Page6(CalmA, 1, 0);
+						Select_Next(2);
+						Select_Next(3);
+						Select_Next(4);
+					}
 					return 1;
-				} else
+				} else {
+					if (lastPage == 1) {
+						Enter_Conf_Page6(0, 0, 1);
+					}
+					if (lastPage == 2) {
+						Enter_Conf_Page6(0, 0, 2);
+						Select_Next(2);
+					}
+					if (lastPage == 3) {
+						Enter_Conf_Page6(0, 0, 0);
+						Select_Next(2);
+						Select_Next(3);
+					}
+					if (lastPage == 4) {
+						Enter_Conf_Page6(0, 0, 0);
+						Select_Next(2);
+						Select_Next(3);
+						Select_Next(4);
+					}
 					return 0;
+				}
 			}
 		}
 		HAL_Delay(200);
@@ -3228,7 +3421,7 @@ void Change_Conf_temp20mA(float temp20mA) {
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-void Change_Conf_ADMAX(float temp20mA) {
+void Change_Conf_ADMAX(float temp20mA, uint8_t selectnum) {
 	/* EE 20 01 18 00 F0 00 02 2D FF FC FF FF  */
 	uint8_t CMD[14] = { 0xEE, 0x20, 0x01, 24, 0x00, 114, 0x01, 0x02, 0x2D, 0x20,
 			0xFF, 0xFC, 0xFF, 0xFF };
@@ -3268,6 +3461,10 @@ void Change_Conf_ADMAX(float temp20mA) {
 		CMD[3] = 44;
 		ADMAX20mANum1CMD[7] = 91;
 	}
+	if (selectnum == 0) {
+		UnitCMD[7] = 126;
+	} else
+		UnitCMD[7] = 125;
 	HAL_UART_Transmit(&huart1, CMD, sizeof(CMD), USARTSENDTIME);
 
 	HAL_UART_Transmit(&huart1, ADMAX20mANum2CMD, sizeof(ADMAX20mANum2CMD),
@@ -3284,7 +3481,7 @@ void Change_Conf_ADMAX(float temp20mA) {
  * @出口参数 : 无
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
-void Change_Conf_ADMIN(float temp4mA) {
+void Change_Conf_ADMIN(float temp4mA, uint8_t selectnum) {
 	/* EE 20 01 18 00 F0 00 02 2D FF FC FF FF  */
 	uint8_t CMD[14] = { 0xEE, 0x20, 0x01, 24, 0x00, 62, 0x01, 0x02, 0x2D, 0x20,
 			0xFF, 0xFC, 0xFF, 0xFF };
@@ -3326,6 +3523,10 @@ void Change_Conf_ADMIN(float temp4mA) {
 		CMD[3] = 44;
 		ShowConf4mANum1CMD[7] = 91;
 	}
+	if (selectnum == 0) {
+		UnitCMD[7] = 126;
+	} else
+		UnitCMD[7] = 125;
 	HAL_UART_Transmit(&huart1, CMD, sizeof(CMD), USARTSENDTIME);
 
 	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, sizeof(ShowConf4mANum2CMD),
@@ -4230,7 +4431,7 @@ void Select_Next(uint8_t Selection) {
  */
 void Conf_UI(void) {
 	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
-	uint32_t BTN_TIME = 0;
+	uint32_t BTN_TIME = 0, CalmA = 0, Password = 0;
 	uint32_t i = 0;
 	memcpy(&tempdata, &savedata, sizeof(savedata));
 	memcpy(&sdateconfstructureget, &sdatestructureget,
@@ -4280,7 +4481,7 @@ void Conf_UI(void) {
 			configLastPage = 5;
 		}
 		if (configCurrentPage == 6 && configLastPage != 6) {
-			Enter_Conf_Page6();
+			Enter_Conf_Page6(0, Password, 0);
 			configLastPage = 6;
 		}
 		if (configCurrentPage == 7 && configLastPage != 7) {
@@ -4593,32 +4794,62 @@ void Conf_UI(void) {
 			case 6:
 				switch (CurrentSelect) {
 				case 1:
-					//校准4mA
-					tempdata.MIN += 1;
-					if (tempdata.MIN > (ADMIN + ADMINCAL)) {
-						tempdata.MIN = (ADMIN - ADMINCAL);
+					if (Password == 0) {
+						Password = Enter_PasW_Page(1, CalmA);
 					}
-					Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
-							tempdata.MIN);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
-							tempdata.MIN);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+					if (Password == 1) {
+						//校准4mA
+						if (CalmA == 0) {
+							tempdata.MIN += 1;
+							if (tempdata.MIN > (ADMIN + ADMINCAL)) {
+								tempdata.MIN = (ADMIN - ADMINCAL);
+							}
+							Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2,
+							DAC_ALIGN_12B_R, tempdata.MIN);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+						} else {
+							tempdata.MINADTEMP += 1;
+							if (tempdata.MINADTEMP > (ADMIN + ADMINCAL)) {
+								tempdata.MINADTEMP = (ADMIN - ADMINCAL);
+							}
+							Change_Conf_ADMIN((tempdata.MINADTEMP - ADMIN) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1,
+							DAC_ALIGN_12B_R, tempdata.MINADTEMP);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+						}
+					}
 					break;
 				case 2:
-					//校准20mA
-					tempdata.MAX += 1;
-					if (tempdata.MAX > (ADMAX + ADMAXCAL)) {
-						tempdata.MAX = (ADMAX - ADMAXCAL);
+					if (Password == 0) {
+						Password = Enter_PasW_Page(2, CalmA);
 					}
-					Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
-							tempdata.MAX);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
-							tempdata.MAX);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+					if (Password == 1) {
+						//校准20mA
+						if (CalmA == 0) {
+							tempdata.MAX += 1;
+							if (tempdata.MAX > (ADMAX + ADMAXCAL)) {
+								tempdata.MAX = (ADMAX - ADMAXCAL);
+							}
+							Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2,
+							DAC_ALIGN_12B_R, tempdata.MAX);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+						} else {
+							tempdata.MAXADTEMP += 1;
+							if (tempdata.MAXADTEMP > (ADMAX + ADMAXCAL)) {
+								tempdata.MAXADTEMP = (ADMAX - ADMAXCAL);
+							}
+							Change_Conf_ADMAX((tempdata.MAXADTEMP - ADMAX) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1,
+							DAC_ALIGN_12B_R, tempdata.MAXADTEMP);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+						}
+					}
 					break;
 				case 3:
 					//修改历史记录时间间隔
@@ -4634,14 +4865,8 @@ void Conf_UI(void) {
 						tempdata.password = 1;
 						Change_Conf_PassW(tempdata.password);
 					} else if (tempdata.password != 0) {
-						//进入输入密码界面
-						if (Enter_PasW_Page(1) == 1) {
-							tempdata.password = 0;
-							Change_Conf_PassW(tempdata.password);
-						} else {
-							tempdata.password = 1;
-							Change_Conf_PassW(tempdata.password);
-						}
+						tempdata.password = 0;
+						Change_Conf_PassW(tempdata.password);
 					}
 					break;
 				default:
@@ -5047,32 +5272,62 @@ void Conf_UI(void) {
 			case 6:
 				switch (CurrentSelect) {
 				case 1:
-					//校准4mA
-					tempdata.MIN -= 1;
-					if (tempdata.MIN < (ADMIN - ADMINCAL)) {
-						tempdata.MIN = (ADMIN + ADMINCAL);
+					if (Password == 0) {
+						Password = Enter_PasW_Page(1, CalmA);
 					}
-					Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
-							tempdata.MIN);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
-							tempdata.MIN);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+					if (Password == 1) {
+						//校准4mA
+						if (CalmA == 0) {
+							tempdata.MIN -= 1;
+							if (tempdata.MIN < (ADMIN - ADMINCAL)) {
+								tempdata.MIN = (ADMIN + ADMINCAL);
+							}
+							Change_Conf_ADMIN((tempdata.MIN - ADMIN) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2,
+							DAC_ALIGN_12B_R, tempdata.MIN);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+						} else {
+							tempdata.MINADTEMP -= 1;
+							if (tempdata.MINADTEMP < (ADMIN - ADMINCAL)) {
+								tempdata.MINADTEMP = (ADMIN + ADMINCAL);
+							}
+							Change_Conf_ADMIN((tempdata.MINADTEMP - ADMIN) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1,
+							DAC_ALIGN_12B_R, tempdata.MINADTEMP);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+						}
+					}
 					break;
 				case 2:
-					//校准20mA
-					tempdata.MAX -= 1;
-					if (tempdata.MAX < (ADMAX - ADMAXCAL)) {
-						tempdata.MAX = (ADMAX + ADMAXCAL);
+					if (Password == 0) {
+						Password = Enter_PasW_Page(2, CalmA);
 					}
-					Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
-							tempdata.MAX);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-					HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R,
-							tempdata.MAX);
-					HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+					if (Password == 1) {
+						//校准20mA
+						if (CalmA == 0) {
+							tempdata.MAX -= 1;
+							if (tempdata.MAX < (ADMAX - ADMAXCAL)) {
+								tempdata.MAX = (ADMAX + ADMAXCAL);
+							}
+							Change_Conf_ADMAX((tempdata.MAX - ADMAX) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2,
+							DAC_ALIGN_12B_R, tempdata.MAX);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+						} else {
+							tempdata.MAXADTEMP -= 1;
+							if (tempdata.MAXADTEMP < (ADMAX - ADMAXCAL)) {
+								tempdata.MAXADTEMP = (ADMAX + ADMAXCAL);
+							}
+							Change_Conf_ADMAX((tempdata.MAXADTEMP - ADMAX) / 10,
+									CalmA);
+							HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1,
+							DAC_ALIGN_12B_R, tempdata.MAXADTEMP);
+							HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+						}
+					}
 					break;
 				case 3:
 					//修改历史记录时间间隔
@@ -5088,14 +5343,8 @@ void Conf_UI(void) {
 						tempdata.password = 1;
 						Change_Conf_PassW(tempdata.password);
 					} else if (tempdata.password != 0) {
-						//进入输入密码界面
-						if (Enter_PasW_Page(1) == 1) {
-							tempdata.password = 0;
-							Change_Conf_PassW(tempdata.password);
-						} else {
-							tempdata.password = 1;
-							Change_Conf_PassW(tempdata.password);
-						}
+						tempdata.password = 0;
+						Change_Conf_PassW(tempdata.password);
 					}
 					break;
 				default:
@@ -5193,7 +5442,42 @@ void Conf_UI(void) {
 				BTN_TIME = 100000;
 			}
 		}	//end 按下mode键
-
+		//按下Cal键，切换温度或电导4-20mA校正
+		if (!BTN_CAL()) {
+			HAL_Delay(500);
+			if (!BTN_CAL()) {
+				if (configCurrentPage == 6) {
+					if (Password == 0) {
+						Password = Enter_PasW_Page(CurrentSelect, 1);
+					}
+					if (Password == 1) {
+						if (CalmA == 0) {
+							CalmA = 1;
+							Enter_Conf_Page6(CalmA, Password, CurrentSelect);
+						} else {
+							CalmA = 0;
+							Enter_Conf_Page6(CalmA, Password, CurrentSelect);
+						}
+						switch (CurrentSelect) {
+						case 2:
+							Select_Next(2);
+							break;
+						case 3:
+							Select_Next(2);
+							Select_Next(3);
+							break;
+						case 4:
+							Select_Next(2);
+							Select_Next(3);
+							Select_Next(4);
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			}
+		}
 		//按下Enter键，选中下一条
 		if (!BTN_ENTER()) {
 			HAL_Delay(100);
@@ -5876,8 +6160,9 @@ void Cal_UI(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void History_UI(void) {
-	uint8_t configCurrentPage = 1, configLastPage = 0, CurrentSelect = 1;
-	uint8_t BTN_TIME = 0;
+	uint8_t __attribute__ ((unused)) configCurrentPage = 1, configLastPage = 0,
+			CurrentSelect = 1;
+	uint8_t __attribute__ ((unused)) BTN_TIME = 0;
 	memcpy(&tempdata, &savedata, sizeof(savedata));
 	while (historyFlag) {
 		BTN_TIME = 0;
@@ -6102,7 +6387,7 @@ void Button_Scan(void) {
 				Button_Cal_Flag = 0;
 				Button_Right_Flag = 0;
 				if (savedata.password == 1) {
-					if (Enter_PasW_Page(0) == 1) {
+					if (Enter_PasW_Page(0, 0) == 1) {
 						Cal_UI();
 					} else {
 						LCD_Init();
@@ -6152,7 +6437,7 @@ void Button_Scan(void) {
 				Button_Cal_Flag = 0;
 				Button_Right_Flag = 0;
 				if (savedata.password == 1) {
-					if (Enter_PasW_Page(0) == 1) {
+					if (Enter_PasW_Page(0, 0) == 1) {
 						factoryConfig(2);
 					}
 				} else {

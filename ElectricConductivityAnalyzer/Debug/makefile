@@ -28,13 +28,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: 5000-01.elf
+all: 5000-01(03).elf
 
 # Tool invocations
-5000-01.elf: $(OBJS) $(USER_OBJS) ../STM32F103VCTx_FLASH.ld
+5000-01(03).elf: $(OBJS) $(USER_OBJS) ../STM32F103VCTx_FLASH.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -T"../STM32F103VCTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "5000-01.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -T"../STM32F103VCTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "5000-01(03).elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -46,8 +46,8 @@ clean:
 
 post-build:
 	-@echo 'Generating hex and Printing size information:'
-	arm-none-eabi-objcopy -O ihex "5000-01.elf" "5000-01.hex"
-	arm-none-eabi-size "5000-01.elf"
+	arm-none-eabi-objcopy -O ihex "5000-01(03).elf" "5000-01(03).hex"
+	arm-none-eabi-size "5000-01(03).elf"
 	-@echo ' '
 
 .PHONY: all clean dependents

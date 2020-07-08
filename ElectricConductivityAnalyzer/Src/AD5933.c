@@ -9,10 +9,12 @@
 #define	AD5933_MCLK_USE_OUT	1	//0内部时钟  1外部时钟
 #define AD5933_Correction 101615461.47044108 //10k
 
-double R_Correction[8] = { 1966257.2265625, 10508294.921875, 97174892.578125,
-		962529980.46875, 1915128124.9999998, 4759922363.281251, 9270630859.375,
-		16997701171.875 };
+double R_Correction[7] = { 953523.95361868362, 2618886.397035114,
+		10771029.399944296, 97032567.340095446, 959868455.95206976,
+		9293568285.81674, 54623696838.268166 };
 extern uint8_t range;
+uint8_t num = 100;
+
 void Ini_I2c(void) //初始化I2C
 {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -42,7 +44,7 @@ void Ini_I2c(void) //初始化I2C
 void RangeSelect(uint8_t index) {
 	switch (index) {
 	case 0:
-		/* Y0, IY2 */
+		/* Y0, IY2 100 */
 		S0(0);
 		S1(0);
 		S2(0);
@@ -51,7 +53,16 @@ void RangeSelect(uint8_t index) {
 		S5(0);
 		break;
 	case 1:
-		/* Y1, IY2 */
+		/* Y4, IY2 200 */
+		S0(0);
+		S1(0);
+		S2(1);
+		S3(0);
+		S4(1);
+		S5(0);
+		break;
+	case 2:
+		/* Y1, IY2 1k */
 		S0(1);
 		S1(0);
 		S2(0);
@@ -59,18 +70,9 @@ void RangeSelect(uint8_t index) {
 		S4(1);
 		S5(0);
 		break;
-	case 2:
-		/* Y2, IY2 */
-		S0(0);
-		S1(1);
-		S2(0);
-		S3(0);
-		S4(1);
-		S5(0);
-		break;
 	case 3:
-		/* Y3, IY2 */
-		S0(1);
+		/* Y2, IY2 10k */
+		S0(0);
 		S1(1);
 		S2(0);
 		S3(0);
@@ -78,26 +80,35 @@ void RangeSelect(uint8_t index) {
 		S5(0);
 		break;
 	case 4:
-		/* Y4, IY2 */
-		S0(0);
-		S1(0);
-		S2(1);
+		/* Y3, IY2 100k */
+		S0(1);
+		S1(1);
+		S2(0);
 		S3(0);
 		S4(1);
 		S5(0);
 		break;
+//	case 5:
+//		/* Y5, IY2 500k */
+//		S0(1);
+//		S1(0);
+//		S2(1);
+//		S3(0);
+//		S4(1);
+//		S5(0);
+//		break;
 	case 5:
-		/* Y5, IY2 */
-		S0(1);
-		S1(0);
+		/* Y6, IY2 1M */
+		S0(0);
+		S1(1);
 		S2(1);
 		S3(0);
 		S4(1);
 		S5(0);
 		break;
 	case 6:
-		/* Y6, IY2 */
-		S0(0);
+		/* Y7, IY2 10M */
+		S0(1);
 		S1(1);
 		S2(1);
 		S3(0);
@@ -105,15 +116,24 @@ void RangeSelect(uint8_t index) {
 		S5(0);
 		break;
 	case 7:
-		/* Y7, IY2 */
+		/* Y5, IY5 100校准 */
 		S0(1);
-		S1(1);
+		S1(0);
 		S2(1);
-		S3(0);
-		S4(1);
-		S5(0);
+		S3(1);
+		S4(0);
+		S5(1);
 		break;
 	case 8:
+		/* Y4, IY4 200校准 */
+		S0(0);
+		S1(0);
+		S2(1);
+		S3(0);
+		S4(0);
+		S5(1);
+		break;
+	case 9:
 		/* Y1, IY1 1K校准 */
 		S0(1);
 		S1(0);
@@ -122,7 +142,7 @@ void RangeSelect(uint8_t index) {
 		S4(0);
 		S5(0);
 		break;
-	case 9:
+	case 10:
 		/* Y2, IY0 10K校准 */
 		S0(0);
 		S1(1);
@@ -131,7 +151,7 @@ void RangeSelect(uint8_t index) {
 		S4(0);
 		S5(0);
 		break;
-	case 10:
+	case 11:
 		/* Y3, IY3 100K校准 */
 		S0(1);
 		S1(1);
@@ -140,25 +160,7 @@ void RangeSelect(uint8_t index) {
 		S4(1);
 		S5(0);
 		break;
-	case 11:
-		/* Y4, IY4 200K校准 */
-		S0(0);
-		S1(0);
-		S2(1);
-		S3(0);
-		S4(0);
-		S5(1);
-		break;
 	case 12:
-		/* Y5, IY5 500K校准 */
-		S0(1);
-		S1(0);
-		S2(1);
-		S3(1);
-		S4(0);
-		S5(1);
-		break;
-	case 13:
 		/* Y6, IY6 1M校准 */
 		S0(0);
 		S1(1);
@@ -167,8 +169,8 @@ void RangeSelect(uint8_t index) {
 		S4(1);
 		S5(1);
 		break;
-	case 14:
-		/* Y7, IY7 2M校准 */
+	case 13:
+		/* Y7, IY7 10M校准 */
 		S0(1);
 		S1(1);
 		S2(1);
@@ -389,17 +391,17 @@ void Maopao_Paixu(float *dat, uint16_t leng) {
 			}
 }
 
-//float Get_resistance(uint16_t num) {
-//	uint16_t i;
-//	float navle;
-//	Maopao_Paixu(resistance, num);
-//	navle = resistance[0];
-//	for (i = num / 2 - num / 4; i < num / 2 + num / 4; i++) {
-//		navle = (navle + resistance[i]) / 2;
-//	}
-//
-//	return (navle * R_Correction[range]);
-//}
+float Get_resistance(uint16_t num) {
+	uint16_t i;
+	float navle;
+	Maopao_Paixu(resistance, num);
+	navle = resistance[0];
+	for (i = num / 2 - num / 4; i < num / 2 + num / 4; i++) {
+		navle = (navle + resistance[i]) / 2;
+	}
+
+	return (navle * R_Correction[range]);
+}
 void Fre_To_Hex(float fre, uint8_t *buf) {
 	uint32_t dat;
 	dat = (AD5933_CLK / (double) (AD5933_MCLK * 1000000)) * fre;
@@ -457,13 +459,8 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 	uint8_t Mode = CValue[0] & 0x0f;
 	long ReadTemp, realArr[3], imageArr[3];
 	float magnitude;
-//                unsigned int start_f[3]={0X33,0X26,0X17};
-//                unsigned int inc_f[3]={0,0,0X21};
-//                unsigned int num_f[2]={0,0XC8};
-//                unsigned int control[2]={0XB1,0X00};
-//								CValue[0]=Mode|AD5933_Standby;
+
 	j = 0;
-	Ini_I2c(); //初始化I2C
 
 	AddrTemp = 0X82; //初始化起始频率寄存器
 	for (i = 0; i < 3; i++) {
@@ -480,7 +477,7 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 		Write_Byte(AddrTemp, NValue[i]);
 		AddrTemp++;
 	}
-	//初始化控制寄存器，1011 0001 0000 0000待机模式，2V，一倍放大，内部时钟
+	//初始化控制寄存器，1011 0001 0000 0000待机模式，2V，一倍放大，外部时钟
 	AddrTemp = 0X80;
 	Write_Byte(AddrTemp, (Mode | (AD5933_Standby >> 8)));
 	AddrTemp++;
@@ -505,7 +502,7 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 		imageArr[1] = Rece_Byte(0x97);
 		imageArr[2] = imageArr[0] * 0x100 + imageArr[1];
 
-		rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
+//		rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
 		//计算实部的原码(除符号位外，取反加一)
 		if (realArr[2] >= 0x8000) {
 			realArr[2] ^= 0xFFFF;
@@ -520,8 +517,8 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 			imageArr[2] += 1;
 			imageArr[2] ^= 0x8000;
 		}
-		AD5933_Dat_Re[j] = realArr[2];
-		AD5933_Dat_Im[j] = imageArr[2];
+//		AD5933_Dat_Re[j] = realArr[2];
+//		AD5933_Dat_Im[j] = imageArr[2];
 		magnitude = sqrt(realArr[2] * realArr[2] + imageArr[2] * imageArr[2]); //模值计算
 		resistance[j++] = 1 / (magnitude * Gain);    //阻抗计算
 
@@ -533,18 +530,25 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 		else
 			Write_Byte(0X80, CValue[0]); //控制寄存器写入重复当前频率点扫描
 	}
-	Write_Byte(0X80, 0XA1); //进入掉电模式
+//	Write_Byte(0X80, 0XA1); //进入掉电模式
 	return magnitude;
 }
 
 float DA5933_Get_Rs(void) {
 	float __attribute__ ((unused)) Rs, re, im;
 
-	AD5933_Sweep(10080, 0, 3, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-//	Rs = Get_resistance(4);
-	Rs = resistance[3] * R_Correction[range];
-	re = Rs * cos(rads[0]);
-	im = Rs * sin(rads[0]);
+	AD5933_Sweep(10000, 0, 4, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+	Rs = Get_resistance(4);
+//	Rs = resistance[4] * R_Correction[range];
+//	re = Rs * cos(rads[0]);
+//	im = Rs * sin(rads[0]);
+
+	/* 测试系统误差临时使用 */
+//	resistance[num++] = Rs;
+//	if (num == 199)
+//		num = 100;
+	/* end of 测试系统误差临时使用 */
+
 	return Rs;
 }
 float DA5933_Dat_Cap(float Fre) {
