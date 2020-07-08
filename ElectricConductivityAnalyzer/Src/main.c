@@ -66,7 +66,7 @@
 /* 串口3发送等待时间 */
 #define USARTSENDTIME 0xFFFF
 /* 目前可调范围 +-99 */
-#define ADMAX 4008
+#define ADMAX 3996
 #define ADMIN 770
 #define ADMAXCAL 99
 #define ADMINCAL 99
@@ -6469,9 +6469,9 @@ void Button_Scan(void) {
  */
 void eepromReadSetting(void) {
 	HAL_NVIC_DisableIRQ(USART1_IRQn);
-	HAL_NVIC_DisableIRQ(USART2_IRQn);
-	HAL_NVIC_DisableIRQ(USART3_IRQn);
-	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+//	HAL_NVIC_DisableIRQ(USART2_IRQn);
+//	HAL_NVIC_DisableIRQ(USART3_IRQn);
+//	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 	HAL_NVIC_DisableIRQ(TIM2_IRQn);
 	HAL_Delay(1000);
 	SPI_Flash_WAKEUP();
@@ -6485,9 +6485,9 @@ void eepromReadSetting(void) {
 	SPI_Flash_PowerDown();
 	HAL_Delay(1000);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-	HAL_NVIC_EnableIRQ(USART2_IRQn);
-	HAL_NVIC_EnableIRQ(USART3_IRQn);
-	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+//	HAL_NVIC_EnableIRQ(USART2_IRQn);
+//	HAL_NVIC_EnableIRQ(USART3_IRQn);
+//	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }/* End eepromReadSetting() */
 
@@ -6499,9 +6499,9 @@ void eepromReadSetting(void) {
  */
 void eepromWriteSetting(void) {
 	HAL_NVIC_DisableIRQ(USART1_IRQn);
-	HAL_NVIC_DisableIRQ(USART2_IRQn);
-	HAL_NVIC_DisableIRQ(USART3_IRQn);
-	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+//	HAL_NVIC_DisableIRQ(USART2_IRQn);
+//	HAL_NVIC_DisableIRQ(USART3_IRQn);
+//	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 	HAL_NVIC_DisableIRQ(TIM2_IRQn);
 //	HAL_Delay(50);
 	SPI_Flash_WAKEUP();
@@ -6517,9 +6517,9 @@ void eepromWriteSetting(void) {
 	SPI_Flash_PowerDown();
 //	HAL_Delay(50);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-	HAL_NVIC_EnableIRQ(USART2_IRQn);
-	HAL_NVIC_EnableIRQ(USART3_IRQn);
-	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+//	HAL_NVIC_EnableIRQ(USART2_IRQn);
+//	HAL_NVIC_EnableIRQ(USART3_IRQn);
+//	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }/* End eepromWriteSetting() */
 
