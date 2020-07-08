@@ -2148,7 +2148,6 @@ void getRs(void) {
 		D = -272.934947363955;
 		range = 1;
 		RangeSelect(range);
-		f_Rs = 1.5625 * DA5933_Get_Rs() - 203;
 		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 900 && f_Rs < 9900) {
 		A = 30740.6243793141;
@@ -2157,7 +2156,6 @@ void getRs(void) {
 		D = 285.921768546588;
 		range = 2;
 		RangeSelect(range);
-		f_Rs = 1.1463 * DA5933_Get_Rs() - 272.87;
 		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 9900 && f_Rs < 99900) {
 		A = 474032130888176;
@@ -2175,7 +2173,6 @@ void getRs(void) {
 		D = 63002.8241622625;
 		range = 4;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
 		f_Rs = 1E-06 * f_Rs * f_Rs + 0.399 * f_Rs + 60277;
 		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 999900 && f_Rs < 9999900) {
@@ -2185,7 +2182,6 @@ void getRs(void) {
 		D = 1001385.56012878;
 		range = 5;
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs();
 		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 9999900) {
 		range = 6;

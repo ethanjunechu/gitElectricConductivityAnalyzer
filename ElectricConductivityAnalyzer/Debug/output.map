@@ -4839,7 +4839,7 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000008000000                g_pfnVectors
                 0x00000000080001e4                . = ALIGN (0x4)
 
-.text           0x00000000080001e8     0xf7e0
+.text           0x00000000080001e8     0xf780
                 0x00000000080001e8                . = ALIGN (0x4)
  *(.text)
  .text          0x00000000080001e8       0x40 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
@@ -5304,463 +5304,463 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000008006368                LCD_Init
  .text.getTemp  0x00000000080064e0      0x238 Src/main.o
                 0x00000000080064e0                getTemp
- .text.getRs    0x0000000008006718      0x494 Src/main.o
+ .text.getRs    0x0000000008006718      0x434 Src/main.o
                 0x0000000008006718                getRs
- *fill*         0x0000000008006bac        0x4 
+ *fill*         0x0000000008006b4c        0x4 
  .text.ProcessData
-                0x0000000008006bb0      0x2dc Src/main.o
-                0x0000000008006bb0                ProcessData
+                0x0000000008006b50      0x2dc Src/main.o
+                0x0000000008006b50                ProcessData
  .text.Change_Conf_Unit
-                0x0000000008006e8c       0x48 Src/main.o
-                0x0000000008006e8c                Change_Conf_Unit
+                0x0000000008006e2c       0x48 Src/main.o
+                0x0000000008006e2c                Change_Conf_Unit
  .text.Change_Conf_TempMode
-                0x0000000008006ed4       0x50 Src/main.o
-                0x0000000008006ed4                Change_Conf_TempMode
- *fill*         0x0000000008006f24        0x4 
+                0x0000000008006e74       0x50 Src/main.o
+                0x0000000008006e74                Change_Conf_TempMode
+ *fill*         0x0000000008006ec4        0x4 
  .text.Change_Conf_Temp
-                0x0000000008006f28       0xd8 Src/main.o
-                0x0000000008006f28                Change_Conf_Temp
+                0x0000000008006ec8       0xd8 Src/main.o
+                0x0000000008006ec8                Change_Conf_Temp
  .text.Change_Conf_Temp_Now
-                0x0000000008007000       0xd8 Src/main.o
-                0x0000000008007000                Change_Conf_Temp_Now
+                0x0000000008006fa0       0xd8 Src/main.o
+                0x0000000008006fa0                Change_Conf_Temp_Now
  .text.Enter_Conf_Page1
-                0x00000000080070d8       0xa8 Src/main.o
-                0x00000000080070d8                Enter_Conf_Page1
+                0x0000000008007078       0xa8 Src/main.o
+                0x0000000008007078                Enter_Conf_Page1
  .text.Change_Conf_TempFactor
-                0x0000000008007180      0x160 Src/main.o
-                0x0000000008007180                Change_Conf_TempFactor
+                0x0000000008007120      0x160 Src/main.o
+                0x0000000008007120                Change_Conf_TempFactor
  .text.Change_Conf_TempFactorType
-                0x00000000080072e0       0x5c Src/main.o
-                0x00000000080072e0                Change_Conf_TempFactorType
+                0x0000000008007280       0x5c Src/main.o
+                0x0000000008007280                Change_Conf_TempFactorType
  .text.Enter_Conf_Page1_2
-                0x000000000800733c       0x54 Src/main.o
-                0x000000000800733c                Enter_Conf_Page1_2
+                0x00000000080072dc       0x54 Src/main.o
+                0x00000000080072dc                Enter_Conf_Page1_2
  .text.Change_Conf_PPM4mA
-                0x0000000008007390      0x24c Src/main.o
-                0x0000000008007390                Change_Conf_PPM4mA
- *fill*         0x00000000080075dc        0x4 
+                0x0000000008007330      0x24c Src/main.o
+                0x0000000008007330                Change_Conf_PPM4mA
+ *fill*         0x000000000800757c        0x4 
  .text.Change_Conf_ppm20mA
-                0x00000000080075e0      0x24c Src/main.o
-                0x00000000080075e0                Change_Conf_ppm20mA
- *fill*         0x000000000800782c        0x4 
+                0x0000000008007580      0x24c Src/main.o
+                0x0000000008007580                Change_Conf_ppm20mA
+ *fill*         0x00000000080077cc        0x4 
  .text.Change_Conf_temp4mA
-                0x0000000008007830       0xe8 Src/main.o
-                0x0000000008007830                Change_Conf_temp4mA
+                0x00000000080077d0       0xe8 Src/main.o
+                0x00000000080077d0                Change_Conf_temp4mA
  .text.Change_Conf_temp20mA
-                0x0000000008007918       0xe8 Src/main.o
-                0x0000000008007918                Change_Conf_temp20mA
+                0x00000000080078b8       0xe8 Src/main.o
+                0x00000000080078b8                Change_Conf_temp20mA
  .text.Enter_Conf_Page2
-                0x0000000008007a00      0x158 Src/main.o
-                0x0000000008007a00                Enter_Conf_Page2
+                0x00000000080079a0      0x158 Src/main.o
+                0x00000000080079a0                Enter_Conf_Page2
  .text.Change_Conf_ADMAX
-                0x0000000008007b58      0x194 Src/main.o
-                0x0000000008007b58                Change_Conf_ADMAX
- *fill*         0x0000000008007cec        0x4 
+                0x0000000008007af8      0x194 Src/main.o
+                0x0000000008007af8                Change_Conf_ADMAX
+ *fill*         0x0000000008007c8c        0x4 
  .text.Change_Conf_ADMIN
-                0x0000000008007cf0      0x194 Src/main.o
-                0x0000000008007cf0                Change_Conf_ADMIN
+                0x0000000008007c90      0x194 Src/main.o
+                0x0000000008007c90                Change_Conf_ADMIN
  .text.Change_Conf_UpLimitAuto
-                0x0000000008007e84       0x34 Src/main.o
-                0x0000000008007e84                Change_Conf_UpLimitAuto
+                0x0000000008007e24       0x34 Src/main.o
+                0x0000000008007e24                Change_Conf_UpLimitAuto
  .text.Change_Conf_UpLimit
-                0x0000000008007eb8      0x24c Src/main.o
-                0x0000000008007eb8                Change_Conf_UpLimit
- *fill*         0x0000000008008104        0x4 
+                0x0000000008007e58      0x24c Src/main.o
+                0x0000000008007e58                Change_Conf_UpLimit
+ *fill*         0x00000000080080a4        0x4 
  .text.Change_Conf_UpLimitDelay
-                0x0000000008008108      0x24c Src/main.o
-                0x0000000008008108                Change_Conf_UpLimitDelay
+                0x00000000080080a8      0x24c Src/main.o
+                0x00000000080080a8                Change_Conf_UpLimitDelay
  .text.Enter_Conf_Page3
-                0x0000000008008354      0x118 Src/main.o
-                0x0000000008008354                Enter_Conf_Page3
+                0x00000000080082f4      0x118 Src/main.o
+                0x00000000080082f4                Enter_Conf_Page3
  .text.Change_Conf_LowLimitAuto
-                0x000000000800846c       0x34 Src/main.o
-                0x000000000800846c                Change_Conf_LowLimitAuto
+                0x000000000800840c       0x34 Src/main.o
+                0x000000000800840c                Change_Conf_LowLimitAuto
  .text.Change_Conf_LowLimit
-                0x00000000080084a0      0x24c Src/main.o
-                0x00000000080084a0                Change_Conf_LowLimit
- *fill*         0x00000000080086ec        0x4 
+                0x0000000008008440      0x24c Src/main.o
+                0x0000000008008440                Change_Conf_LowLimit
+ *fill*         0x000000000800868c        0x4 
  .text.Change_Conf_LowLimitDelay
-                0x00000000080086f0      0x24c Src/main.o
-                0x00000000080086f0                Change_Conf_LowLimitDelay
+                0x0000000008008690      0x24c Src/main.o
+                0x0000000008008690                Change_Conf_LowLimitDelay
  .text.Enter_Conf_Page4
-                0x000000000800893c      0x118 Src/main.o
-                0x000000000800893c                Enter_Conf_Page4
+                0x00000000080088dc      0x118 Src/main.o
+                0x00000000080088dc                Enter_Conf_Page4
  .text.Change_Conf_WashHoldTime
-                0x0000000008008a54       0x74 Src/main.o
-                0x0000000008008a54                Change_Conf_WashHoldTime
+                0x00000000080089f4       0x74 Src/main.o
+                0x00000000080089f4                Change_Conf_WashHoldTime
  .text.Change_Conf_WashDelayTime
-                0x0000000008008ac8       0x74 Src/main.o
-                0x0000000008008ac8                Change_Conf_WashDelayTime
+                0x0000000008008a68       0x74 Src/main.o
+                0x0000000008008a68                Change_Conf_WashDelayTime
  .text.Change_Conf_Filter
-                0x0000000008008b3c       0x74 Src/main.o
-                0x0000000008008b3c                Change_Conf_Filter
+                0x0000000008008adc       0x74 Src/main.o
+                0x0000000008008adc                Change_Conf_Filter
  .text.Change_Conf_Brightness
-                0x0000000008008bb0       0x78 Src/main.o
-                0x0000000008008bb0                Change_Conf_Brightness
+                0x0000000008008b50       0x78 Src/main.o
+                0x0000000008008b50                Change_Conf_Brightness
  .text.Enter_Conf_Page5
-                0x0000000008008c28       0x68 Src/main.o
-                0x0000000008008c28                Enter_Conf_Page5
+                0x0000000008008bc8       0x68 Src/main.o
+                0x0000000008008bc8                Enter_Conf_Page5
  .text.Change_Conf_Year
-                0x0000000008008c90       0xc0 Src/main.o
-                0x0000000008008c90                Change_Conf_Year
+                0x0000000008008c30       0xc0 Src/main.o
+                0x0000000008008c30                Change_Conf_Year
  .text.Change_Conf_Month
-                0x0000000008008d50       0x8c Src/main.o
-                0x0000000008008d50                Change_Conf_Month
+                0x0000000008008cf0       0x8c Src/main.o
+                0x0000000008008cf0                Change_Conf_Month
  .text.Change_Conf_Date
-                0x0000000008008ddc       0x8c Src/main.o
-                0x0000000008008ddc                Change_Conf_Date
+                0x0000000008008d7c       0x8c Src/main.o
+                0x0000000008008d7c                Change_Conf_Date
  .text.Enter_Conf_Page7
-                0x0000000008008e68       0x58 Src/main.o
-                0x0000000008008e68                Enter_Conf_Page7
+                0x0000000008008e08       0x58 Src/main.o
+                0x0000000008008e08                Enter_Conf_Page7
  .text.Change_Conf_Hours
-                0x0000000008008ec0       0x8c Src/main.o
-                0x0000000008008ec0                Change_Conf_Hours
+                0x0000000008008e60       0x8c Src/main.o
+                0x0000000008008e60                Change_Conf_Hours
  .text.Change_Conf_Minutes
-                0x0000000008008f4c       0x8c Src/main.o
-                0x0000000008008f4c                Change_Conf_Minutes
+                0x0000000008008eec       0x8c Src/main.o
+                0x0000000008008eec                Change_Conf_Minutes
  .text.Change_Conf_Seconds
-                0x0000000008008fd8       0x8c Src/main.o
-                0x0000000008008fd8                Change_Conf_Seconds
+                0x0000000008008f78       0x8c Src/main.o
+                0x0000000008008f78                Change_Conf_Seconds
  .text.Enter_Conf_Page8
-                0x0000000008009064       0x58 Src/main.o
-                0x0000000008009064                Enter_Conf_Page8
+                0x0000000008009004       0x58 Src/main.o
+                0x0000000008009004                Enter_Conf_Page8
  .text.Change_Conf_Interval
-                0x00000000080090bc       0x94 Src/main.o
-                0x00000000080090bc                Change_Conf_Interval
+                0x000000000800905c       0x94 Src/main.o
+                0x000000000800905c                Change_Conf_Interval
  .text.Change_Conf_PassW
-                0x0000000008009150       0x3c Src/main.o
-                0x0000000008009150                Change_Conf_PassW
+                0x00000000080090f0       0x3c Src/main.o
+                0x00000000080090f0                Change_Conf_PassW
  .text.Enter_Conf_Page6
-                0x000000000800918c      0x158 Src/main.o
-                0x000000000800918c                Enter_Conf_Page6
+                0x000000000800912c      0x158 Src/main.o
+                0x000000000800912c                Enter_Conf_Page6
  .text.Change_CalType
-                0x00000000080092e4       0x58 Src/main.o
-                0x00000000080092e4                Change_CalType
+                0x0000000008009284       0x58 Src/main.o
+                0x0000000008009284                Change_CalType
  .text.Enter_Cal_Page1
-                0x000000000800933c       0x48 Src/main.o
-                0x000000000800933c                Enter_Cal_Page1
+                0x00000000080092dc       0x48 Src/main.o
+                0x00000000080092dc                Enter_Cal_Page1
  .text.Change_LastCell
-                0x0000000008009384      0x210 Src/main.o
-                0x0000000008009384                Change_LastCell
+                0x0000000008009324      0x210 Src/main.o
+                0x0000000008009324                Change_LastCell
  .text.Change_PreCell
-                0x0000000008009594      0x210 Src/main.o
-                0x0000000008009594                Change_PreCell
+                0x0000000008009534      0x210 Src/main.o
+                0x0000000008009534                Change_PreCell
  .text.Enter_Cal_Page2
-                0x00000000080097a4       0x78 Src/main.o
-                0x00000000080097a4                Enter_Cal_Page2
+                0x0000000008009744       0x78 Src/main.o
+                0x0000000008009744                Enter_Cal_Page2
  .text.Change_Cal_Temp
-                0x000000000800981c      0x108 Src/main.o
-                0x000000000800981c                Change_Cal_Temp
+                0x00000000080097bc      0x108 Src/main.o
+                0x00000000080097bc                Change_Cal_Temp
  .text.Select_Next
-                0x0000000008009924       0xa0 Src/main.o
-                0x0000000008009924                Select_Next
+                0x00000000080098c4       0xa0 Src/main.o
+                0x00000000080098c4                Select_Next
  .text.Enter_PasW_Page
-                0x00000000080099c4      0x72c Src/main.o
-                0x00000000080099c4                Enter_PasW_Page
- .text.Cal_UI   0x000000000800a0f0      0xec0 Src/main.o
-                0x000000000800a0f0                Cal_UI
+                0x0000000008009964      0x72c Src/main.o
+                0x0000000008009964                Enter_PasW_Page
+ .text.Cal_UI   0x000000000800a090      0xec0 Src/main.o
+                0x000000000800a090                Cal_UI
  .text.DrawLine
-                0x000000000800afb0       0x5c Src/main.o
-                0x000000000800afb0                DrawLine
- *fill*         0x000000000800b00c        0x4 
+                0x000000000800af50       0x5c Src/main.o
+                0x000000000800af50                DrawLine
+ *fill*         0x000000000800afac        0x4 
  .text.Enter_History_Page1
-                0x000000000800b010      0x674 Src/main.o
-                0x000000000800b010                Enter_History_Page1
+                0x000000000800afb0      0x674 Src/main.o
+                0x000000000800afb0                Enter_History_Page1
  .text.History_UI
-                0x000000000800b684       0xf0 Src/main.o
-                0x000000000800b684                History_UI
+                0x000000000800b624       0xf0 Src/main.o
+                0x000000000800b624                History_UI
  .text.UART_RxIDLECallback
-                0x000000000800b774        0x2 Src/main.o
-                0x000000000800b774                UART_RxIDLECallback
- *fill*         0x000000000800b776        0x2 
+                0x000000000800b714        0x2 Src/main.o
+                0x000000000800b714                UART_RxIDLECallback
+ *fill*         0x000000000800b716        0x2 
  .text.eepromReadSetting
-                0x000000000800b778       0xc4 Src/main.o
-                0x000000000800b778                eepromReadSetting
+                0x000000000800b718       0xc4 Src/main.o
+                0x000000000800b718                eepromReadSetting
  .text.eepromWriteSetting
-                0x000000000800b83c       0xc0 Src/main.o
-                0x000000000800b83c                eepromWriteSetting
- *fill*         0x000000000800b8fc        0x4 
- .text.Conf_UI  0x000000000800b900     0x20ec Src/main.o
-                0x000000000800b900                Conf_UI
+                0x000000000800b7dc       0xc0 Src/main.o
+                0x000000000800b7dc                eepromWriteSetting
+ *fill*         0x000000000800b89c        0x4 
+ .text.Conf_UI  0x000000000800b8a0     0x20ec Src/main.o
+                0x000000000800b8a0                Conf_UI
  .text.Button_Scan
-                0x000000000800d9ec      0x21c Src/main.o
-                0x000000000800d9ec                Button_Scan
+                0x000000000800d98c      0x21c Src/main.o
+                0x000000000800d98c                Button_Scan
  .text.application
-                0x000000000800dc08      0x3a4 Src/main.o
-                0x000000000800dc08                application
+                0x000000000800dba8      0x3a4 Src/main.o
+                0x000000000800dba8                application
  .text._Error_Handler
-                0x000000000800dfac        0x2 Src/main.o
-                0x000000000800dfac                _Error_Handler
- *fill*         0x000000000800dfae        0x2 
+                0x000000000800df4c        0x2 Src/main.o
+                0x000000000800df4c                _Error_Handler
+ *fill*         0x000000000800df4e        0x2 
  .text.SystemClock_Config
-                0x000000000800dfb0       0xa8 Src/main.o
-                0x000000000800dfb0                SystemClock_Config
- .text.main     0x000000000800e058      0x188 Src/main.o
-                0x000000000800e058                main
+                0x000000000800df50       0xa8 Src/main.o
+                0x000000000800df50                SystemClock_Config
+ .text.main     0x000000000800dff8      0x188 Src/main.o
+                0x000000000800dff8                main
  .text.MX_RTC_Init
-                0x000000000800e1e0       0x34 Src/rtc.o
-                0x000000000800e1e0                MX_RTC_Init
+                0x000000000800e180       0x34 Src/rtc.o
+                0x000000000800e180                MX_RTC_Init
  .text.HAL_RTC_MspInit
-                0x000000000800e214       0x40 Src/rtc.o
-                0x000000000800e214                HAL_RTC_MspInit
+                0x000000000800e1b4       0x40 Src/rtc.o
+                0x000000000800e1b4                HAL_RTC_MspInit
  .text.MX_SPI2_Init
-                0x000000000800e254       0x48 Src/spi.o
-                0x000000000800e254                MX_SPI2_Init
+                0x000000000800e1f4       0x48 Src/spi.o
+                0x000000000800e1f4                MX_SPI2_Init
  .text.HAL_SPI_MspInit
-                0x000000000800e29c       0x5c Src/spi.o
-                0x000000000800e29c                HAL_SPI_MspInit
+                0x000000000800e23c       0x5c Src/spi.o
+                0x000000000800e23c                HAL_SPI_MspInit
  .text.HAL_MspInit
-                0x000000000800e2f8       0x9c Src/stm32f1xx_hal_msp.o
-                0x000000000800e2f8                HAL_MspInit
+                0x000000000800e298       0x9c Src/stm32f1xx_hal_msp.o
+                0x000000000800e298                HAL_MspInit
  .text.NMI_Handler
-                0x000000000800e394        0x2 Src/stm32f1xx_it.o
-                0x000000000800e394                NMI_Handler
+                0x000000000800e334        0x2 Src/stm32f1xx_it.o
+                0x000000000800e334                NMI_Handler
  .text.HardFault_Handler
-                0x000000000800e396        0x2 Src/stm32f1xx_it.o
-                0x000000000800e396                HardFault_Handler
+                0x000000000800e336        0x2 Src/stm32f1xx_it.o
+                0x000000000800e336                HardFault_Handler
  .text.MemManage_Handler
-                0x000000000800e398        0x2 Src/stm32f1xx_it.o
-                0x000000000800e398                MemManage_Handler
+                0x000000000800e338        0x2 Src/stm32f1xx_it.o
+                0x000000000800e338                MemManage_Handler
  .text.BusFault_Handler
-                0x000000000800e39a        0x2 Src/stm32f1xx_it.o
-                0x000000000800e39a                BusFault_Handler
+                0x000000000800e33a        0x2 Src/stm32f1xx_it.o
+                0x000000000800e33a                BusFault_Handler
  .text.UsageFault_Handler
-                0x000000000800e39c        0x2 Src/stm32f1xx_it.o
-                0x000000000800e39c                UsageFault_Handler
+                0x000000000800e33c        0x2 Src/stm32f1xx_it.o
+                0x000000000800e33c                UsageFault_Handler
  .text.SVC_Handler
-                0x000000000800e39e        0x2 Src/stm32f1xx_it.o
-                0x000000000800e39e                SVC_Handler
+                0x000000000800e33e        0x2 Src/stm32f1xx_it.o
+                0x000000000800e33e                SVC_Handler
  .text.DebugMon_Handler
-                0x000000000800e3a0        0x2 Src/stm32f1xx_it.o
-                0x000000000800e3a0                DebugMon_Handler
+                0x000000000800e340        0x2 Src/stm32f1xx_it.o
+                0x000000000800e340                DebugMon_Handler
  .text.PendSV_Handler
-                0x000000000800e3a2        0x2 Src/stm32f1xx_it.o
-                0x000000000800e3a2                PendSV_Handler
+                0x000000000800e342        0x2 Src/stm32f1xx_it.o
+                0x000000000800e342                PendSV_Handler
  .text.SysTick_Handler
-                0x000000000800e3a4        0xc Src/stm32f1xx_it.o
-                0x000000000800e3a4                SysTick_Handler
+                0x000000000800e344        0xc Src/stm32f1xx_it.o
+                0x000000000800e344                SysTick_Handler
  .text.DMA1_Channel3_IRQHandler
-                0x000000000800e3b0       0x10 Src/stm32f1xx_it.o
-                0x000000000800e3b0                DMA1_Channel3_IRQHandler
+                0x000000000800e350       0x10 Src/stm32f1xx_it.o
+                0x000000000800e350                DMA1_Channel3_IRQHandler
  .text.DMA1_Channel5_IRQHandler
-                0x000000000800e3c0       0x10 Src/stm32f1xx_it.o
-                0x000000000800e3c0                DMA1_Channel5_IRQHandler
+                0x000000000800e360       0x10 Src/stm32f1xx_it.o
+                0x000000000800e360                DMA1_Channel5_IRQHandler
  .text.DMA1_Channel6_IRQHandler
-                0x000000000800e3d0       0x10 Src/stm32f1xx_it.o
-                0x000000000800e3d0                DMA1_Channel6_IRQHandler
+                0x000000000800e370       0x10 Src/stm32f1xx_it.o
+                0x000000000800e370                DMA1_Channel6_IRQHandler
  .text.USART1_IRQHandler
-                0x000000000800e3e0       0x10 Src/stm32f1xx_it.o
-                0x000000000800e3e0                USART1_IRQHandler
+                0x000000000800e380       0x10 Src/stm32f1xx_it.o
+                0x000000000800e380                USART1_IRQHandler
  .text.USART2_IRQHandler
-                0x000000000800e3f0       0x18 Src/stm32f1xx_it.o
-                0x000000000800e3f0                USART2_IRQHandler
+                0x000000000800e390       0x18 Src/stm32f1xx_it.o
+                0x000000000800e390                USART2_IRQHandler
  .text.USART3_IRQHandler
-                0x000000000800e408       0x10 Src/stm32f1xx_it.o
-                0x000000000800e408                USART3_IRQHandler
+                0x000000000800e3a8       0x10 Src/stm32f1xx_it.o
+                0x000000000800e3a8                USART3_IRQHandler
  .text.SystemInit
-                0x000000000800e418       0x4c Src/system_stm32f1xx.o
-                0x000000000800e418                SystemInit
+                0x000000000800e3b8       0x4c Src/system_stm32f1xx.o
+                0x000000000800e3b8                SystemInit
  .text.MX_USART1_UART_Init
-                0x000000000800e464       0x3c Src/usart.o
-                0x000000000800e464                MX_USART1_UART_Init
+                0x000000000800e404       0x3c Src/usart.o
+                0x000000000800e404                MX_USART1_UART_Init
  .text.HAL_UART_MspInit
-                0x000000000800e4a0      0x1c8 Src/usart.o
-                0x000000000800e4a0                HAL_UART_MspInit
+                0x000000000800e440      0x1c8 Src/usart.o
+                0x000000000800e440                HAL_UART_MspInit
  .text.Reset_Handler
-                0x000000000800e668       0x48 startup/startup_stm32f103xe.o
-                0x000000000800e668                Reset_Handler
+                0x000000000800e608       0x48 startup/startup_stm32f103xe.o
+                0x000000000800e608                Reset_Handler
  .text.Default_Handler
-                0x000000000800e6b0        0x2 startup/startup_stm32f103xe.o
-                0x000000000800e6b0                DMA2_Channel3_IRQHandler
-                0x000000000800e6b0                EXTI2_IRQHandler
-                0x000000000800e6b0                TIM8_TRG_COM_IRQHandler
-                0x000000000800e6b0                TIM8_CC_IRQHandler
-                0x000000000800e6b0                TIM1_CC_IRQHandler
-                0x000000000800e6b0                TIM6_IRQHandler
-                0x000000000800e6b0                PVD_IRQHandler
-                0x000000000800e6b0                SDIO_IRQHandler
-                0x000000000800e6b0                EXTI3_IRQHandler
-                0x000000000800e6b0                EXTI0_IRQHandler
-                0x000000000800e6b0                I2C2_EV_IRQHandler
-                0x000000000800e6b0                ADC1_2_IRQHandler
-                0x000000000800e6b0                SPI1_IRQHandler
-                0x000000000800e6b0                TAMPER_IRQHandler
-                0x000000000800e6b0                TIM8_UP_IRQHandler
-                0x000000000800e6b0                DMA2_Channel2_IRQHandler
-                0x000000000800e6b0                DMA1_Channel4_IRQHandler
-                0x000000000800e6b0                RTC_IRQHandler
-                0x000000000800e6b0                DMA1_Channel7_IRQHandler
-                0x000000000800e6b0                CAN1_RX1_IRQHandler
-                0x000000000800e6b0                UART5_IRQHandler
-                0x000000000800e6b0                ADC3_IRQHandler
-                0x000000000800e6b0                TIM4_IRQHandler
-                0x000000000800e6b0                DMA2_Channel1_IRQHandler
-                0x000000000800e6b0                I2C1_EV_IRQHandler
-                0x000000000800e6b0                UART4_IRQHandler
-                0x000000000800e6b0                TIM3_IRQHandler
-                0x000000000800e6b0                RCC_IRQHandler
-                0x000000000800e6b0                TIM1_TRG_COM_IRQHandler
-                0x000000000800e6b0                DMA1_Channel1_IRQHandler
-                0x000000000800e6b0                Default_Handler
-                0x000000000800e6b0                EXTI15_10_IRQHandler
-                0x000000000800e6b0                TIM7_IRQHandler
-                0x000000000800e6b0                TIM5_IRQHandler
-                0x000000000800e6b0                EXTI9_5_IRQHandler
-                0x000000000800e6b0                SPI2_IRQHandler
-                0x000000000800e6b0                EXTI4_IRQHandler
-                0x000000000800e6b0                USB_LP_CAN1_RX0_IRQHandler
-                0x000000000800e6b0                USB_HP_CAN1_TX_IRQHandler
-                0x000000000800e6b0                FSMC_IRQHandler
-                0x000000000800e6b0                TIM1_UP_IRQHandler
-                0x000000000800e6b0                WWDG_IRQHandler
-                0x000000000800e6b0                TIM2_IRQHandler
-                0x000000000800e6b0                TIM1_BRK_IRQHandler
-                0x000000000800e6b0                EXTI1_IRQHandler
-                0x000000000800e6b0                DMA2_Channel4_5_IRQHandler
-                0x000000000800e6b0                I2C2_ER_IRQHandler
-                0x000000000800e6b0                DMA1_Channel2_IRQHandler
-                0x000000000800e6b0                TIM8_BRK_IRQHandler
-                0x000000000800e6b0                CAN1_SCE_IRQHandler
-                0x000000000800e6b0                FLASH_IRQHandler
-                0x000000000800e6b0                SPI3_IRQHandler
-                0x000000000800e6b0                I2C1_ER_IRQHandler
-                0x000000000800e6b0                USBWakeUp_IRQHandler
-                0x000000000800e6b0                RTC_Alarm_IRQHandler
- *fill*         0x000000000800e6b2        0x2 
- .text.pow      0x000000000800e6b4      0x334 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_pow.o)
-                0x000000000800e6b4                pow
- .text.sqrt     0x000000000800e9e8       0xbc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_sqrt.o)
-                0x000000000800e9e8                sqrt
- *fill*         0x000000000800eaa4        0x4 
+                0x000000000800e650        0x2 startup/startup_stm32f103xe.o
+                0x000000000800e650                DMA2_Channel3_IRQHandler
+                0x000000000800e650                EXTI2_IRQHandler
+                0x000000000800e650                TIM8_TRG_COM_IRQHandler
+                0x000000000800e650                TIM8_CC_IRQHandler
+                0x000000000800e650                TIM1_CC_IRQHandler
+                0x000000000800e650                TIM6_IRQHandler
+                0x000000000800e650                PVD_IRQHandler
+                0x000000000800e650                SDIO_IRQHandler
+                0x000000000800e650                EXTI3_IRQHandler
+                0x000000000800e650                EXTI0_IRQHandler
+                0x000000000800e650                I2C2_EV_IRQHandler
+                0x000000000800e650                ADC1_2_IRQHandler
+                0x000000000800e650                SPI1_IRQHandler
+                0x000000000800e650                TAMPER_IRQHandler
+                0x000000000800e650                TIM8_UP_IRQHandler
+                0x000000000800e650                DMA2_Channel2_IRQHandler
+                0x000000000800e650                DMA1_Channel4_IRQHandler
+                0x000000000800e650                RTC_IRQHandler
+                0x000000000800e650                DMA1_Channel7_IRQHandler
+                0x000000000800e650                CAN1_RX1_IRQHandler
+                0x000000000800e650                UART5_IRQHandler
+                0x000000000800e650                ADC3_IRQHandler
+                0x000000000800e650                TIM4_IRQHandler
+                0x000000000800e650                DMA2_Channel1_IRQHandler
+                0x000000000800e650                I2C1_EV_IRQHandler
+                0x000000000800e650                UART4_IRQHandler
+                0x000000000800e650                TIM3_IRQHandler
+                0x000000000800e650                RCC_IRQHandler
+                0x000000000800e650                TIM1_TRG_COM_IRQHandler
+                0x000000000800e650                DMA1_Channel1_IRQHandler
+                0x000000000800e650                Default_Handler
+                0x000000000800e650                EXTI15_10_IRQHandler
+                0x000000000800e650                TIM7_IRQHandler
+                0x000000000800e650                TIM5_IRQHandler
+                0x000000000800e650                EXTI9_5_IRQHandler
+                0x000000000800e650                SPI2_IRQHandler
+                0x000000000800e650                EXTI4_IRQHandler
+                0x000000000800e650                USB_LP_CAN1_RX0_IRQHandler
+                0x000000000800e650                USB_HP_CAN1_TX_IRQHandler
+                0x000000000800e650                FSMC_IRQHandler
+                0x000000000800e650                TIM1_UP_IRQHandler
+                0x000000000800e650                WWDG_IRQHandler
+                0x000000000800e650                TIM2_IRQHandler
+                0x000000000800e650                TIM1_BRK_IRQHandler
+                0x000000000800e650                EXTI1_IRQHandler
+                0x000000000800e650                DMA2_Channel4_5_IRQHandler
+                0x000000000800e650                I2C2_ER_IRQHandler
+                0x000000000800e650                DMA1_Channel2_IRQHandler
+                0x000000000800e650                TIM8_BRK_IRQHandler
+                0x000000000800e650                CAN1_SCE_IRQHandler
+                0x000000000800e650                FLASH_IRQHandler
+                0x000000000800e650                SPI3_IRQHandler
+                0x000000000800e650                I2C1_ER_IRQHandler
+                0x000000000800e650                USBWakeUp_IRQHandler
+                0x000000000800e650                RTC_Alarm_IRQHandler
+ *fill*         0x000000000800e652        0x2 
+ .text.pow      0x000000000800e654      0x334 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_pow.o)
+                0x000000000800e654                pow
+ .text.sqrt     0x000000000800e988       0xbc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_sqrt.o)
+                0x000000000800e988                sqrt
+ *fill*         0x000000000800ea44        0x4 
  .text.__ieee754_pow
-                0x000000000800eaa8      0xae4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_pow.o)
-                0x000000000800eaa8                __ieee754_pow
+                0x000000000800ea48      0xae4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_pow.o)
+                0x000000000800ea48                __ieee754_pow
  .text.__ieee754_sqrt
-                0x000000000800f58c      0x184 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_sqrt.o)
-                0x000000000800f58c                __ieee754_sqrt
- .text.fabs     0x000000000800f710        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_fabs.o)
-                0x000000000800f710                fabs
- .text.finite   0x000000000800f718        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_finite.o)
-                0x000000000800f718                finite
- .text.matherr  0x000000000800f724        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_matherr.o)
-                0x000000000800f724                matherr
- .text.nan      0x000000000800f728        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_nan.o)
-                0x000000000800f728                nan
- .text.rint     0x000000000800f734      0x118 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_rint.o)
-                0x000000000800f734                rint
- *fill*         0x000000000800f84c        0x4 
- .text.scalbn   0x000000000800f850       0xe4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_scalbn.o)
-                0x000000000800f850                scalbn
+                0x000000000800f52c      0x184 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_sqrt.o)
+                0x000000000800f52c                __ieee754_sqrt
+ .text.fabs     0x000000000800f6b0        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_fabs.o)
+                0x000000000800f6b0                fabs
+ .text.finite   0x000000000800f6b8        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_finite.o)
+                0x000000000800f6b8                finite
+ .text.matherr  0x000000000800f6c4        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_matherr.o)
+                0x000000000800f6c4                matherr
+ .text.nan      0x000000000800f6c8        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_nan.o)
+                0x000000000800f6c8                nan
+ .text.rint     0x000000000800f6d4      0x118 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_rint.o)
+                0x000000000800f6d4                rint
+ *fill*         0x000000000800f7ec        0x4 
+ .text.scalbn   0x000000000800f7f0       0xe4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_scalbn.o)
+                0x000000000800f7f0                scalbn
  .text.copysign
-                0x000000000800f934       0x10 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_copysign.o)
-                0x000000000800f934                copysign
- .text.__errno  0x000000000800f944        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-errno.o)
-                0x000000000800f944                __errno
+                0x000000000800f8d4       0x10 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_copysign.o)
+                0x000000000800f8d4                copysign
+ .text.__errno  0x000000000800f8e4        0xc /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-errno.o)
+                0x000000000800f8e4                __errno
  .text.__libc_init_array
-                0x000000000800f950       0x48 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-init.o)
-                0x000000000800f950                __libc_init_array
- .text.memcpy   0x000000000800f998       0x16 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-memcpy-stub.o)
-                0x000000000800f998                memcpy
+                0x000000000800f8f0       0x48 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-init.o)
+                0x000000000800f8f0                __libc_init_array
+ .text.memcpy   0x000000000800f938       0x16 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-memcpy-stub.o)
+                0x000000000800f938                memcpy
  *(.glue_7)
- .glue_7        0x000000000800f9ae        0x0 linker stubs
+ .glue_7        0x000000000800f94e        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x000000000800f9ae        0x0 linker stubs
+ .glue_7t       0x000000000800f94e        0x0 linker stubs
  *(.eh_frame)
- *fill*         0x000000000800f9ae        0x2 
- .eh_frame      0x000000000800f9b0        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+ *fill*         0x000000000800f94e        0x2 
+ .eh_frame      0x000000000800f950        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
  *(.init)
- .init          0x000000000800f9b0        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crti.o
-                0x000000000800f9b0                _init
- .init          0x000000000800f9b4        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
+ .init          0x000000000800f950        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crti.o
+                0x000000000800f950                _init
+ .init          0x000000000800f954        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
  *(.fini)
- .fini          0x000000000800f9bc        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crti.o
-                0x000000000800f9bc                _fini
- .fini          0x000000000800f9c0        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
-                0x000000000800f9c8                . = ALIGN (0x4)
-                0x000000000800f9c8                _etext = .
+ .fini          0x000000000800f95c        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crti.o
+                0x000000000800f95c                _fini
+ .fini          0x000000000800f960        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
+                0x000000000800f968                . = ALIGN (0x4)
+                0x000000000800f968                _etext = .
 
-.vfp11_veneer   0x000000000800f9c8        0x0
- .vfp11_veneer  0x000000000800f9c8        0x0 linker stubs
+.vfp11_veneer   0x000000000800f968        0x0
+ .vfp11_veneer  0x000000000800f968        0x0 linker stubs
 
-.v4_bx          0x000000000800f9c8        0x0
- .v4_bx         0x000000000800f9c8        0x0 linker stubs
+.v4_bx          0x000000000800f968        0x0
+ .v4_bx         0x000000000800f968        0x0 linker stubs
 
-.iplt           0x000000000800f9c8        0x0
- .iplt          0x000000000800f9c8        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+.iplt           0x000000000800f968        0x0
+ .iplt          0x000000000800f968        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
 
-.rodata         0x000000000800f9c8      0x598
-                0x000000000800f9c8                . = ALIGN (0x4)
+.rodata         0x000000000800f968      0x598
+                0x000000000800f968                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x000000000800f9c8       0x12 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
- *fill*         0x000000000800f9da        0x2 
- .rodata        0x000000000800f9dc       0x12 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
- *fill*         0x000000000800f9ee        0x2 
- .rodata        0x000000000800f9f0      0x4d8 Src/main.o
- .rodata        0x000000000800fec8       0x18 Src/system_stm32f1xx.o
-                0x000000000800fec8                AHBPrescTable
-                0x000000000800fed8                APBPrescTable
+ .rodata        0x000000000800f968       0x12 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
+ *fill*         0x000000000800f97a        0x2 
+ .rodata        0x000000000800f97c       0x12 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
+ *fill*         0x000000000800f98e        0x2 
+ .rodata        0x000000000800f990      0x4d8 Src/main.o
+ .rodata        0x000000000800fe68       0x18 Src/system_stm32f1xx.o
+                0x000000000800fe68                AHBPrescTable
+                0x000000000800fe78                APBPrescTable
  *(.rodata*)
  .rodata.str1.4
-                0x000000000800fee0        0xd Src/adc.o
- *fill*         0x000000000800feed        0x3 
+                0x000000000800fe80        0xd Src/adc.o
+ *fill*         0x000000000800fe8d        0x3 
  .rodata.str1.4
-                0x000000000800fef0        0xd Src/dac.o
- *fill*         0x000000000800fefd        0x3 
+                0x000000000800fe90        0xd Src/dac.o
+ *fill*         0x000000000800fe9d        0x3 
  .rodata.str1.4
-                0x000000000800ff00        0xe Src/main.o
- *fill*         0x000000000800ff0e        0x2 
+                0x000000000800fea0        0xe Src/main.o
+ *fill*         0x000000000800feae        0x2 
  .rodata.str1.4
-                0x000000000800ff10        0xd Src/rtc.o
- *fill*         0x000000000800ff1d        0x3 
+                0x000000000800feb0        0xd Src/rtc.o
+ *fill*         0x000000000800febd        0x3 
  .rodata.str1.4
-                0x000000000800ff20        0xd Src/spi.o
- *fill*         0x000000000800ff2d        0x3 
+                0x000000000800fec0        0xd Src/spi.o
+ *fill*         0x000000000800fecd        0x3 
  .rodata.str1.4
-                0x000000000800ff30        0xf Src/usart.o
- *fill*         0x000000000800ff3f        0x1 
+                0x000000000800fed0        0xf Src/usart.o
+ *fill*         0x000000000800fedf        0x1 
  .rodata.pow.str1.4
-                0x000000000800ff40        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_pow.o)
+                0x000000000800fee0        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_pow.o)
  .rodata.sqrt.str1.4
-                0x000000000800ff44        0x5 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_sqrt.o)
+                0x000000000800fee4        0x5 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-w_sqrt.o)
  .rodata.__ieee754_pow.str1.4
-                0x000000000800ff49        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_pow.o)
+                0x000000000800fee9        0x8 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-e_pow.o)
                                           0x1 (size before relaxing)
- *fill*         0x000000000800ff49        0x7 
- .rodata.TWO52  0x000000000800ff50       0x10 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_rint.o)
-                0x000000000800ff60                . = ALIGN (0x4)
+ *fill*         0x000000000800fee9        0x7 
+ .rodata.TWO52  0x000000000800fef0       0x10 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/libm.a(lib_a-s_rint.o)
+                0x000000000800ff00                . = ALIGN (0x4)
 
-.rel.dyn        0x000000000800ff60        0x0
- .rel.iplt      0x000000000800ff60        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+.rel.dyn        0x000000000800ff00        0x0
+ .rel.iplt      0x000000000800ff00        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x000000000800ff60        0x0
-                0x000000000800ff60                __exidx_start = .
+.ARM            0x000000000800ff00        0x0
+                0x000000000800ff00                __exidx_start = .
  *(.ARM.exidx*)
-                0x000000000800ff60                __exidx_end = .
+                0x000000000800ff00                __exidx_end = .
 
-.preinit_array  0x000000000800ff60        0x0
-                0x000000000800ff60                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x000000000800ff00        0x0
+                0x000000000800ff00                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x000000000800ff60                PROVIDE (__preinit_array_end = .)
+                0x000000000800ff00                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x000000000800ff60        0x4
-                0x000000000800ff60                PROVIDE (__init_array_start = .)
+.init_array     0x000000000800ff00        0x4
+                0x000000000800ff00                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x000000000800ff60        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
-                0x000000000800ff64                PROVIDE (__init_array_end = .)
+ .init_array    0x000000000800ff00        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+                0x000000000800ff04                PROVIDE (__init_array_end = .)
 
-.fini_array     0x000000000800ff64        0x4
+.fini_array     0x000000000800ff04        0x4
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x000000000800ff64        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+ .fini_array    0x000000000800ff04        0x4 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x000000000800ff68                _sidata = LOADADDR (.data)
+                0x000000000800ff08                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000      0xe14 load address 0x000000000800ff68
+.data           0x0000000020000000      0xe14 load address 0x000000000800ff08
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -5979,11 +5979,11 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000020000e14                . = ALIGN (0x4)
                 0x0000000020000e14                _edata = .
 
-.igot.plt       0x0000000020000e14        0x0 load address 0x0000000008010d7c
+.igot.plt       0x0000000020000e14        0x0 load address 0x0000000008010d1c
  .igot.plt      0x0000000020000e14        0x0 /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
                 0x0000000020000e14                . = ALIGN (0x4)
 
-.bss            0x0000000020000e18     0x2300 load address 0x0000000008010d7c
+.bss            0x0000000020000e18     0x2300 load address 0x0000000008010d1c
                 0x0000000020000e18                _sbss = .
                 0x0000000020000e18                __bss_start__ = _sbss
  *(.bss)
@@ -6068,7 +6068,7 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000020003118                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x0000000020003118      0x600 load address 0x0000000008010d7c
+                0x0000000020003118      0x600 load address 0x0000000008010d1c
                 0x0000000020003118                . = ALIGN (0x8)
                 0x0000000020003118                PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
@@ -6214,7 +6214,7 @@ LOAD /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools
                 0x0000000000000ada       0x1d /Applications/Eclipse.app/Contents/Eclipse/plugins/fr.ac6.mcu.externaltools.arm-none.macos64_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
 OUTPUT(5000-01(03).elf elf32-littlearm)
 
-.debug_info     0x0000000000000000    0x1ebe6
+.debug_info     0x0000000000000000    0x1ebc2
  .debug_info    0x0000000000000000      0x80f Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
  .debug_info    0x000000000000080f      0xe60 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
  .debug_info    0x000000000000166f      0xb8a Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.o
@@ -6240,14 +6240,14 @@ OUTPUT(5000-01(03).elf elf32-littlearm)
  .debug_info    0x0000000000010f70      0x212 Src/delay.o
  .debug_info    0x0000000000011182      0x41f Src/dma.o
  .debug_info    0x00000000000115a1      0x57b Src/gpio.o
- .debug_info    0x0000000000011b1c     0xa479 Src/main.o
- .debug_info    0x000000000001bf95      0x4f0 Src/rtc.o
- .debug_info    0x000000000001c485      0x8a5 Src/spi.o
- .debug_info    0x000000000001cd2a      0x558 Src/stm32f1xx_hal_msp.o
- .debug_info    0x000000000001d282      0x78c Src/stm32f1xx_it.o
- .debug_info    0x000000000001da0e      0x436 Src/system_stm32f1xx.o
- .debug_info    0x000000000001de44      0xd80 Src/usart.o
- .debug_info    0x000000000001ebc4       0x22 startup/startup_stm32f103xe.o
+ .debug_info    0x0000000000011b1c     0xa455 Src/main.o
+ .debug_info    0x000000000001bf71      0x4f0 Src/rtc.o
+ .debug_info    0x000000000001c461      0x8a5 Src/spi.o
+ .debug_info    0x000000000001cd06      0x558 Src/stm32f1xx_hal_msp.o
+ .debug_info    0x000000000001d25e      0x78c Src/stm32f1xx_it.o
+ .debug_info    0x000000000001d9ea      0x436 Src/system_stm32f1xx.o
+ .debug_info    0x000000000001de20      0xd80 Src/usart.o
+ .debug_info    0x000000000001eba0       0x22 startup/startup_stm32f103xe.o
 
 .debug_abbrev   0x0000000000000000     0x3f2d
  .debug_abbrev  0x0000000000000000      0x1fe Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
@@ -6524,7 +6524,7 @@ OUTPUT(5000-01(03).elf elf32-littlearm)
  .debug_macro   0x0000000000019ca9      0x1e6 Src/system_stm32f1xx.o
  .debug_macro   0x0000000000019e8f      0x207 Src/usart.o
 
-.debug_line     0x0000000000000000    0x16f17
+.debug_line     0x0000000000000000    0x16f0a
  .debug_line    0x0000000000000000      0xa5c Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
  .debug_line    0x0000000000000a5c      0xdda Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
  .debug_line    0x0000000000001836      0xc31 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.o
@@ -6550,14 +6550,14 @@ OUTPUT(5000-01(03).elf elf32-littlearm)
  .debug_line    0x000000000000fc6e      0x8b6 Src/delay.o
  .debug_line    0x0000000000010524      0x87f Src/dma.o
  .debug_line    0x0000000000010da3      0x8b6 Src/gpio.o
- .debug_line    0x0000000000011659     0x22a1 Src/main.o
- .debug_line    0x00000000000138fa      0x8ae Src/rtc.o
- .debug_line    0x00000000000141a8      0x8ca Src/spi.o
- .debug_line    0x0000000000014a72      0x889 Src/stm32f1xx_hal_msp.o
- .debug_line    0x00000000000152fb      0x97f Src/stm32f1xx_it.o
- .debug_line    0x0000000000015c7a      0x8b5 Src/system_stm32f1xx.o
- .debug_line    0x000000000001652f      0x96b Src/usart.o
- .debug_line    0x0000000000016e9a       0x7d startup/startup_stm32f103xe.o
+ .debug_line    0x0000000000011659     0x2294 Src/main.o
+ .debug_line    0x00000000000138ed      0x8ae Src/rtc.o
+ .debug_line    0x000000000001419b      0x8ca Src/spi.o
+ .debug_line    0x0000000000014a65      0x889 Src/stm32f1xx_hal_msp.o
+ .debug_line    0x00000000000152ee      0x97f Src/stm32f1xx_it.o
+ .debug_line    0x0000000000015c6d      0x8b5 Src/system_stm32f1xx.o
+ .debug_line    0x0000000000016522      0x96b Src/usart.o
+ .debug_line    0x0000000000016e8d       0x7d startup/startup_stm32f103xe.o
 
 .debug_str      0x0000000000000000    0x8dca8
  .debug_str     0x0000000000000000    0x826c4 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
