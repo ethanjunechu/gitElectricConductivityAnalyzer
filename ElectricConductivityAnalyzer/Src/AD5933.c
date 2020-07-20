@@ -4,17 +4,24 @@
 #define AD5933 1
 //#define AD5933_MCLK 16.776 //=536870912/MCLK;
 //#define AD5933_CLK 536870912
-#define AD5933_CLK 524288000
+#define AD5933_CLK 536870912
 #define AD5933_MCLK 16.384   //=524288000/MCLK;
 #define	AD5933_MCLK_USE_OUT	1	//0内部时钟  1外部时钟
-#define AD5933_Correction 101615461.47044108 //10k
+//#define AD5933_Correction 101615461.47044108 //10k
 
-double R_Correction[7] = { 953523.95361868362, 2618886.397035114,
-		10771029.399944296, 97032567.340095446, 959868455.95206976,
-		9293568285.81674, 54623696838.268166 };
+double R_Correction[7] = { 1289636.25, 2611425.25, 10763098, 96914352,
+		958445376, 9289377792, 54633222144 };
+float K_Correction[7] = { 1, 1, 1, 1, 1, 1, 1 };
+
+float rads_Correction[7] = { 0, 0, 0, 0, 0, 0, 0 };
+//float rads_Correction_B = 0;
 extern uint8_t range;
-uint8_t num = 100;
-
+//uint8_t num = 10;
+float resistance[10];
+float rads[4];
+//int AD5933_Dat_Re[10];
+//int AD5933_Dat_Im[10];
+long hz = 10000;	//扫描频率
 void Ini_I2c(void) //初始化I2C
 {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -116,10 +123,10 @@ void RangeSelect(uint8_t index) {
 		S5(0);
 		break;
 	case 7:
-		/* Y5, IY5 100校准 */
-		S0(1);
+		/* Y0, IY5 100校准 */
+		S0(0);
 		S1(0);
-		S2(1);
+		S2(0);
 		S3(1);
 		S4(0);
 		S5(1);
@@ -171,6 +178,69 @@ void RangeSelect(uint8_t index) {
 		break;
 	case 13:
 		/* Y7, IY7 10M校准 */
+		S0(1);
+		S1(1);
+		S2(1);
+		S3(1);
+		S4(1);
+		S5(1);
+		break;
+	case 14:
+		/* Y0, IY4 100校准200 */
+		S0(0);
+		S1(0);
+		S2(0);
+		S3(0);
+		S4(0);
+		S5(1);
+		break;
+	case 15:
+		/* Y4, IY1 200校准1K */
+		S0(0);
+		S1(0);
+		S2(1);
+		S3(1);
+		S4(0);
+		S5(0);
+		break;
+	case 16:
+		/* Y1, IY0 1K校准10K */
+		S0(1);
+		S1(0);
+		S2(0);
+		S3(0);
+		S4(0);
+		S5(0);
+		break;
+	case 17:
+		/* Y2, IY3 10K校准100K */
+		S0(0);
+		S1(1);
+		S2(0);
+		S3(1);
+		S4(1);
+		S5(0);
+		break;
+	case 18:
+		/* Y3, IY6 100K校准1M */
+		S0(1);
+		S1(1);
+		S2(0);
+		S3(0);
+		S4(1);
+		S5(1);
+		break;
+	case 19:
+		/* Y6, IY7 1M校准10M */
+		S0(0);
+		S1(1);
+		S2(1);
+		S3(1);
+		S4(1);
+		S5(1);
+		break;
+	case 20:
+		/* Y7, IY7 10M校准10M */
 		S0(1);
 		S1(1);
 		S2(1);
@@ -374,11 +444,6 @@ uint16_t AD5933_Tempter(void) {
 	return Tm;
 }
 
-float resistance[200];
-float rads[200];
-int AD5933_Dat_Re[200];
-int AD5933_Dat_Im[200];
-
 void Maopao_Paixu(float *dat, uint16_t leng) {
 	uint16_t i, j;
 	float buf;
@@ -502,7 +567,8 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 		imageArr[1] = Rece_Byte(0x97);
 		imageArr[2] = imageArr[0] * 0x100 + imageArr[1];
 
-//		rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
+		//rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
+		rads[j] = atan2(imageArr[2], realArr[2]);
 		//计算实部的原码(除符号位外，取反加一)
 		if (realArr[2] >= 0x8000) {
 			realArr[2] ^= 0xFFFF;
@@ -535,61 +601,64 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 }
 
 float DA5933_Get_Rs(void) {
-	float __attribute__ ((unused)) Rs, re, im;
+	float __attribute__ ((unused)) Rs, re;
+//			, im;
 
-	AD5933_Sweep(10000, 0, 4, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = Get_resistance(4);
-//	Rs = resistance[4] * R_Correction[range];
-//	re = Rs * cos(rads[0]);
+	AD5933_Sweep(hz, 0, 4, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+	Rs = K_Correction[range] * Get_resistance(4);
+//	re = Rs * cos(rads[0] - rads_Correction[range] - rads_Correction_B);
 //	im = Rs * sin(rads[0]);
 
 	/* 测试系统误差临时使用 */
-//	resistance[num++] = Rs;
-//	if (num == 199)
-//		num = 100;
+//	resistance[num++] = re;
+//	resistance[num + 10] = Rs;
+//	resistance[num + 20] = rads[0] - rads_Correction[range];
+//	resistance[num + 30] = range;
+//	if (num == 20)
+//		num = 10;
 	/* end of 测试系统误差临时使用 */
 
 	return Rs;
 }
-float DA5933_Dat_Cap(float Fre) {
-	float pp;
-//	float dat=3.1415926*2*Fre;
-	float dat = 1;
-	pp = 1000000 * 23.9999992 / (AD5933_Dat_Re[0] * dat);
-	return pp;
-}
+//float DA5933_Dat_Cap(float Fre) {
+//	float pp;
+////	float dat=3.1415926*2*Fre;
+//	float dat = 1;
+//	pp = 1000000 * 23.9999992 / (AD5933_Dat_Re[0] * dat);
+//	return pp;
+//}
 
-float DA5933_Get_Cap(float Fre) {
-//	float Cap,dat;
+//float DA5933_Get_Cap(float Fre) {
+////	float Cap,dat;
+////
+////	AD5933_Sweep(30000,1,40,AD5933_OUTPUT_2V,AD5933_Gain_1,AD5933_Fre_UP);
+////	Cap=DA5933_Get_Rs();
+////	dat=1/(Cap*30000*2*3.1415926/100000000000000);
+////	DA5933_Dat_Cap(30000);
+////
+////	return Cap;
 //
-//	AD5933_Sweep(30000,1,40,AD5933_OUTPUT_2V,AD5933_Gain_1,AD5933_Fre_UP);
-//	Cap=DA5933_Get_Rs();
-//	dat=1/(Cap*30000*2*3.1415926/100000000000000);
-//	DA5933_Dat_Cap(30000);
+//	float __attribute__ ((unused)) Rs, re, im, cap;
 //
-//	return Cap;
-
-	float __attribute__ ((unused)) Rs, re, im, cap;
-
-//	AD5933_Sweep(30000,200,2,AD5933_OUTPUT_2V,AD5933_Gain_1,AD5933_Fre_Rep);
-	AD5933_Sweep(100000, 1, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = Get_resistance(20);
-//	re=Rs*cos(rads[0]);
-	im = Rs * sin(rads[0]);
-	cap = 0.9442 / (2 * 3.1415926 * im / 10000000);
-	return cap;
-}
-float DA5933_Get_L(float Fre) {
-	float L;
-	float __attribute__ ((unused)) Rs, re, im;
-
-	AD5933_Sweep(100000, 1, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = Get_resistance(20);
-//	re=Rs*cos(rads[0]);
-	im = Rs * sin(rads[0]);
-	L = im * 1000 / (2 * 3.1415926);
-	return L;
-}
+////	AD5933_Sweep(30000,200,2,AD5933_OUTPUT_2V,AD5933_Gain_1,AD5933_Fre_Rep);
+//	AD5933_Sweep(100000, 1, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+//	Rs = Get_resistance(20);
+////	re=Rs*cos(rads[0]);
+//	im = Rs * sin(rads[0]);
+//	cap = 0.9442 / (2 * 3.1415926 * im / 10000000);
+//	return cap;
+//}
+//float DA5933_Get_L(float Fre) {
+//	float L;
+//	float __attribute__ ((unused)) Rs, re, im;
+//
+//	AD5933_Sweep(100000, 1, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+//	Rs = Get_resistance(20);
+////	re=Rs*cos(rads[0]);
+//	im = Rs * sin(rads[0]);
+//	L = im * 1000 / (2 * 3.1415926);
+//	return L;
+//}
 //---------------------------------------------------------------------------------------------------------------------
 // 函数原形：void display(unsigned int re,unsigned int im)
 // 功能描述：显示函数。

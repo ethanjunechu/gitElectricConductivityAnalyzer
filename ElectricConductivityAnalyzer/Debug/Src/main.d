@@ -34,10 +34,8 @@ Src/main.o: ../Src/main.c \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/adc.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/main.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/dac.h \
- /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/dma.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/rtc.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/spi.h \
- /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/tim.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/usart.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/gpio.h \
  /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/bsp_spi_flash.h \
@@ -116,13 +114,9 @@ Src/main.o: ../Src/main.c \
 
 /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/dac.h:
 
-/Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/dma.h:
-
 /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/rtc.h:
 
 /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/spi.h:
-
-/Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/tim.h:
 
 /Users/ethanchu/Ethan/Hardware\ Develop/STM32_ElectricConductivityAnalyzer/gitElectricConductivityAnalyzer/ElectricConductivityAnalyzer/Inc/usart.h:
 

@@ -40,10 +40,10 @@
 #include "stm32f1xx_hal.h"
 #include "adc.h"
 #include "dac.h"
-#include "dma.h"
+//#include "dma.h"
 #include "rtc.h"
 #include "spi.h"
-#include "tim.h"
+//#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -63,6 +63,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* 调试模式 */
 //#define DEBUG 1
+#define FLASHBASEADDR 0x0803FC00
 /* 串口3发送等待时间 */
 #define USARTSENDTIME 0xFFFF
 /* 目前可调范围 +-99 */
@@ -78,11 +79,10 @@
 //#define CELLAREA 1
 DAC_HandleTypeDef hdac;
 /* GPIO宏定义 */
-#define LED_LO(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_RESET))
-#define LED_HI(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET))
-#define LED_LS(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET))
-#define LED_WASH(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET))
-
+//#define LED_LO(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_RESET))
+//#define LED_HI(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET))
+//#define LED_LS(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET))
+//#define LED_WASH(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET))
 #define RELAY_WASH(x)	(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET))
 #define RELAY_LO(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_RESET))
 #define RELAY_HI(x)		(x == 1 ? HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET))
@@ -92,59 +92,59 @@ DAC_HandleTypeDef hdac;
 #define BTN_MODE()		HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9)
 #define BTN_RIGHT() 	HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_0)
 #define BTN_ENTER() 	HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1)
-#define RS485_EN(x) 	(x == 1 ? HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET))
+//#define RS485_EN(x) 	(x == 1 ? HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET))
 
 #define TP_CONTROL(x)	(x == 1 ? HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET))
 
 //校正次数宏定义——1次1s
 #define CAL_COUNT 10
 
-// CRC 高位字节值表
-static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
-		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40 };
-// CRC 低位字节值表
-static char auchCRCLo[] = { 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2,
-		0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD,
-		0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09, 0x08, 0xC8,
-		0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F,
-		0xDD, 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6,
-		0xD2, 0x12, 0x13, 0xD3, 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1,
-		0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7, 0x37, 0xF5, 0x35, 0x34, 0xF4,
-		0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A, 0x3B, 0xFB,
-		0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA,
-		0xEE, 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5,
-		0x27, 0xE7, 0xE6, 0x26, 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0,
-		0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2, 0x62, 0x66, 0xA6, 0xA7, 0x67,
-		0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F, 0x6E, 0xAE,
-		0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79,
-		0xBB, 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C,
-		0xB4, 0x74, 0x75, 0xB5, 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73,
-		0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91, 0x51, 0x93, 0x53, 0x52, 0x92,
-		0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C, 0x5D, 0x9D,
-		0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98,
-		0x88, 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F,
-		0x8D, 0x4D, 0x4C, 0x8C, 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86,
-		0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40 };
+//// CRC 高位字节值表
+//static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+//		0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
+//		0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40 };
+//// CRC 低位字节值表
+//static char auchCRCLo[] = { 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2,
+//		0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD,
+//		0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09, 0x08, 0xC8,
+//		0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F,
+//		0xDD, 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6,
+//		0xD2, 0x12, 0x13, 0xD3, 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1,
+//		0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7, 0x37, 0xF5, 0x35, 0x34, 0xF4,
+//		0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A, 0x3B, 0xFB,
+//		0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA,
+//		0xEE, 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5,
+//		0x27, 0xE7, 0xE6, 0x26, 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0,
+//		0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2, 0x62, 0x66, 0xA6, 0xA7, 0x67,
+//		0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F, 0x6E, 0xAE,
+//		0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79,
+//		0xBB, 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C,
+//		0xB4, 0x74, 0x75, 0xB5, 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73,
+//		0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91, 0x51, 0x93, 0x53, 0x52, 0x92,
+//		0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C, 0x5D, 0x9D,
+//		0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98,
+//		0x88, 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F,
+//		0x8D, 0x4D, 0x4C, 0x8C, 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86,
+//		0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40 };
 
 /* NTC30K阻值表 */
 float NTC30K[100] = { 98.2641, 93.373, 88.754, 84.3904, 80.2668, 76.3686,
@@ -171,8 +171,13 @@ static long historyEnd = 0;
 
 /* AD转换结果值 */
 uint32_t ADC_ConvertedValue[2];
+extern ADC_HandleTypeDef hadc1;
 
-extern double R_Correction[8];
+extern double R_Correction[7];
+extern float K_Correction[7];
+extern float rads_Correction[7];
+extern float rads[4];
+//extern float rads_Correction_B;
 uint8_t range = 1;
 
 //设置背景白色
@@ -193,80 +198,18 @@ uint8_t SetForeBlueCMD[8] = { 0xEE, 0x41, 0x00, 0x1F, 0xFF, 0xFC, 0xFF, 0xFF };
 //根据已设置背景色清屏
 uint8_t ClearBackBlackCMD[6] = { 0xEE, 0x01, 0xFF, 0xFC, 0xFF, 0xFF };
 
-//显示主数字第1位												/ 数字位图片编号 /
-uint8_t ShowMainNum1CMD[13] = { 0xEE, 0x32, 0x00, 86, 0x00, 58, 0x00, 1, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示主数字第2位
-uint8_t ShowMainNum2CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 58, 0x00, 1, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示主数字第3位
-uint8_t ShowMainNum3CMD[13] = { 0xEE, 0x32, 0x00, 215, 0x00, 58, 0x00, 21, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示主数字第4位
-uint8_t ShowMainNum4CMD[13] = { 0xEE, 0x32, 0x00, 238, 0x00, 58, 0x00, 1, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示主数字第5位
-uint8_t ShowMainNum5CMD[13] = { 0xEE, 0x32, 0x01, 46, 0x00, 58, 0x00, 1, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-
-//显示温度数字第1位
-uint8_t ShowTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 30, 0x00, 164, 0x00, 0x46,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示温度数字第2位
-uint8_t ShowTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 58, 0x00, 164, 0x00, 0x46,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示温度数字第3位
-uint8_t ShowTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 85, 0x00, 164, 0x00, 0x45,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示温度数字第4位
-uint8_t ShowTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 96, 0x00, 164, 0x00, 0x46,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
-//显示氧浓度单位
-uint8_t ShowMainUnitCMD[13] = { 0xEE, 0x32, 0x01, 130, 0x00, 62, 0x00, 0x1B,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示温度单位
-uint8_t ShowTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 126, 0x00, 168, 0x00, 0x51,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
 //显示界面状态
 uint8_t ShowPageStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x29, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
 //显示报警状态
 uint8_t ShowAlarmStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x2B, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
 //显示清洗状态
 uint8_t ShowWashStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x44, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
-//显示电极状态文字
-uint8_t ShowElectrodeTextCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
-		45, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
 //显示电极状态
 uint8_t ShowElectrodeStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x0A, 0x00, 240, 0x00,
 		46, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
-//显示输出电流文字
-uint8_t ShowmATextCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 82,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示输出电流数字第1位
-uint8_t ShowmANum1CMD[13] = { 0xEE, 0x32, 0x01, 100, 0x00, 242, 0x00, 31, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示输出电流数字第2位
-uint8_t ShowmANum2CMD[13] = { 0xEE, 0x32, 0x01, 116, 0x00, 242, 0x00, 31, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示输出电流数字第3位-小数点
-uint8_t ShowmANum3CMD[13] = { 0xEE, 0x32, 0x01, 134, 0x00, 242, 0x00, 30, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示输出电流数字第4位
-uint8_t ShowmANum4CMD[13] = { 0xEE, 0x32, 0x01, 142, 0x00, 242, 0x00, 31, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
-//显示输出电流单位
-uint8_t ShowmAUnitCMD[13] = { 0xEE, 0x32, 0x01, 161, 0x00, 241, 0x00, 25, 0x00,
-		0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示日期数字第1位
 uint8_t ShowDateNum1CMD[13] = { 0xEE, 0x32, 0x00, 200, 0x00, 0, 0x00, 33, 0x00,
@@ -628,50 +571,6 @@ uint8_t ShowCalPage2CMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 86,
 uint8_t ShowCalTypeCMD[13] = { 0xEE, 0x32, 0x01, 14, 0x00, 64, 0x00, 87, 0x00,
 		0xFF, 0xFC, 0xFF, 0xFF };
 
-//显示上次传感器系数数字0
-uint8_t ShowLastCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字1
-uint8_t ShowLastCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字2-小数点
-uint8_t ShowLastCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00, 30,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字3
-uint8_t ShowLastCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字4
-uint8_t ShowLastCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字5
-uint8_t ShowLastCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示上次传感器系数数字6
-uint8_t ShowLastCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 114, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
-//显示预设传感器系数数字0
-uint8_t ShowPreCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字1
-uint8_t ShowPreCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字2-小数点
-uint8_t ShowPreCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 64, 0x00, 30,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字03
-uint8_t ShowPreCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字4
-uint8_t ShowPreCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字5
-uint8_t ShowPreCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-//显示预设传感器系数数字6
-uint8_t ShowPreCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 64, 0x00, 31,
-		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
-
 //显示正在校正状态
 uint8_t ShowCalingStatusCMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 159, 0x00, 44,
 		0x00, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -747,7 +646,7 @@ uint8_t Show0pptCMD[19] = { 0xEE, 0x20, 0x00, 16, 0x00, 246, 0x00, 0x00, 0x30,
 		0x2E, 0x30, 0x30, 0x70, 0x70, 0x74, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //获取传感器数据
-uint8_t GetSensor[8] = { 0x03, 0x03, 0x00, 0x00, 0x00, 0x0A, 0xC4, 0x2F };
+//uint8_t GetSensor[8] = { 0x03, 0x03, 0x00, 0x00, 0x00, 0x0A, 0xC4, 0x2F };
 
 //是否需要刷新标志位
 uint8_t refreshFlag = 0;
@@ -762,7 +661,7 @@ uint8_t calFlag = 0;
 uint8_t historyFlag = 0;
 
 //传感器接收数据
-uint8_t sensorRevBuf[50];
+//uint8_t sensorRevBuf[50];
 
 float f_Rs;
 //修正值
@@ -771,6 +670,7 @@ float f_Rs_fixed[60];
 float f_Rs_filter;
 //滤波计数器
 uint8_t filterCNT = 0;
+extern long hz;	//扫描频率
 
 float f_Temp;
 float f_Temp_fixed;
@@ -857,7 +757,7 @@ RTC_TimeTypeDef sTime;
 RTC_DateTypeDef DateToUpdate;
 
 uint8_t lastHours = 25;
-#define FLASHBASEADDR 0x0800F800
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -934,9 +834,9 @@ void Conf_UI(void);
 void Cal_UI(void);
 void History_UI(void);
 void DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-void UART_RxIDLECallback(UART_HandleTypeDef *uartHandle);
-unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen);
-void change_float_big_485rom(unsigned int j);
+//void UART_RxIDLECallback(UART_HandleTypeDef *uartHandle);
+//unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen);
+//void change_float_big_485rom(unsigned int j);
 void Button_Scan(void);
 void eepromReadSetting(void);
 void eepromWriteSetting(void);
@@ -974,7 +874,7 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	MX_DMA_Init();
+//	MX_DMA_Init();
 	MX_DAC_Init();
 	MX_ADC1_Init();
 	MX_SPI2_Init();
@@ -1037,20 +937,7 @@ int main(void) {
 	/* 预转换获取电导，保证开机有数据 */
 	getRs();
 	getTemp();
-	/* 前后总共15s启动LOGO延时, 保证传感器开机时间 */
-//	HAL_Delay(3000);
-//	/* 开机获取传感器数据 */
-//	getRs();
-//	HAL_Delay(1500);
-//	getRs();
-//	HAL_Delay(1500);
-//	getRs();
-//	HAL_Delay(1500);
-	/* 防止未接传感器，开机误报低报警 */
-	if (refreshFlag == 0) {
-		Sensor_Status = 1;
-	}
-
+	f_Rs_filter = savedata.lowlimit + savedata.lowlimitdelay;
 	/* 初始化主界面 */
 	LCD_Init();
 
@@ -1136,8 +1023,8 @@ void SystemClock_Config(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void startCalc(void) {
-	double ma1 = 0, ma2 = 0, temp = 0;
-	double R_Ref[7] = { 100, 200, 1000, 10000, 100000, 1000000, 10000000 };
+	float ma1 = 0, ma2 = 0, temp = 0;
+	float R_Ref[7] = { 100, 200, 1000, 10000, 100000, 1000000, 10000000 };
 	uint8_t i = 0, j = 0;
 	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 	uint16_t buf = 0;
@@ -1145,42 +1032,36 @@ void startCalc(void) {
 		RangeSelect(i + 7);
 		ma1 = 0;
 		ma2 = 0;
-		for (j = 0; j < 3; j++) {
-			Fre_To_Hex(9950, SValue);
+		for (j = 0; j < 1; j++) {
+			Fre_To_Hex(hz - 500, SValue);
 			Fre_To_Hex(1, IValue);
 			NValue[0] = 0;
 			NValue[1] = 8;
-#ifdef AD5933_MCLK_USE_OUT
-	  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
-	#else
 			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
-					| AD5933_IN_MCLK;
-#endif
+					| AD5933_OUT_MCLK;
 			CValue[0] = buf >> 8;
 			CValue[1] = buf;
 
 			ma1 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
 
-			Fre_To_Hex(10050, SValue);
+			Fre_To_Hex(hz + 500, SValue);
 			Fre_To_Hex(1, IValue);
 			NValue[0] = 0;
 			NValue[1] = 8;
-#ifdef AD5933_MCLK_USE_OUT
-			  buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
-			#else
 			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
-					| AD5933_IN_MCLK;
-#endif
+					| AD5933_OUT_MCLK;
 			CValue[0] = buf >> 8;
 			CValue[1] = buf;
 
 			ma2 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
 		}
 		temp = 1
-				/ ((ma1 / 3)
-						+ ((1 / 100) / (ma2 / 3) - (1 / 100) / (ma1 / 3)) / 2);
+				/ ((ma1 / j)
+						+ ((1 / 100) / (ma2 / j) - (1 / 100) / (ma1 / j)) / 2);
 		if (temp > 0) {
+			K_Correction[i] = temp / R_Correction[i];
 			R_Correction[i] = temp;
+			rads_Correction[i] = rads[0];
 		}
 	}
 }
@@ -1614,6 +1495,48 @@ void application(void) {
  * @历史版本 : V0.0.1 - Ethan - 2018/08/03
  */
 void LCD_Update(void) {
+	//显示主数字第1位												/ 数字位图片编号 /
+	uint8_t ShowMainNum1CMD[13] = { 0xEE, 0x32, 0x00, 86, 0x00, 58, 0x00, 1,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主数字第2位
+	uint8_t ShowMainNum2CMD[13] = { 0xEE, 0x32, 0x00, 150, 0x00, 58, 0x00, 1,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主数字第3位
+	uint8_t ShowMainNum3CMD[13] = { 0xEE, 0x32, 0x00, 215, 0x00, 58, 0x00, 21,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主数字第4位
+	uint8_t ShowMainNum4CMD[13] = { 0xEE, 0x32, 0x00, 238, 0x00, 58, 0x00, 1,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主数字第5位
+	uint8_t ShowMainNum5CMD[13] = { 0xEE, 0x32, 0x01, 46, 0x00, 58, 0x00, 1,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第1位
+	uint8_t ShowTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 30, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第2位
+	uint8_t ShowTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 58, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第3位
+	uint8_t ShowTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 85, 0x00, 164, 0x00, 0x45,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第4位
+	uint8_t ShowTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 96, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主单位
+	uint8_t ShowMainUnitCMD[13] = { 0xEE, 0x32, 0x01, 130, 0x00, 62, 0x00, 0x1B,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第1位
+	uint8_t ShowmANum1CMD[13] = { 0xEE, 0x32, 0x01, 100, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第2位
+	uint8_t ShowmANum2CMD[13] = { 0xEE, 0x32, 0x01, 116, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第3位-小数点
+	uint8_t ShowmANum3CMD[13] = { 0xEE, 0x32, 0x01, 134, 0x00, 242, 0x00, 30,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第4位
+	uint8_t ShowmANum4CMD[13] = { 0xEE, 0x32, 0x01, 142, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	uint8_t u_10PPM = 0, u_1PPM = 0, u_01PPM = 0, u_001PPM = 0;
 	uint8_t u_10mA, u_1mA, u_01mA;
 	uint8_t u_10Temp, u_1Temp, u_01Temp;
@@ -1636,7 +1559,7 @@ void LCD_Update(void) {
 	switch (savedata.mode) {
 	case 0:
 		/* 电导率 */
-		if (f_Rs_filter < 10000) {
+		if (f_Rs_filter < 2000) {
 			ShowMainUnitCMD[7] = 27;
 			f_Rs_Show = f_Rs_filter;
 		} else {
@@ -1730,10 +1653,6 @@ void LCD_Update(void) {
 		ShowElectrodeStatusCMD[7] = 47;
 		if (Relay_Flag != 0) {
 			Relay_Flag = 0;
-//			memcpy(&sdatelowlimitdelaystructureget, &sdatestructureget,
-//					sizeof(sdatestructureget));
-//			memcpy(&stimelowlimitdelaystructureget, &stimestructureget,
-//					sizeof(stimestructureget));
 		}
 	} else if ((f_Rs_filter >= savedata.uplimit) && (Sensor_Status == 0)
 			&& (savedata.uplimitauto == 1)) {
@@ -1741,10 +1660,6 @@ void LCD_Update(void) {
 		ShowElectrodeStatusCMD[7] = 48;
 		if (Relay_Flag != 2) {
 			Relay_Flag = 2;
-//			memcpy(&sdateuplimitdelaystructureget, &sdatestructureget,
-//					sizeof(sdatestructureget));
-//			memcpy(&stimeuplimitdelaystructureget, &stimestructureget,
-//					sizeof(stimestructureget));
 		}
 	} else if (Sensor_Status) {
 		ShowElectrodeStatusCMD[7] = 46;
@@ -1752,9 +1667,6 @@ void LCD_Update(void) {
 		Relay_Flag_Low = 0;
 		Relay_Flag_Up = 0;
 	}
-//	if (Sensor_Status != 0) {
-//		Relay_Flag = 1;
-//	}
 	u_10mA = f_mA / 10;
 	u_1mA = f_mA - u_10mA * 10;
 	u_01mA = (f_mA - u_10mA * 10 - u_1mA) * 10;
@@ -1800,8 +1712,7 @@ void LCD_Update(void) {
 	HAL_UART_Transmit(&huart1, ShowTempNum3CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowTempNum4CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD, 13, USARTSENDTIME);
-	/* 清洗状态 - 屏蔽 */
-//	HAL_UART_Transmit(&huart1, ShowWashStatusCMD, 13, USARTSENDTIME);
+
 	HAL_UART_Transmit(&huart1, ShowmANum1CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowmANum2CMD, 13, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ShowmANum3CMD, 13, USARTSENDTIME);
@@ -2016,6 +1927,39 @@ long calcTimeSpan(uint8_t datenowYear, uint8_t datenowMonth,
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void LCD_Init(void) {
+	//显示温度数字第1位
+	uint8_t ShowTempNum1CMD[13] = { 0xEE, 0x32, 0x01, 30, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第2位
+	uint8_t ShowTempNum2CMD[13] = { 0xEE, 0x32, 0x01, 58, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第3位
+	uint8_t ShowTempNum3CMD[13] = { 0xEE, 0x32, 0x01, 85, 0x00, 164, 0x00, 0x45,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度数字第4位
+	uint8_t ShowTempNum4CMD[13] = { 0xEE, 0x32, 0x01, 96, 0x00, 164, 0x00, 0x46,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示主单位
+	uint8_t ShowMainUnitCMD[13] = { 0xEE, 0x32, 0x01, 130, 0x00, 62, 0x00, 0x1B,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示温度单位
+	uint8_t ShowTempUnitCMD[13] = { 0xEE, 0x32, 0x01, 126, 0x00, 168, 0x00,
+			0x51, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第1位
+	uint8_t ShowmANum1CMD[13] = { 0xEE, 0x32, 0x01, 100, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第2位
+	uint8_t ShowmANum2CMD[13] = { 0xEE, 0x32, 0x01, 116, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第3位-小数点
+	uint8_t ShowmANum3CMD[13] = { 0xEE, 0x32, 0x01, 134, 0x00, 242, 0x00, 30,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流数字第4位
+	uint8_t ShowmANum4CMD[13] = { 0xEE, 0x32, 0x01, 142, 0x00, 242, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+	//显示输出电流单位
+	uint8_t ShowmAUnitCMD[13] = { 0xEE, 0x32, 0x01, 161, 0x00, 241, 0x00, 25,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	/* 根据保存的设置调整亮度 */
 	ChangeBrightnessCMD[3] = savedata.brightness * 20 + 55;
 	ChangeBrightnessCMD[4] = ChangeBrightnessCMD[3];
@@ -2023,11 +1967,6 @@ void LCD_Init(void) {
 
 	HAL_UART_Transmit(&huart1, SetBackWhiteCMD, 8, USARTSENDTIME);
 	HAL_UART_Transmit(&huart1, ClearBackBlackCMD, 6, USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowMainNum1CMD, 13, USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowMainNum2CMD, 13, USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowMainNum3CMD, 13, USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowMainNum4CMD, 13, USARTSENDTIME);
-//	HAL_UART_Transmit(&huart1, ShowMainNum5CMD, 13, USARTSENDTIME);
 	LCD_Update();
 	switch (savedata.mode) {
 	case 0:
@@ -2116,13 +2055,13 @@ void getTemp(void) {
 	ADC_ConvertedValue[0] = 0;
 	ADC_ConvertedValue[1] = 0;
 	HAL_ADC_Stop(&hadc1);
-	if (f_Temp > 60) {
+	if (f_Temp > 99) {
 		f_Temp = 0;
 	}
 	if (f_Temp < 0) {
 		f_Temp = 0;
 	}
-	f_Temp_fixed = f_Temp * savedata.ktemp;
+	f_Temp_fixed = (f_Temp_fixed + f_Temp * savedata.ktemp) / 2;
 }
 
 /**
@@ -2132,61 +2071,108 @@ void getTemp(void) {
  * @历史版本 : V0.0.1 - Ethan - 2020/02/03
  */
 void getRs(void) {
-	double A,B,C,D;
+	double A = 1, B = 1, C = 1, D = 1;
+//	double a = 1, b = 1, c = 1, d = 1;
+	uint8_t rangetemp = range;
 	if (f_Rs < 100) {
-		A = 2367424146.70513;
-		B = -0.388909314573357;
-		C = 2.07838423690103E+18;
-		D = -948.435152784848;
+		A = 1069.06077999153;
+		B = -1.21500650935111;
+		C = 188.86854728134;
+		D = -349.365716618024;
+//		a = 12287229.0190371;
+//
+//		b = 0.985335349515177;
+//
+//		c = 1.24681615949208E-06;
+//
+//		d = -0.199477864893327;
 		range = 0;
-		RangeSelect(range);
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 100 && f_Rs < 900) {
-		A = 40935424999406.6;
-		B = -0.90189531795727;
-		C = 347272469728688;
-		D = -272.934947363955;
+		A = 212018852620660;
+		B = -0.935003561330031;
+		C = 793523686715824;
+		D = -145.13268534197;
+//		a = 2439204772055.68;
+//
+//		b = 1.00174357800465;
+//
+//		c = 1.73064809114887E-11;
+//
+//		d = -0.200396799185461;
 		range = 1;
-		RangeSelect(range);
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 900 && f_Rs < 9900) {
-		A = 30740.6243793141;
-		B = -1.40993856464411;
-		C = 15591.6647859978;
-		D = 285.921768546588;
+		A = 271833862407165;
+		B = -0.999312554371451;
+		C = 254185065805555;
+		D = -92.5678587879467;
+//		a = 84.9395207010786;
+//
+//		b = 1.00697772531956;
+//
+//		c = 2.02504981693157;
+//
+//		d = -0.164707256538432;
 		range = 2;
-		RangeSelect(range);
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
 	} else if (f_Rs >= 9900 && f_Rs < 99900) {
-		A = 474032130888176;
-		B = -1.00603568163648;
-		C = 406202752588375;
-		D = 327.980666260545;
+		A = 5283589107343.12;
+		B = -1.00058966452611;
+		C = 5134133495927.26;
+		D = -90.0947907729795;
+//		a = 163.498807145464;
+//
+//		b = 1.006400626512;
+//
+//		c = 9.48035457726195;
+//
+//		d = -0.14821772590625;
 		range = 3;
-		RangeSelect(range);
-		f_Rs = 1.0212 * DA5933_Get_Rs() + 112.84;
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
-	} else if (f_Rs >= 99900 && f_Rs < 999900) {
-		A = 9.4441857296374E+17;
-		B = -1.61382070255075;
-		C = 18941495999895.4;
-		D = 63002.8241622625;
+	} else if (f_Rs >= 99900 && f_Rs < 399900) {
+		A = 346057097013129;
+		B = -1.02515983111702;
+		C = 207142683868656;
+		D = 2762.32996006807;
+//		a = 330536321.660332;
+//
+//		b = 1.00381401715703;
+//
+//		c = 4.80854345249882E-05;
+//
+//		d = -0.146606718046701;
 		range = 4;
-		RangeSelect(range);
-		f_Rs = 1E-06 * f_Rs * f_Rs + 0.399 * f_Rs + 60277;
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
-	} else if (f_Rs >= 999900 && f_Rs < 9999900) {
-		A = 6.87223483865145E+18;
-		B = -17.0352928287941;
-		C = 5842771.02860434;
-		D = 1001385.56012878;
+	} else if (f_Rs >= 399900 && f_Rs < 2099900) {
+		A = 1.20212753386793E+16;
+		B = -0.233848476671557;
+		C = 3.83002076962508E+46;
+		D = -2866457.78827296;
+//		a = 7781860378.55522;
+//
+//		b = 1.05011021118064;
+//
+//		c = 5.77481428330007E-05;
+//
+//		d = -0.13500812913517;
 		range = 5;
-		RangeSelect(range);
-		f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs()/C),B)) + D;
-	} else if (f_Rs >= 9999900) {
+	} else if (f_Rs >= 2099900) {
+		A = 7.69791680089553E+18;
+		B = -4.78014060660571;
+		C = 2194691212.60418;
+		D = 1817224.06021675;
+//		a = 2384539846.26623;
+//
+//		b = 0.4150541007826;
+//
+//		c = 5.45082965902506E-18;
+//
+//		d = -0.19136479286779;
 		range = 6;
+	}
+	if (rangetemp != range) {
 		RangeSelect(range);
-		f_Rs = DA5933_Get_Rs()/40;
+	}
+//	rads_Correction_B = (a - d) / (1 + pow(((f_Rs + 100) / c), b)) + d;
+	f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs() / C), B)) + D - 100;
+	if (f_Rs <= 0) {
+		f_Rs = 0.001;
 	}
 }
 
@@ -2206,10 +2192,42 @@ void ProcessData(void) {
 	}
 	switch (savedata.mode) {
 	case 0:
-		/* change to μS/cm */
-		f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
-				/ f_Rs + savedata.bdo;
-
+		if (f_Rs > 25000000) {
+			f_Rs_fixed[filterCNT] = 0;
+		} else {
+			/* change to μS/cm */
+			f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
+					/ f_Rs + savedata.bdo;
+			if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
+					- rads_Correction[range]) > 0.2) {
+				if (f_Rs_fixed[filterCNT] <= 500) {
+					f_Rs_fixed[filterCNT] = -236.32226167242
+							+ 10.5261223406364 * f_Rs_fixed[filterCNT]
+							- 0.0187275932130559 * pow(f_Rs_fixed[filterCNT], 2)
+							+ 4.16084470422851E-05
+									* pow(f_Rs_fixed[filterCNT], 3)
+							- 3.02324383997023E-08
+									* pow(f_Rs_fixed[filterCNT], 4);
+				} else {
+					f_Rs_fixed[filterCNT] = 1739.69718765024
+							+ 2.892596689399 * f_Rs_fixed[filterCNT]
+							+ 0.00337048638969243
+									* pow(f_Rs_fixed[filterCNT], 2)
+							- 6.80784191251609E-07
+									* pow(f_Rs_fixed[filterCNT], 3)
+							+ 5.91969220269017E-11
+									* pow(f_Rs_fixed[filterCNT], 4);
+				}
+//				f_Rs_fixed[filterCNT] =
+//						(4.72289372562168E+16 - 76.2816672432326)
+//								/ (1
+//										+ pow(
+//												(f_Rs_fixed[filterCNT]
+//														/ 901441623309033),
+//												-1.06890741249374))
+//								- 76.2816672432326;
+			}
+		}
 		if (f_Rs_fixed[filterCNT] > 250000) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
@@ -3054,8 +3072,7 @@ void Change_Conf_TempMode(uint8_t tempmode) {
 		ShowConfTempModeCMD[7] = 118;
 	else if (tempdata.tempmode == 2)
 		ShowConfTempModeCMD[7] = 120;
-	HAL_UART_Transmit(&huart1, ShowConfTempModeCMD, sizeof(ShowConfTempModeCMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempModeCMD, 13, USARTSENDTIME);
 }
 /**
  * @功能简介 : 修改设置界面的温度补偿系数
@@ -3075,14 +3092,10 @@ void Change_Conf_Temp(float temp) {
 		ShowConfTempNum1CMD[7] += 31;
 	} else
 		ShowConfTempNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConfTempNum1CMD, sizeof(ShowConfTempNum1CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNum2CMD, sizeof(ShowConfTempNum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNum3CMD, sizeof(ShowConfTempNum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNum4CMD, sizeof(ShowConfTempNum4CMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNum4CMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3104,14 +3117,10 @@ void Change_Conf_Temp_Now(float temp) {
 		ShowConfTempNowNum1CMD[7] += 31;
 	} else
 		ShowConfTempNowNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConfTempNowNum1CMD,
-			sizeof(ShowConfTempNowNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNowNum2CMD,
-			sizeof(ShowConfTempNowNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNowNum3CMD,
-			sizeof(ShowConfTempNowNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfTempNowNum4CMD,
-			sizeof(ShowConfTempNowNum4CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempNowNum4CMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3128,12 +3137,11 @@ void Change_Conf_TempFactorType(uint8_t TempFactorType) {
 	} else {
 		ShowConfTempFactorTypeCMD[7] = 112;
 	}
-	HAL_UART_Transmit(&huart1, ShowConfTempFactorTypeCMD,
-			sizeof(ShowConfTempFactorTypeCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfTempFactorTypeCMD, 13,
+	USARTSENDTIME);
 	/* clean */
 	ShowConf20mANum2CMD[7] = 122;
-	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, 13, USARTSENDTIME);
 	Change_Conf_TempFactor(tempdata.tempfactor);
 }
 
@@ -3158,32 +3166,18 @@ void Change_Conf_TempFactor(float Factor) {
 			ShowConf20mANum1CMD[7] += 31;
 		} else
 			ShowConf20mANum1CMD[7] = 91;
-		HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD,
-				sizeof(ShowConf20mANum1CMD),
-				USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD,
-				sizeof(ShowConf20mANum2CMD),
-				USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD,
-				sizeof(ShowConf20mANum3CMD),
-				USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD,
-				sizeof(ShowConf20mANum4CMD),
-				USARTSENDTIME);
-		HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD,
-				sizeof(ShowConf20mANum5CMD),
-				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, 13, USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, 13, USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD, 13, USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD, 13, USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD, 13, USARTSENDTIME);
 
 		ShowConf20mAUnitCMD[7] = 23;
 
-		HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD,
-				sizeof(ShowConf20mAUnitCMD),
-				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, 13, USARTSENDTIME);
 	} else {
 		ShowConf20mANum2CMD[7] = 121;
-		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD,
-				sizeof(ShowConf20mANum2CMD),
-				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, 13, USARTSENDTIME);
 	}
 }
 
@@ -3251,22 +3245,14 @@ void Change_Conf_PPM4mA(float ppm4mA) {
 				ShowConf4mANum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConf4mANum00CMD, sizeof(ShowConf4mANum00CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum0CMD, sizeof(ShowConf4mANum0CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD, sizeof(ShowConf4mANum1CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, sizeof(ShowConf4mANum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum3CMD, sizeof(ShowConf4mANum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum4CMD, sizeof(ShowConf4mANum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum5CMD, sizeof(ShowConf4mANum5CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mAUnitCMD, sizeof(ShowConf4mAUnitCMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum00CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum0CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum5CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mAUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3333,23 +3319,14 @@ void Change_Conf_ppm20mA(float ppm20mA) {
 				ShowConf20mANum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConf20mANum00CMD,
-			sizeof(ShowConf20mANum00CMD),
-			USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum0CMD, sizeof(ShowConf20mANum0CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, sizeof(ShowConf20mANum1CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, sizeof(ShowConf20mANum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD, sizeof(ShowConf20mANum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD, sizeof(ShowConf20mANum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD, sizeof(ShowConf20mANum5CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, sizeof(ShowConf20mAUnitCMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum00CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum0CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mANum5CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mAUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3370,16 +3347,11 @@ void Change_Conf_temp4mA(float temp4mA) {
 		ShowConf4mATempNum1CMD[7] += 31;
 	} else
 		ShowConf4mATempNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum1CMD,
-			sizeof(ShowConf4mATempNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum2CMD,
-			sizeof(ShowConf4mATempNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum3CMD,
-			sizeof(ShowConf4mATempNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum4CMD,
-			sizeof(ShowConf4mATempNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempUnitCMD,
-			sizeof(ShowConf4mATempUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3400,16 +3372,11 @@ void Change_Conf_temp20mA(float temp20mA) {
 		ShowConf20mATempNum1CMD[7] += 31;
 	} else
 		ShowConf20mATempNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConf20mATempNum1CMD,
-			sizeof(ShowConf20mATempNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mATempNum2CMD,
-			sizeof(ShowConf20mATempNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mATempNum3CMD,
-			sizeof(ShowConf20mATempNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mATempNum4CMD,
-			sizeof(ShowConf20mATempNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf20mATempUnitCMD,
-			sizeof(ShowConf20mATempUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf20mATempUnitCMD, 13, USARTSENDTIME);
 }
 /**
  * @功能简介 : 修改设置界面的20mA修正值
@@ -3450,8 +3417,7 @@ void Change_Conf_ADMAX(float temp20mA, uint8_t selectnum) {
 		ADMAX20mANum1CMD[7] += 31;
 		CMD[2] = 0x01;
 		CMD[3] = 24;
-		HAL_UART_Transmit(&huart1, ADMAX20mANum1CMD, sizeof(ADMAX20mANum1CMD),
-		USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ADMAX20mANum1CMD, 13, USARTSENDTIME);
 	} else {
 		CMD[2] = 0x01;
 		CMD[3] = 44;
@@ -3461,15 +3427,12 @@ void Change_Conf_ADMAX(float temp20mA, uint8_t selectnum) {
 		UnitCMD[7] = 126;
 	} else
 		UnitCMD[7] = 125;
-	HAL_UART_Transmit(&huart1, CMD, sizeof(CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, CMD, 14, USARTSENDTIME);
 
-	HAL_UART_Transmit(&huart1, ADMAX20mANum2CMD, sizeof(ADMAX20mANum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ADMAX20mANum3CMD, sizeof(ADMAX20mANum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ADMAX20mANum4CMD, sizeof(ADMAX20mANum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, UnitCMD, sizeof(UnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ADMAX20mANum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ADMAX20mANum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ADMAX20mANum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, UnitCMD, 13, USARTSENDTIME);
 }
 /**
  * @功能简介 : 修改设置界面的4mA修正值
@@ -3511,9 +3474,7 @@ void Change_Conf_ADMIN(float temp4mA, uint8_t selectnum) {
 		ShowConf4mANum1CMD[7] += 31;
 		CMD[2] = 0x01;
 		CMD[3] = 24;
-		HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD,
-				sizeof(ShowConf4mANum1CMD),
-				USARTSENDTIME);
+		HAL_UART_Transmit(&huart1, ShowConf4mANum1CMD, 13, USARTSENDTIME);
 	} else {
 		CMD[2] = 0x01;
 		CMD[3] = 44;
@@ -3523,15 +3484,12 @@ void Change_Conf_ADMIN(float temp4mA, uint8_t selectnum) {
 		UnitCMD[7] = 126;
 	} else
 		UnitCMD[7] = 125;
-	HAL_UART_Transmit(&huart1, CMD, sizeof(CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, CMD, 14, USARTSENDTIME);
 
-	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, sizeof(ShowConf4mANum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum3CMD, sizeof(ShowConf4mANum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mANum4CMD, sizeof(ShowConf4mANum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, UnitCMD, sizeof(UnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mANum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, UnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3546,8 +3504,7 @@ void Change_Conf_UpLimitAuto(uint8_t uplimitauto) {
 	} else {
 		ShowConfUpLimitAutoCMD[7] = 51;
 	}
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitAutoCMD,
-			sizeof(ShowConfUpLimitAutoCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitAutoCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3614,22 +3571,14 @@ void Change_Conf_UpLimit(float uplimit) {
 				ShowConfUpLimitNum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum00CMD,
-			sizeof(ShowConfUpLimitNum00CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum0CMD,
-			sizeof(ShowConfUpLimitNum0CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum1CMD,
-			sizeof(ShowConfUpLimitNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum2CMD,
-			sizeof(ShowConfUpLimitNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum3CMD,
-			sizeof(ShowConfUpLimitNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum4CMD,
-			sizeof(ShowConfUpLimitNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum5CMD,
-			sizeof(ShowConfUpLimitNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitUnitCMD,
-			sizeof(ShowConfUpLimitUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum00CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum0CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitNum5CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3699,22 +3648,22 @@ void Change_Conf_UpLimitDelay(float delaytime) {
 				ShowConfUpLimitDelayNum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum00CMD,
-			sizeof(ShowConfUpLimitDelayNum00CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum0CMD,
-			sizeof(ShowConfUpLimitDelayNum0CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum1CMD,
-			sizeof(ShowConfUpLimitDelayNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum2CMD,
-			sizeof(ShowConfUpLimitDelayNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum3CMD,
-			sizeof(ShowConfUpLimitDelayNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum4CMD,
-			sizeof(ShowConfUpLimitDelayNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum5CMD,
-			sizeof(ShowConfUpLimitDelayNum5CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD,
-			sizeof(ShowConfLimitDelayUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum00CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum0CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum1CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum2CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum3CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum4CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfUpLimitDelayNum5CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD, 13,
+	USARTSENDTIME);
 }
 
 /**
@@ -3729,8 +3678,7 @@ void Change_Conf_LowLimitAuto(uint8_t lowlimitauto) {
 	} else {
 		ShowConfLowLimitAutoCMD[7] = 51;
 	}
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitAutoCMD,
-			sizeof(ShowConfLowLimitAutoCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitAutoCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3797,22 +3745,14 @@ void Change_Conf_LowLimit(float lowlimit) {
 				ShowConfLowLimitNum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum00CMD,
-			sizeof(ShowConfLowLimitNum00CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum0CMD,
-			sizeof(ShowConfLowLimitNum0CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum1CMD,
-			sizeof(ShowConfLowLimitNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum2CMD,
-			sizeof(ShowConfLowLimitNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum3CMD,
-			sizeof(ShowConfLowLimitNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum4CMD,
-			sizeof(ShowConfLowLimitNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum5CMD,
-			sizeof(ShowConfLowLimitNum5CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitUnitCMD,
-			sizeof(ShowConfLowLimitUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum00CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum0CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitNum5CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -3882,22 +3822,22 @@ void Change_Conf_LowLimitDelay(float delaytime) {
 				ShowConfLowLimitDelayNum1CMD[7] = 91;
 		}
 	}
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum00CMD,
-			sizeof(ShowConfLowLimitDelayNum00CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum0CMD,
-			sizeof(ShowConfLowLimitDelayNum0CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum1CMD,
-			sizeof(ShowConfLowLimitDelayNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum2CMD,
-			sizeof(ShowConfLowLimitDelayNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum3CMD,
-			sizeof(ShowConfLowLimitDelayNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum4CMD,
-			sizeof(ShowConfLowLimitDelayNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum5CMD,
-			sizeof(ShowConfLowLimitDelayNum5CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD,
-			sizeof(ShowConfLimitDelayUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum00CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum0CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum1CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum2CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum3CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum4CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLowLimitDelayNum5CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfLimitDelayUnitCMD, 13,
+	USARTSENDTIME);
 }
 
 /**
@@ -3915,12 +3855,12 @@ void Change_Conf_WashHoldTime(uint8_t washholdtime) {
 		ShowConfWashHoldTimeNum1CMD[7] += 31;
 	} else
 		ShowConfWashHoldTimeNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeNum1CMD,
-			sizeof(ShowConfWashHoldTimeNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeNum2CMD,
-			sizeof(ShowConfWashHoldTimeNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeUnitCMD,
-			sizeof(ShowConfWashHoldTimeUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeNum1CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeNum2CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashHoldTimeUnitCMD, 13,
+	USARTSENDTIME);
 }
 
 /**
@@ -3938,12 +3878,12 @@ void Change_Conf_WashDelayTime(uint8_t washdelaytime) {
 		ShowConfWashDelayTimeNum1CMD[7] += 31;
 	} else
 		ShowConfWashDelayTimeNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeNum1CMD,
-			sizeof(ShowConfWashDelayTimeNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeNum2CMD,
-			sizeof(ShowConfWashDelayTimeNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeUnitCMD,
-			sizeof(ShowConfWashDelayTimeUnitCMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeNum1CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeNum2CMD, 13,
+	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfWashDelayTimeUnitCMD, 13,
+	USARTSENDTIME);
 }
 
 /**
@@ -3960,15 +3900,9 @@ void Change_Conf_Filter(uint8_t filter) {
 		ShowConfFilterNum1CMD[7] += 31;
 	} else
 		ShowConfFilterNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConfFilterNum1CMD,
-			sizeof(ShowConfFilterNum1CMD),
-			USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfFilterNum2CMD,
-			sizeof(ShowConfFilterNum2CMD),
-			USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConfFilterUnitCMD,
-			sizeof(ShowConfFilterUnitCMD),
-			USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfFilterNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfFilterNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConfFilterUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -4203,6 +4137,27 @@ void Change_CalType(uint8_t calType) {
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
 void Change_LastCell(float cell) {
+//显示上次传感器系数数字0
+	uint8_t ShowLastCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字1
+	uint8_t ShowLastCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字2-小数点
+	uint8_t ShowLastCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 114, 0x00,
+			30, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字3
+	uint8_t ShowLastCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字4
+	uint8_t ShowLastCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字5
+	uint8_t ShowLastCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示上次传感器系数数字6
+	uint8_t ShowLastCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 114, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	if (cell >= 10) {
 		ShowLastCellNum0CMD[7] = cell / 10;
 		cell -= ShowLastCellNum0CMD[7] * 10;
@@ -4248,6 +4203,27 @@ void Change_LastCell(float cell) {
  * @历史版本 : V0.0.1 - Ethan - 2020/01/03
  */
 void Change_PreCell(float cell) {
+//显示预设传感器系数数字0
+	uint8_t ShowPreCellNum0CMD[13] = { 0xEE, 0x32, 0x01, 34, 0x00, 64, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字1
+	uint8_t ShowPreCellNum1CMD[13] = { 0xEE, 0x32, 0x01, 54, 0x00, 64, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字2-小数点
+	uint8_t ShowPreCellNum2CMD[13] = { 0xEE, 0x32, 0x01, 74, 0x00, 64, 0x00, 30,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字03
+	uint8_t ShowPreCellNum3CMD[13] = { 0xEE, 0x32, 0x01, 84, 0x00, 64, 0x00, 31,
+			0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字4
+	uint8_t ShowPreCellNum4CMD[13] = { 0xEE, 0x32, 0x01, 104, 0x00, 64, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字5
+	uint8_t ShowPreCellNum5CMD[13] = { 0xEE, 0x32, 0x01, 124, 0x00, 64, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+//显示预设传感器系数数字6
+	uint8_t ShowPreCellNum6CMD[13] = { 0xEE, 0x32, 0x01, 144, 0x00, 64, 0x00,
+			31, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 	if (cell >= 10) {
 		ShowPreCellNum0CMD[7] = cell / 10;
 		cell -= ShowPreCellNum0CMD[7] * 10;
@@ -4306,16 +4282,11 @@ void Change_Cal_PPM_Fixed(float ppm) {
 		ShowConf4mATempNum1CMD[7] += 31;
 	} else
 		ShowConf4mATempNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum1CMD,
-			sizeof(ShowConf4mATempNum1CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum2CMD,
-			sizeof(ShowConf4mATempNum2CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum3CMD,
-			sizeof(ShowConf4mATempNum3CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum4CMD,
-			sizeof(ShowConf4mATempNum4CMD), USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowConf4mATempNum5CMD,
-			sizeof(ShowConf4mATempNum5CMD), USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowConf4mATempNum5CMD, 13, USARTSENDTIME);
 	switch (savedata.mode) {
 	case 0:
 		ShowCalPPMFixedUnitCMD[7] = 27;
@@ -4329,9 +4300,7 @@ void Change_Cal_PPM_Fixed(float ppm) {
 	default:
 		break;
 	}
-	HAL_UART_Transmit(&huart1, ShowCalPPMFixedUnitCMD,
-			sizeof(ShowCalPPMFixedUnitCMD),
-			USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalPPMFixedUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -4368,16 +4337,11 @@ void Change_Cal_Temp(void) {
 		ShowCalTempNum1CMD[7] += 31;
 	} else
 		ShowCalTempNum1CMD[7] = 91;
-	HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD, sizeof(ShowCalTempNum1CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD, sizeof(ShowCalTempNum2CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD, sizeof(ShowCalTempNum3CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD, sizeof(ShowCalTempNum4CMD),
-	USARTSENDTIME);
-	HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD, sizeof(ShowCalTempUnitCMD),
-	USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum1CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum2CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum3CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempNum4CMD, 13, USARTSENDTIME);
+	HAL_UART_Transmit(&huart1, ShowCalTempUnitCMD, 13, USARTSENDTIME);
 }
 
 /**
@@ -6306,29 +6270,29 @@ void UART_RxIDLECallback(UART_HandleTypeDef *uartHandle) {
 //	}
 }
 
-unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen) {
-	unsigned char uchCRCHi = 0xFF; /* 高CRC字节初始化 */
-	unsigned char uchCRCLo = 0xFF; /* 低CRC 字节初始化 */
-	unsigned uIndex; /* CRC循环中的索引 */
-	while (usDataLen--) /* 传输消息缓冲区 */
-	{
-		uIndex = uchCRCHi ^ *puchMsg++; /* 计算CRC */
-		uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
-		uchCRCLo = auchCRCLo[uIndex];
-	}
-	return (uchCRCHi << 8 | uchCRCLo);
-}
-void change_float_big_485rom(unsigned int j)  //修改浮点数在 rom 中的存储大小端
-{
-	char temp_c = 0;
-	temp_c = sensorRevBuf[j + 3];
-	sensorRevBuf[j + 3] = sensorRevBuf[j + 0];
-	sensorRevBuf[j + 0] = temp_c;
-
-	temp_c = sensorRevBuf[j + 2];
-	sensorRevBuf[j + 2] = sensorRevBuf[j + 1];
-	sensorRevBuf[j + 1] = temp_c;
-}
+//unsigned short CRC16(unsigned char *puchMsg, unsigned short usDataLen) {
+//	unsigned char uchCRCHi = 0xFF; /* 高CRC字节初始化 */
+//	unsigned char uchCRCLo = 0xFF; /* 低CRC 字节初始化 */
+//	unsigned uIndex; /* CRC循环中的索引 */
+//	while (usDataLen--) /* 传输消息缓冲区 */
+//	{
+//		uIndex = uchCRCHi ^ *puchMsg++; /* 计算CRC */
+//		uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
+//		uchCRCLo = auchCRCLo[uIndex];
+//	}
+//	return (uchCRCHi << 8 | uchCRCLo);
+//}
+//void change_float_big_485rom(unsigned int j)  //修改浮点数在 rom 中的存储大小端
+//{
+//	char temp_c = 0;
+//	temp_c = sensorRevBuf[j + 3];
+//	sensorRevBuf[j + 3] = sensorRevBuf[j + 0];
+//	sensorRevBuf[j + 0] = temp_c;
+//
+//	temp_c = sensorRevBuf[j + 2];
+//	sensorRevBuf[j + 2] = sensorRevBuf[j + 1];
+//	sensorRevBuf[j + 1] = temp_c;
+//}
 /**
  * @功能简介 : 外部中断服务函数
  * @入口参数 : GPIO_Pin：引脚
@@ -6472,7 +6436,7 @@ void eepromReadSetting(void) {
 //	HAL_NVIC_DisableIRQ(USART2_IRQn);
 //	HAL_NVIC_DisableIRQ(USART3_IRQn);
 //	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-	HAL_NVIC_DisableIRQ(TIM2_IRQn);
+//	HAL_NVIC_DisableIRQ(TIM2_IRQn);
 	HAL_Delay(1000);
 	SPI_Flash_WAKEUP();
 	SPI_FLASH_BufferRead((uint8_t*) &SPI_Flashed, 1, 1);
@@ -6488,7 +6452,7 @@ void eepromReadSetting(void) {
 //	HAL_NVIC_EnableIRQ(USART2_IRQn);
 //	HAL_NVIC_EnableIRQ(USART3_IRQn);
 //	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-	HAL_NVIC_EnableIRQ(TIM2_IRQn);
+//	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }/* End eepromReadSetting() */
 
 /**
@@ -6502,7 +6466,7 @@ void eepromWriteSetting(void) {
 //	HAL_NVIC_DisableIRQ(USART2_IRQn);
 //	HAL_NVIC_DisableIRQ(USART3_IRQn);
 //	HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-	HAL_NVIC_DisableIRQ(TIM2_IRQn);
+//	HAL_NVIC_DisableIRQ(TIM2_IRQn);
 //	HAL_Delay(50);
 	SPI_Flash_WAKEUP();
 	SPI_FLASH_SectorErase(0);
@@ -6520,7 +6484,7 @@ void eepromWriteSetting(void) {
 //	HAL_NVIC_EnableIRQ(USART2_IRQn);
 //	HAL_NVIC_EnableIRQ(USART3_IRQn);
 //	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-	HAL_NVIC_EnableIRQ(TIM2_IRQn);
+//	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }/* End eepromWriteSetting() */
 
 /* USER CODE END 4 */
