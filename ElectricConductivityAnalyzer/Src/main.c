@@ -2200,24 +2200,24 @@ void ProcessData(void) {
 					/ f_Rs + savedata.bdo;
 			if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
 					- rads_Correction[range]) > 0.2) {
-				if (f_Rs_fixed[filterCNT] <= 500) {
-					f_Rs_fixed[filterCNT] = -236.32226167242
-							+ 10.5261223406364 * f_Rs_fixed[filterCNT]
-							- 0.0187275932130559 * pow(f_Rs_fixed[filterCNT], 2)
-							+ 4.16084470422851E-05
-									* pow(f_Rs_fixed[filterCNT], 3)
-							- 3.02324383997023E-08
-									* pow(f_Rs_fixed[filterCNT], 4);
-				} else {
-					f_Rs_fixed[filterCNT] = 1739.69718765024
-							+ 2.892596689399 * f_Rs_fixed[filterCNT]
-							+ 0.00337048638969243
+//				if (f_Rs_fixed[filterCNT] <= 500) {
+//					f_Rs_fixed[filterCNT] = -236.32226167242
+//							+ 10.5261223406364 * f_Rs_fixed[filterCNT]
+//							- 0.0187275932130559 * pow(f_Rs_fixed[filterCNT], 2)
+//							+ 4.16084470422851E-05
+//									* pow(f_Rs_fixed[filterCNT], 3)
+//							- 3.02324383997023E-08
+//									* pow(f_Rs_fixed[filterCNT], 4);
+//				} else {
+					f_Rs_fixed[filterCNT] = 524.011273136224
+							+ 3.64613005164988 * f_Rs_fixed[filterCNT]
+							+ 0.00386198181351411
 									* pow(f_Rs_fixed[filterCNT], 2)
-							- 6.80784191251609E-07
+							- 8.38903989621984E-07
 									* pow(f_Rs_fixed[filterCNT], 3)
-							+ 5.91969220269017E-11
+							+ 7.71208554947847E-11
 									* pow(f_Rs_fixed[filterCNT], 4);
-				}
+//				}
 //				f_Rs_fixed[filterCNT] =
 //						(4.72289372562168E+16 - 76.2816672432326)
 //								/ (1
@@ -2228,7 +2228,7 @@ void ProcessData(void) {
 //								- 76.2816672432326;
 			}
 		}
-		if (f_Rs_fixed[filterCNT] > 250000) {
+		if (f_Rs_fixed[filterCNT] > 250000 * savedata.fixedcell) {
 			f_Rs_fixed[filterCNT] = 0;
 			/* 刷新标志位 */
 			refreshFlag = 0;
