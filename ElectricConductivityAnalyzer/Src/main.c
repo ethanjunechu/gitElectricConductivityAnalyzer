@@ -2196,37 +2196,36 @@ void ProcessData(void) {
 			f_Rs_fixed[filterCNT] = 0;
 		} else {
 			/* change to μS/cm */
-			f_Rs_fixed[filterCNT] = savedata.kdo * savedata.fixedcell * 1000000
-					/ f_Rs + savedata.bdo;
+			f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
 			if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
 					- rads_Correction[range]) > 0.2) {
-//				if (f_Rs_fixed[filterCNT] <= 500) {
-//					f_Rs_fixed[filterCNT] = -236.32226167242
-//							+ 10.5261223406364 * f_Rs_fixed[filterCNT]
-//							- 0.0187275932130559 * pow(f_Rs_fixed[filterCNT], 2)
-//							+ 4.16084470422851E-05
-//									* pow(f_Rs_fixed[filterCNT], 3)
-//							- 3.02324383997023E-08
-//									* pow(f_Rs_fixed[filterCNT], 4);
-//				} else {
-					f_Rs_fixed[filterCNT] = 524.011273136224
-							+ 3.64613005164988 * f_Rs_fixed[filterCNT]
-							+ 0.00386198181351411
-									* pow(f_Rs_fixed[filterCNT], 2)
-							- 8.38903989621984E-07
+				if (f_Rs_fixed[filterCNT] <= 120) {
+					f_Rs_fixed[filterCNT] = 3.26395698638032
+							- 1.48887534671519 * f_Rs_fixed[filterCNT]
+							+ 0.160306062414613 * pow(f_Rs_fixed[filterCNT], 2)
+							- 0.000704321334485904
+									* pow(f_Rs_fixed[filterCNT], 3);
+				} else if (f_Rs_fixed[filterCNT] > 120
+						&& f_Rs_fixed[filterCNT] <= 1600) {
+					f_Rs_fixed[filterCNT] = 62.4352272004598
+							+ 5.92530728270914 * f_Rs_fixed[filterCNT]
+							+ 0.0043899431949001 * pow(f_Rs_fixed[filterCNT], 2)
+							- 4.01818764385882E-06
 									* pow(f_Rs_fixed[filterCNT], 3)
-							+ 7.71208554947847E-11
+							+ 1.35675934681257E-09
 									* pow(f_Rs_fixed[filterCNT], 4);
-//				}
-//				f_Rs_fixed[filterCNT] =
-//						(4.72289372562168E+16 - 76.2816672432326)
-//								/ (1
-//										+ pow(
-//												(f_Rs_fixed[filterCNT]
-//														/ 901441623309033),
-//												-1.06890741249374))
-//								- 76.2816672432326;
+				} else {
+					f_Rs_fixed[filterCNT] = 18022.6080632257
+							- 16.5653258051419 * f_Rs_fixed[filterCNT]
+							+ 0.0113321428062606 * pow(f_Rs_fixed[filterCNT], 2)
+							- 1.92889111526266E-06
+									* pow(f_Rs_fixed[filterCNT], 3)
+							+ 1.31722634757075E-10
+									* pow(f_Rs_fixed[filterCNT], 4);
+				}
 			}
+			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
+					+ savedata.bdo) * savedata.fixedcell;
 		}
 		if (f_Rs_fixed[filterCNT] > 250000 * savedata.fixedcell) {
 			f_Rs_fixed[filterCNT] = 0;
@@ -5613,16 +5612,46 @@ void Cal_UI(void) {
 					f_Rs = 0;
 				switch (tempdata.mode) {
 				case 0:
-					f_PPM_Cal = savedata.kdo * savedata.fixedcell * 1000000
-							/ f_Rs;
+					f_PPM_Cal = 1000000 / f_Rs;
+					if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
+							- rads_Correction[range]) > 0.2) {
+						if (f_Rs_fixed[filterCNT] <= 120) {
+							f_Rs_fixed[filterCNT] = 3.26395698638032
+									- 1.48887534671519 * f_Rs_fixed[filterCNT]
+									+ 0.160306062414613
+											* pow(f_Rs_fixed[filterCNT], 2)
+									- 0.000704321334485904
+											* pow(f_Rs_fixed[filterCNT], 3);
+						} else if (f_Rs_fixed[filterCNT] > 120
+								&& f_Rs_fixed[filterCNT] <= 1600) {
+							f_Rs_fixed[filterCNT] = 62.4352272004598
+									+ 5.92530728270914 * f_Rs_fixed[filterCNT]
+									+ 0.0043899431949001
+											* pow(f_Rs_fixed[filterCNT], 2)
+									- 4.01818764385882E-06
+											* pow(f_Rs_fixed[filterCNT], 3)
+									+ 1.35675934681257E-09
+											* pow(f_Rs_fixed[filterCNT], 4);
+						} else {
+							f_Rs_fixed[filterCNT] = 18022.6080632257
+									- 16.5653258051419 * f_Rs_fixed[filterCNT]
+									+ 0.0113321428062606
+											* pow(f_Rs_fixed[filterCNT], 2)
+									- 1.92889111526266E-06
+											* pow(f_Rs_fixed[filterCNT], 3)
+									+ 1.31722634757075E-10
+											* pow(f_Rs_fixed[filterCNT], 4);
+						}
+					}
+					f_PPM_Cal = (tempdata.kdo * f_PPM_Cal) * tempdata.fixedcell;
 					if (f_PPM_Cal < 0)
 						f_PPM_Cal = 0;
 					if (f_PPM_Cal > 200000)
 						f_PPM_Cal = 200000;
 					break;
 				case 1:
-					f_PPM_Cal = savedata.kdo
-							* (f_Rs / 100000 / savedata.fixedcell);
+					f_PPM_Cal = tempdata.kdo
+							* (f_Rs / 100000 / tempdata.fixedcell);
 					if (f_PPM_Cal < 0)
 						f_PPM_Cal = 0;
 					if (f_PPM_Cal > 20)
@@ -5686,9 +5715,40 @@ void Cal_UI(void) {
 					f_Temp_fixed = 50;
 				//显示温度
 				Change_Cal_Temp();
+				f_PPM_Cal = 1000000 / f_Rs;
+				if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
+						- rads_Correction[range]) > 0.2) {
+					if (f_Rs_fixed[filterCNT] <= 120) {
+						f_Rs_fixed[filterCNT] = 3.26395698638032
+								- 1.48887534671519 * f_Rs_fixed[filterCNT]
+								+ 0.160306062414613
+										* pow(f_Rs_fixed[filterCNT], 2)
+								- 0.000704321334485904
+										* pow(f_Rs_fixed[filterCNT], 3);
+					} else if (f_Rs_fixed[filterCNT] > 120
+							&& f_Rs_fixed[filterCNT] <= 1600) {
+						f_Rs_fixed[filterCNT] = 62.4352272004598
+								+ 5.92530728270914 * f_Rs_fixed[filterCNT]
+								+ 0.0043899431949001
+										* pow(f_Rs_fixed[filterCNT], 2)
+								- 4.01818764385882E-06
+										* pow(f_Rs_fixed[filterCNT], 3)
+								+ 1.35675934681257E-09
+										* pow(f_Rs_fixed[filterCNT], 4);
+					} else {
+						f_Rs_fixed[filterCNT] = 18022.6080632257
+								- 16.5653258051419 * f_Rs_fixed[filterCNT]
+								+ 0.0113321428062606
+										* pow(f_Rs_fixed[filterCNT], 2)
+								- 1.92889111526266E-06
+										* pow(f_Rs_fixed[filterCNT], 3)
+								+ 1.31722634757075E-10
+										* pow(f_Rs_fixed[filterCNT], 4);
+					}
+				}
+				f_PPM_Cal = (f_PPM_Cal + tempdata.bdo) * tempdata.fixedcell;
 				//显示校准值
-				Change_Conf_ppm20mA(
-						tempdata.fixedcell * 1000000 / f_Rs + tempdata.bdo);
+				Change_Conf_ppm20mA(f_PPM_Cal);
 				//显示正在校准闪烁
 				HAL_UART_Transmit(&huart1, ShowConfigSelect2CMD, 13,
 				USARTSENDTIME);
@@ -5700,20 +5760,20 @@ void Cal_UI(void) {
 			if (result >= 5) {
 				switch (std) {
 				case 0:
-					tempdata.kdo = (1413 - tempdata.bdo) * f_Rs
-							/ tempdata.fixedcell / 1000000;
+					tempdata.kdo = (1413 / tempdata.fixedcell - tempdata.bdo)
+							/ f_PPM_Cal;
 					break;
 				case 1:
-					tempdata.kdo = (84 - tempdata.bdo) * f_Rs
-							/ tempdata.fixedcell / 1000000;
+					tempdata.kdo = (84 / tempdata.fixedcell - tempdata.bdo)
+							/ f_PPM_Cal;
 					break;
 				case 2:
-					tempdata.kdo = (12880 - tempdata.bdo) * f_Rs
-							/ tempdata.fixedcell / 1000000;
+					tempdata.kdo = (12880 / tempdata.fixedcell - tempdata.bdo)
+							/ f_PPM_Cal;
 					break;
 				}
-				f_PPM_Cal = tempdata.kdo * tempdata.fixedcell * 1000000 / f_Rs
-						+ tempdata.bdo;
+				f_PPM_Cal = (f_PPM_Cal * tempdata.kdo + tempdata.bdo)
+						* tempdata.fixedcell;
 				Change_Conf_ppm20mA(f_PPM_Cal);
 				success = 1;
 			} else {
@@ -5840,12 +5900,18 @@ void Cal_UI(void) {
 						switch (std) {
 						case 0:
 							f_PPM_Cal += 0.01;
+							tempdata.kdo = (1413 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						case 1:
 							f_PPM_Cal += 0.01;
+							tempdata.kdo = (84 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						case 2:
 							f_PPM_Cal += 10;
+							tempdata.kdo = (12880 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						default:
 							break;
@@ -5853,8 +5919,7 @@ void Cal_UI(void) {
 						if (f_PPM_Cal > 200000) {
 							f_PPM_Cal = 200000;
 						}
-						tempdata.kdo = (f_PPM_Cal - tempdata.bdo) * f_Rs
-								/ tempdata.fixedcell / 1000000;
+
 						Change_Conf_ppm20mA(f_PPM_Cal);
 					}
 					if (calType == 2 && success == 1) {
@@ -6003,12 +6068,18 @@ void Cal_UI(void) {
 						switch (std) {
 						case 0:
 							f_PPM_Cal -= 0.01;
+							tempdata.kdo = (1413 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						case 1:
 							f_PPM_Cal -= 0.01;
+							tempdata.kdo = (84 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						case 2:
 							f_PPM_Cal -= 10;
+							tempdata.kdo = (12880 / tempdata.fixedcell
+									- tempdata.bdo) / f_PPM_Cal;
 							break;
 						default:
 							break;
@@ -6016,8 +6087,6 @@ void Cal_UI(void) {
 						if (f_PPM_Cal < 1) {
 							f_PPM_Cal = 1;
 						}
-						tempdata.kdo = (f_PPM_Cal - tempdata.bdo) * f_Rs
-								/ tempdata.fixedcell / 1000000;
 						Change_Conf_ppm20mA(f_PPM_Cal);
 					}
 					if (calType == 2 && success == 1) {
