@@ -97,7 +97,7 @@ DAC_HandleTypeDef hdac;
 #define TP_CONTROL(x)	(x == 1 ? HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET) : HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET))
 
 //校正次数宏定义——1次1s
-#define CAL_COUNT 10
+#define CAL_COUNT 3
 
 //// CRC 高位字节值表
 //static unsigned char auchCRCHi[] = { 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80,
@@ -173,7 +173,7 @@ static long historyEnd = 0;
 uint32_t ADC_ConvertedValue[2];
 extern ADC_HandleTypeDef hadc1;
 
-extern double R_Correction[7];
+extern float R_Correction[7];
 extern float K_Correction[7];
 extern float rads_Correction[7];
 extern float rads[4];
@@ -692,7 +692,7 @@ long Sensor_Time = 0;
 //传感器状态标志位
 long Sensor_Status = 0;
 //校准结果状态
-uint8_t result = 0;
+//uint8_t result = 0;
 
 //flash保存参数
 typedef struct {
@@ -1331,6 +1331,8 @@ void application(void) {
 #endif
 		/* 显示更新时间和日期 */
 		RTC_Update();
+		/* 扫描按键 */
+		Button_Scan();
 		/* 获取阻抗 */
 		getRs();
 		/* 扫描按键 */
@@ -2061,7 +2063,12 @@ void getTemp(void) {
 	if (f_Temp < 0) {
 		f_Temp = 0;
 	}
-	f_Temp_fixed = (f_Temp_fixed + f_Temp * savedata.ktemp) / 2;
+	if ((f_Temp * savedata.ktemp - f_Temp_fixed) > 2
+			|| (f_Temp * savedata.ktemp - f_Temp_fixed) < -2) {
+		f_Temp_fixed = f_Temp * savedata.ktemp;
+	} else {
+		f_Temp_fixed = (f_Temp_fixed * 4 + f_Temp * savedata.ktemp) / 5;
+	}
 }
 
 /**
@@ -2071,8 +2078,8 @@ void getTemp(void) {
  * @历史版本 : V0.0.1 - Ethan - 2020/02/03
  */
 void getRs(void) {
-	double A = 1, B = 1, C = 1, D = 1;
-//	double a = 1, b = 1, c = 1, d = 1;
+	float A = 1, B = 1, C = 1, D = 1;
+//	float a = 1, b = 1, c = 1, d = 1;
 	uint8_t rangetemp = range;
 	if (f_Rs < 100) {
 		A = 1069.06077999153;
@@ -2139,7 +2146,7 @@ void getRs(void) {
 //
 //		d = -0.146606718046701;
 		range = 4;
-	} else if (f_Rs >= 399900 && f_Rs < 2099900) {
+	} else if (f_Rs >= 399900) {
 		A = 1.20212753386793E+16;
 		B = -0.233848476671557;
 		C = 3.83002076962508E+46;
@@ -2152,19 +2159,19 @@ void getRs(void) {
 //
 //		d = -0.13500812913517;
 		range = 5;
-	} else if (f_Rs >= 2099900) {
-		A = 7.69791680089553E+18;
-		B = -4.78014060660571;
-		C = 2194691212.60418;
-		D = 1817224.06021675;
-//		a = 2384539846.26623;
-//
-//		b = 0.4150541007826;
-//
-//		c = 5.45082965902506E-18;
-//
-//		d = -0.19136479286779;
-		range = 6;
+//	} else if (f_Rs >= 2099900) {
+//		A = 7.69791680089553E+18;
+//		B = -4.78014060660571;
+//		C = 2194691212.60418;
+//		D = 1817224.06021675;
+////		a = 2384539846.26623;
+////
+////		b = 0.4150541007826;
+////
+////		c = 5.45082965902506E-18;
+////
+////		d = -0.19136479286779;
+//		range = 6;
 	}
 	if (rangetemp != range) {
 		RangeSelect(range);
@@ -2186,58 +2193,64 @@ void ProcessData(void) {
 	float temp;
 	/* 刷新标志位 */
 	refreshFlag = 1;
-	result++;
-	if (result > 40) {
-		result = 0;
-	}
+//	result++;
+//	if (result > 40) {
+//		result = 0;
+//	}
 	switch (savedata.mode) {
 	case 0:
-		if (f_Rs > 25000000) {
-			f_Rs_fixed[filterCNT] = 0;
-		} else {
-			/* change to μS/cm */
-			f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
-			if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
-					- rads_Correction[range]) > 0.2) {
-				if (f_Rs_fixed[filterCNT] <= 120) {
-					f_Rs_fixed[filterCNT] = 3.26395698638032
-							- 1.48887534671519 * f_Rs_fixed[filterCNT]
-							+ 0.160306062414613 * pow(f_Rs_fixed[filterCNT], 2)
-							- 0.000704321334485904
-									* pow(f_Rs_fixed[filterCNT], 3);
-				} else if (f_Rs_fixed[filterCNT] > 120
-						&& f_Rs_fixed[filterCNT] <= 1600) {
-					f_Rs_fixed[filterCNT] = 62.4352272004598
-							+ 5.92530728270914 * f_Rs_fixed[filterCNT]
-							+ 0.0043899431949001 * pow(f_Rs_fixed[filterCNT], 2)
-							- 4.01818764385882E-06
-									* pow(f_Rs_fixed[filterCNT], 3)
-							+ 1.35675934681257E-09
-									* pow(f_Rs_fixed[filterCNT], 4);
-				} else {
-					f_Rs_fixed[filterCNT] = 18022.6080632257
-							- 16.5653258051419 * f_Rs_fixed[filterCNT]
-							+ 0.0113321428062606 * pow(f_Rs_fixed[filterCNT], 2)
-							- 1.92889111526266E-06
-									* pow(f_Rs_fixed[filterCNT], 3)
-							+ 1.31722634757075E-10
-									* pow(f_Rs_fixed[filterCNT], 4);
-				}
+//		if (f_Rs > 25000000) {
+//			f_Rs_fixed[filterCNT] = 0;
+//		} else {
+		/* change to μS/cm */
+		f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
+		if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
+				- rads_Correction[range]) > 0.2) {
+			if (f_Rs_fixed[filterCNT] <= 120) {
+				f_Rs_fixed[filterCNT] = 3.26395698638032
+						- 1.48887534671519 * f_Rs_fixed[filterCNT]
+						+ 0.160306062414613 * pow(f_Rs_fixed[filterCNT], 2)
+						- 0.000704321334485904 * pow(f_Rs_fixed[filterCNT], 3);
+			} else if (f_Rs_fixed[filterCNT] > 120
+					&& f_Rs_fixed[filterCNT] <= 1600) {
+				f_Rs_fixed[filterCNT] = 62.4352272004598
+						+ 5.92530728270914 * f_Rs_fixed[filterCNT]
+						+ 0.0043899431949001 * pow(f_Rs_fixed[filterCNT], 2)
+						- 4.01818764385882E-06 * pow(f_Rs_fixed[filterCNT], 3)
+						+ 1.35675934681257E-09 * pow(f_Rs_fixed[filterCNT], 4);
+			} else {
+				f_Rs_fixed[filterCNT] = 18022.6080632257
+						- 16.5653258051419 * f_Rs_fixed[filterCNT]
+						+ 0.0113321428062606 * pow(f_Rs_fixed[filterCNT], 2)
+						- 1.92889111526266E-06 * pow(f_Rs_fixed[filterCNT], 3)
+						+ 1.31722634757075E-10 * pow(f_Rs_fixed[filterCNT], 4);
 			}
 			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
 					+ savedata.bdo) * savedata.fixedcell;
+			/* 温度补偿 */
+			if (f_Temp != 0) {
+				f_Rs_fixed[filterCNT] = f_Rs_fixed[filterCNT]
+						- (f_Temp_fixed - 25) * f_Rs_fixed[filterCNT]
+								* (savedata.tempfactor / 100
+										- (f_Temp_fixed - 25)
+												* savedata.tempfactor / 5000);
+			}
+		} else {
+			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
+					+ savedata.bdo) * savedata.fixedcell;
 		}
-		if (f_Rs_fixed[filterCNT] > 250000 * savedata.fixedcell) {
-			f_Rs_fixed[filterCNT] = 0;
-			/* 刷新标志位 */
-			refreshFlag = 0;
-		}
+//		}
+//		if (f_Rs_fixed[filterCNT] > 250000 * savedata.fixedcell) {
+//			f_Rs_fixed[filterCNT] = 0;
+//			/* 刷新标志位 */
+//			refreshFlag = 0;
+//		}
 
-		if (f_Rs_fixed[filterCNT] <= 0) {
-			f_Rs_fixed[filterCNT] = 0;
-			/* 刷新标志位 */
-			refreshFlag = 0;
-		}
+//		if (f_Rs_fixed[filterCNT] <= 0) {
+//			f_Rs_fixed[filterCNT] = 0;
+//			/* 刷新标志位 */
+//			refreshFlag = 0;
+//		}
 		filterCNT++;
 		break;
 	case 1:
@@ -2279,7 +2292,7 @@ void ProcessData(void) {
 	}
 	if (filterCNT > savedata.filter) {
 		uint8_t i;
-		for (i = 0; i < savedata.filter / 10 + 3; i++) {
+		for (i = 0; i < savedata.filter / 20 + 6; i++) {
 			for (filterCNT = 0; filterCNT < savedata.filter - i; filterCNT++) {
 				if (f_Rs_fixed[filterCNT] > f_Rs_fixed[filterCNT + 1]) {
 					temp = f_Rs_fixed[filterCNT + 1];
@@ -2289,14 +2302,6 @@ void ProcessData(void) {
 			}
 		}
 		f_Rs_filter = f_Rs_fixed[savedata.filter / 2];
-		/* 温度补偿 */
-		if (f_Temp != 0) {
-			f_Rs_filter = f_Rs_filter
-					- (f_Temp_fixed - 25) * f_Rs_filter
-							* (savedata.tempfactor / 100
-									- (f_Temp_fixed - 25) * savedata.tempfactor
-											/ 5000);
-		}
 		filterCNT = 0;
 	}
 }
@@ -5596,7 +5601,7 @@ void Cal_UI(void) {
 			//显示正在校准文字
 			HAL_UART_Transmit(&huart1, ShowCalingStatusCMD, 13,
 			USARTSENDTIME);
-			result = 0;
+//			result = 0;
 			//显示正在校正的氧浓度值
 			for (i = 0; i < CAL_COUNT; i++) {
 				//显示正在校准闪烁
@@ -5606,10 +5611,12 @@ void Cal_UI(void) {
 				USARTSENDTIME);
 				/* 获取传感器数据 */
 				getRs();
-				if (f_Temp_fixed > 50)
-					f_Temp_fixed = 50;
+				if (f_Temp_fixed > 99.9)
+					f_Temp_fixed = 99.9;
 				if (f_Rs < 0)
 					f_Rs = 0;
+				//显示温度
+				Change_Cal_Temp();
 				switch (tempdata.mode) {
 				case 0:
 					f_PPM_Cal = 1000000 / f_Rs;
@@ -5667,9 +5674,6 @@ void Cal_UI(void) {
 				default:
 					break;
 				}
-
-				//显示温度
-				Change_Cal_Temp();
 				//显示校准值
 				Change_Conf_PPM4mA(f_PPM_Cal);
 				//显示正在校准闪烁
@@ -5680,28 +5684,30 @@ void Cal_UI(void) {
 				HAL_Delay(100);
 			}
 			//显示校准结果
-			if (result >= 5) {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
-				USARTSENDTIME);
-				Change_Conf_ppm20mA(f_PPM_Cal);
-				success = 1;
-				tempdata.bdo = 0;
-				CurrentSelect = 2;
-				Select_Next(CurrentSelect);
-			} else {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
-				USARTSENDTIME);
-				CurrentSelect = 3;
-				Select_Next(CurrentSelect);
-				CurrentSelect = 4;
-				Select_Next(CurrentSelect);
-			}
+//			if (result >= 5) {
+			HAL_UART_Transmit(&huart1, ShowCalFinishStatus1CMD, 13,
+			USARTSENDTIME);
+			Change_Conf_ppm20mA(f_PPM_Cal);
+			success = 1;
+			tempdata.bdo = 0;
+			CurrentSelect = 2;
+			Select_Next(CurrentSelect);
+//			} else {
+//				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
+//				USARTSENDTIME);
+//				CurrentSelect = 2;
+//				Select_Next(CurrentSelect);
+//				CurrentSelect = 3;
+//				Select_Next(CurrentSelect);
+//				CurrentSelect = 4;
+//				Select_Next(CurrentSelect);
+//			}
 		}
 
 		/* 斜率校正 */
 		if (configCurrentPage == 2 && configLastPage == 2 && CurrentSelect == 2
 				&& calType == 1 && success == 2) {
-			result = 0;
+//			result = 0;
 			//显示正在校正的氧浓度值
 			for (i = 0; i < CAL_COUNT; i++) {
 				//显示正在校准闪烁
@@ -5711,8 +5717,8 @@ void Cal_UI(void) {
 				USARTSENDTIME);
 				/* 获取传感器数据 */
 				getRs();
-				if (f_Temp_fixed > 50)
-					f_Temp_fixed = 50;
+				if (f_Temp_fixed > 99.9)
+					f_Temp_fixed = 99.9;
 				//显示温度
 				Change_Cal_Temp();
 				f_PPM_Cal = 1000000 / f_Rs;
@@ -5757,34 +5763,34 @@ void Cal_UI(void) {
 				HAL_Delay(100);
 			}
 			//显示校准结果
-			if (result >= 5) {
-				switch (std) {
-				case 0:
-					tempdata.kdo = (1413 / tempdata.fixedcell - tempdata.bdo)
-							/ f_PPM_Cal;
-					break;
-				case 1:
-					tempdata.kdo = (84 / tempdata.fixedcell - tempdata.bdo)
-							/ f_PPM_Cal;
-					break;
-				case 2:
-					tempdata.kdo = (12880 / tempdata.fixedcell - tempdata.bdo)
-							/ f_PPM_Cal;
-					break;
-				}
-				f_PPM_Cal = (f_PPM_Cal * tempdata.kdo + tempdata.bdo)
-						* tempdata.fixedcell;
-				Change_Conf_ppm20mA(f_PPM_Cal);
-				success = 1;
-			} else {
-				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
-				USARTSENDTIME);
-				CurrentSelect = 3;
-				Select_Next(CurrentSelect);
-				CurrentSelect = 4;
-				Select_Next(CurrentSelect);
-				success = 0;
+//			if (result >= 5) {
+			switch (std) {
+			case 0:
+				tempdata.kdo = (1413 / tempdata.fixedcell - tempdata.bdo)
+						/ f_PPM_Cal;
+				break;
+			case 1:
+				tempdata.kdo = (84 / tempdata.fixedcell - tempdata.bdo)
+						/ f_PPM_Cal;
+				break;
+			case 2:
+				tempdata.kdo = (12880 / tempdata.fixedcell - tempdata.bdo)
+						/ f_PPM_Cal;
+				break;
 			}
+			f_PPM_Cal = (f_PPM_Cal * tempdata.kdo + tempdata.bdo)
+					* tempdata.fixedcell;
+			Change_Conf_ppm20mA(f_PPM_Cal);
+			success = 1;
+//			} else {
+//				HAL_UART_Transmit(&huart1, ShowCalFinishStatus2CMD, 13,
+//				USARTSENDTIME);
+//				CurrentSelect = 3;
+//				Select_Next(CurrentSelect);
+//				CurrentSelect = 4;
+//				Select_Next(CurrentSelect);
+//				success = 0;
+//			}
 		}
 		if (configCurrentPage == 2 && configLastPage == 2
 				&& CurrentSelect == 3) {
@@ -6028,17 +6034,16 @@ void Cal_UI(void) {
 						break;
 					case 1:
 						if (std == 0) {
-							std = 2;
-							Change_Conf_PPM4mA(1413);
-							Change_Conf_ppm20mA(f_Rs_filter);
-						} else if (std == 1) {
-							std = 0;
+							std = 1;
 							Change_Conf_PPM4mA(84);
 							Change_Conf_ppm20mA(f_Rs_filter);
-
-						} else if (std == 2) {
-							std = 1;
+						} else if (std == 1) {
+							std = 2;
 							Change_Conf_PPM4mA(12880);
+							Change_Conf_ppm20mA(f_Rs_filter);
+						} else if (std == 2) {
+							std = 0;
+							Change_Conf_PPM4mA(1413);
 							Change_Conf_ppm20mA(f_Rs_filter);
 						}
 						break;
