@@ -4,24 +4,29 @@
 #define AD5933 1
 //#define AD5933_MCLK 16.776 //=536870912/MCLK;
 //#define AD5933_CLK 536870912
-#define AD5933_CLK 536870912
-#define AD5933_MCLK 16.384   //=524288000/MCLK;
+#define AD5933_CLK 536576000
+//#define AD5933_MCLK 16.384   //=524288000/MCLK;
+#define AD5933_MCLK 1.024   //=524288000/MCLK;
 #define	AD5933_MCLK_USE_OUT	1	//0内部时钟  1外部时钟
 //#define AD5933_Correction 101615461.47044108 //10k
-
-float R_Correction[7] = { 1289636.25, 2611425.25, 10763098, 96914352,
-		958445376, 9289377792, 54633222144 };
+//long ReadTemp;
+float R_Correction[7] = { 1503188.75, 2766158, 10752188, 97120232, 960129088,
+		1.91978844e+10, 1.91345164e+11 };
 float K_Correction[7] = { 1, 1, 1, 1, 1, 1, 1 };
 
 float rads_Correction[7] = { 0, 0, 0, 0, 0, 0, 0 };
 //float rads_Correction_B = 0;
 extern uint8_t range;
 //uint8_t num = 10;
-float resistance[10];
-float rads[4];
+float resistance[40];
+float rads[40];
+int res_j;
+uint8_t AD5933_Conv_Num = 1;
+uint8_t AD5933_Complete_Flag = 0;
 //int AD5933_Dat_Re[10];
 //int AD5933_Dat_Im[10];
-long hz = 10000;	//扫描频率
+long hz = 300;	//扫描频率
+uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 void Ini_I2c(void) //初始化I2C
 {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -416,33 +421,33 @@ int Rece_Byte(char nAddr) //读取nAddr中的字节到返回值
 	return nTemp;
 }
 
-uint16_t AD5933_Tempter(void) {
-
-// unsigned char Status;  //保存状态
-	unsigned int Tm; //保存实部，虚部，温度
-
-//   //复位AD5933
-//   Write_Byte(0x80,0XB1);
-//   Write_Byte(0x81,0X00);
-
-//启动温度测量
-	Write_Byte(0x80, 0x93);
-
-//等待转换完成
-//   do
-//    {
+//uint16_t AD5933_Tempter(void) {
 //
-//     Status=Rece_Byte(0x8F);
+//// unsigned char Status;  //保存状态
+//	unsigned int Tm; //保存实部，虚部，温度
 //
-//}while(!(Status & 0x01));
-//读出温度，保存在Tm中
-	Tm = Rece_Byte(0x92);
-	Tm <<= 8;
-	Tm += Rece_Byte(0x93);
-	Tm <<= 2;
-
-	return Tm;
-}
+////   //复位AD5933
+////   Write_Byte(0x80,0XB1);
+////   Write_Byte(0x81,0X00);
+//
+////启动温度测量
+//	Write_Byte(0x80, 0x93);
+//
+////等待转换完成
+////   do
+////    {
+////
+////     Status=Rece_Byte(0x8F);
+////
+////}while(!(Status & 0x01));
+////读出温度，保存在Tm中
+//	Tm = Rece_Byte(0x92);
+//	Tm <<= 8;
+//	Tm += Rece_Byte(0x93);
+//	Tm <<= 2;
+//
+//	return Tm;
+//}
 
 void Maopao_Paixu(float *dat, uint16_t leng) {
 	uint16_t i, j;
@@ -497,7 +502,6 @@ void Fre_To_Hex(float fre, uint8_t *buf) {
 //AD5933_Sweep(30000,200,200,AD5933_OUTPUT_2V,AD5933_Gain_1,AD5933_Fre_UP);
 float AD5933_Sweep(float Fre_Begin, float Fre_UP, uint16_t UP_Num,
 		uint16_t OUTPUT_Vatage, uint16_t Gain, uint16_t SWeep_Rep) {
-	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 	uint16_t buf = 0;
 	Fre_To_Hex(Fre_Begin, SValue);
 	Fre_To_Hex(Fre_UP, IValue);
@@ -511,22 +515,21 @@ float AD5933_Sweep(float Fre_Begin, float Fre_UP, uint16_t UP_Num,
 	CValue[0] = buf >> 8;
 	CValue[1] = buf;
 
-	Scale_imp(SValue, IValue, NValue, CValue);
+//	Scale_imp(SValue, IValue, NValue, CValue);
+	Scale_imp();
 	return 0;
 }
 /*SValue[3]起始频率，IValue[3]频率增量，NValue[2]增量数，CValue[2]控制字，ki增益系数，Ps扫频为1重复为0*/
 
-float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
-		uint8_t *CValue) {
-	int i, j, AddrTemp;
-	float Gain = ((~CValue[0]) & 0x01) ? 5 : 1;
+void Scale_imp(void) {
+	int i, AddrTemp;
+//	int j;
+//	float Gain = ((~CValue[0]) & 0x01) ? 5 : 1;
 	uint8_t SWeep_Rep = ((CValue[0] & 0xF0) == (AD5933_Fre_UP >> 8)) ? 1 : 0;
 	uint8_t Mode = CValue[0] & 0x0f;
-	long ReadTemp, realArr[3], imageArr[3];
-	float magnitude;
+	long ReadTemp;
 
-	j = 0;
-
+//	j = 0;
 	AddrTemp = 0X82; //初始化起始频率寄存器
 	for (i = 0; i < 3; i++) {
 		Write_Byte(AddrTemp, SValue[i]);
@@ -550,15 +553,66 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 	AddrTemp++;
 
 	Write_Byte(0x80, (Mode | (AD5933_SYS_Init >> 8))); //控制寄存器写入初始化频率扫描命令
-	HAL_Delay(10);
+	HAL_Delay(1000);
 	Write_Byte(0X80, (Mode | (AD5933_Begin_Fre_Scan >> 8))); //控制寄存器写入开始频率扫描命令
-	while (1) {
-		while (1) {
-			ReadTemp = Rece_Byte(0x8F); //读取状态寄存器检查DFT是否完成
-										//ReadTemp=ReadTemp&0x07;
-			if (ReadTemp & 0x02)
-				break;
-		}
+//	while (1) {
+//		while (1) {
+//			ReadTemp = Rece_Byte(0x8F); //读取状态寄存器检查DFT是否完成
+//										//ReadTemp=ReadTemp&0x07;
+//			if (ReadTemp & 0x02)
+//				break;
+//		}
+//		realArr[0] = Rece_Byte(0x94);
+//		realArr[1] = Rece_Byte(0x95);
+//		realArr[2] = realArr[0] * 0x100 + realArr[1];
+//
+//		imageArr[0] = Rece_Byte(0x96);
+//		imageArr[1] = Rece_Byte(0x97);
+//		imageArr[2] = imageArr[0] * 0x100 + imageArr[1];
+//
+//		//rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
+//		rads[j] = atan2(imageArr[2], realArr[2]);
+//		//计算实部的原码(除符号位外，取反加一)
+//		if (realArr[2] >= 0x8000) {
+//			realArr[2] ^= 0xFFFF;
+//			realArr[2] ^= 0x8000;
+//			realArr[2] += 1;
+//			realArr[2] ^= 0x8000;
+//		}
+//		//计算虚部的原码(除符号位外，取反加一)
+//		if (imageArr[2] >= 0x8000) {
+//			imageArr[2] ^= 0xFFFF;
+//			imageArr[2] ^= 0x8000;
+//			imageArr[2] += 1;
+//			imageArr[2] ^= 0x8000;
+//		}
+////		AD5933_Dat_Re[j] = realArr[2];
+////		AD5933_Dat_Im[j] = imageArr[2];
+//		magnitude = sqrt(realArr[2] * realArr[2] + imageArr[2] * imageArr[2]); //模值计算
+//		resistance[j++] = 1 / (magnitude * Gain);    //阻抗计算
+//
+//		ReadTemp = Rece_Byte(0x8F);      //读取状态寄存器检查频率扫描是否完成
+//		if (ReadTemp & 0x04)
+//			break;
+//		if (SWeep_Rep == 1)
+//			Write_Byte(0X80, CValue[0]); //控制寄存器写入增加频率（跳到下一个频率点)的命令
+//		else
+//			Write_Byte(0X80, CValue[0]); //控制寄存器写入重复当前频率点扫描
+//	}
+////	Write_Byte(0X80, 0XA1); //进入掉电模式
+//	return magnitude;
+}
+
+float check_AD5933(void) {
+	uint8_t SWeep_Rep = ((CValue[0] & 0xF0) == (AD5933_Fre_UP >> 8)) ? 1 : 0;
+	long realArr[3], imageArr[3];
+	float magnitude = 1;
+	float Gain = ((~CValue[0]) & 0x01) ? 5 : 1;
+	long ReadTemp;
+
+	ReadTemp = Rece_Byte(0x8F); //读取状态寄存器检查DFT是否完成
+								//ReadTemp=ReadTemp&0x07;
+	if (ReadTemp & 0x02) {
 		realArr[0] = Rece_Byte(0x94);
 		realArr[1] = Rece_Byte(0x95);
 		realArr[2] = realArr[0] * 0x100 + realArr[1];
@@ -568,7 +622,7 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 		imageArr[2] = imageArr[0] * 0x100 + imageArr[1];
 
 		//rads[j] = atan2(imageArr[2], realArr[2]) - 0.00143485062;
-		rads[j] = atan2(imageArr[2], realArr[2]);
+		rads[res_j] = atan2(imageArr[2], realArr[2]);
 		//计算实部的原码(除符号位外，取反加一)
 		if (realArr[2] >= 0x8000) {
 			realArr[2] ^= 0xFFFF;
@@ -586,15 +640,17 @@ float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
 //		AD5933_Dat_Re[j] = realArr[2];
 //		AD5933_Dat_Im[j] = imageArr[2];
 		magnitude = sqrt(realArr[2] * realArr[2] + imageArr[2] * imageArr[2]); //模值计算
-		resistance[j++] = 1 / (magnitude * Gain);    //阻抗计算
+		resistance[res_j++] = 1 / (magnitude * Gain);    //阻抗计算
 
 		ReadTemp = Rece_Byte(0x8F);      //读取状态寄存器检查频率扫描是否完成
-		if (ReadTemp & 0x04)
-			break;
-		if (SWeep_Rep == 1)
-			Write_Byte(0X80, CValue[0]); //控制寄存器写入增加频率（跳到下一个频率点)的命令
-		else
-			Write_Byte(0X80, CValue[0]); //控制寄存器写入重复当前频率点扫描
+		if (ReadTemp & 0x04) {
+			AD5933_Complete_Flag = 1;
+		} else {
+			if (SWeep_Rep == 1)
+				Write_Byte(0X80, CValue[0]); //控制寄存器写入增加频率（跳到下一个频率点)的命令
+			else
+				Write_Byte(0X80, CValue[0]); //控制寄存器写入重复当前频率点扫描
+		}
 	}
 //	Write_Byte(0X80, 0XA1); //进入掉电模式
 	return magnitude;
@@ -604,8 +660,9 @@ float DA5933_Get_Rs(void) {
 	float __attribute__ ((unused)) Rs, re;
 //			, im;
 
-	AD5933_Sweep(hz, 0, 4, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
-	Rs = K_Correction[range] * Get_resistance(4);
+//	AD5933_Sweep(hz, 40, 20, AD5933_OUTPUT_2V, AD5933_Gain_1, AD5933_Fre_UP);
+	Rs = Get_resistance(AD5933_Conv_Num);
+	re = Rs * cos(rads[0] - rads_Correction[range]);
 //	re = Rs * cos(rads[0] - rads_Correction[range] - rads_Correction_B);
 //	im = Rs * sin(rads[0]);
 
@@ -618,7 +675,7 @@ float DA5933_Get_Rs(void) {
 //		num = 10;
 	/* end of 测试系统误差临时使用 */
 
-	return Rs;
+	return re;
 }
 //float DA5933_Dat_Cap(float Fre) {
 //	float pp;

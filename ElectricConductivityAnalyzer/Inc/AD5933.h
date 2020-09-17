@@ -62,8 +62,10 @@ void Write_Byte(char nAddr, unsigned int nValue);
 void SetPointer(char nAddr);
 int Rece_Byte(char nAddr);
 void Delay_ms(unsigned long nValue);
-float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
-		uint8_t *CValue);
+//float Scale_imp(uint8_t *SValue, uint8_t *IValue, uint8_t *NValue,
+//		uint8_t *CValue);
+void Scale_imp(void);
+float check_AD5933(void);
 uint16_t AD5933_Tempter(void);
 float Get_resistance(uint16_t num);
 float AD5933_Sweep(float Fre_Begin, float Fre_UP, uint16_t UP_Num,

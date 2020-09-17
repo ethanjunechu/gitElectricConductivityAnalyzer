@@ -43,7 +43,7 @@
 //#include "dma.h"
 #include "rtc.h"
 #include "spi.h"
-//#include "tim.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -63,7 +63,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* 调试模式 */
 //#define DEBUG 1
-#define FLASHBASEADDR 0x0803FC00
+#define FLASHBASEADDR 0x0807FC00
 /* 串口3发送等待时间 */
 #define USARTSENDTIME 0xFFFF
 /* 目前可调范围 +-99 */
@@ -176,7 +176,12 @@ extern ADC_HandleTypeDef hadc1;
 extern float R_Correction[7];
 extern float K_Correction[7];
 extern float rads_Correction[7];
+extern float resistance[40];
 extern float rads[4];
+extern int res_j;
+extern uint8_t AD5933_Conv_Num;
+extern uint8_t AD5933_Complete_Flag;
+extern uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 //extern float rads_Correction_B;
 uint8_t range = 1;
 
@@ -209,7 +214,7 @@ uint8_t ShowWashStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x44, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 //显示电极状态
 uint8_t ShowElectrodeStatusCMD[13] = { 0xEE, 0x32, 0x00, 0x0A, 0x00, 240, 0x00,
-		46, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
+		49, 0x00, 0xFF, 0xFC, 0xFF, 0xFF };
 
 //显示日期数字第1位
 uint8_t ShowDateNum1CMD[13] = { 0xEE, 0x32, 0x00, 200, 0x00, 0, 0x00, 33, 0x00,
@@ -663,11 +668,12 @@ uint8_t historyFlag = 0;
 //传感器接收数据
 //uint8_t sensorRevBuf[50];
 
-float f_Rs;
+float f_Rs = 1;
+float old_Rs = 1;
 //修正值
 float f_Rs_fixed[60];
 //滤波数组结果，已进行对应测量模式变换
-float f_Rs_filter;
+float f_Rs_filter = 0;
 //滤波计数器
 uint8_t filterCNT = 0;
 extern long hz;	//扫描频率
@@ -693,6 +699,8 @@ long Sensor_Time = 0;
 long Sensor_Status = 0;
 //校准结果状态
 //uint8_t result = 0;
+//开机去除报警
+uint8_t startup_flag = 0;
 
 //flash保存参数
 typedef struct {
@@ -931,13 +939,15 @@ int main(void) {
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 
 	/* 开机校准 */
-	startCalc();
 	HAL_ADCEx_Calibration_Start(&hadc1);
 
-	/* 预转换获取电导，保证开机有数据 */
-	getRs();
 	getTemp();
-	f_Rs_filter = savedata.lowlimit + savedata.lowlimitdelay;
+
+	startCalc();
+
+	/* 预转换获取电导，保证开机有数据 */
+//	getRs();
+//	f_Rs_filter = savedata.lowlimit + savedata.lowlimitdelay;
 	/* 初始化主界面 */
 	LCD_Init();
 
@@ -1025,36 +1035,55 @@ void SystemClock_Config(void) {
 void startCalc(void) {
 	float ma1 = 0, ma2 = 0, temp = 0;
 	float R_Ref[7] = { 100, 200, 1000, 10000, 100000, 1000000, 10000000 };
-	uint8_t i = 0, j = 0;
-	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
+	uint8_t debugTemp1[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01, 0x02,
+			0x30, 0x31, 0xFF, 0xFC, 0xFF, 0xFF };
+
+	uint8_t i = 0, j = 1;
+//	uint8_t SValue[3], IValue[3], NValue[2], CValue[2];
 	uint16_t buf = 0;
-	for (i = 0; i < 7; i++) {
+	for (i = 1; i < 5; i++) {
 		RangeSelect(i + 7);
 		ma1 = 0;
 		ma2 = 0;
-		for (j = 0; j < 1; j++) {
-			Fre_To_Hex(hz - 500, SValue);
-			Fre_To_Hex(1, IValue);
-			NValue[0] = 0;
-			NValue[1] = 8;
-			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
-					| AD5933_OUT_MCLK;
-			CValue[0] = buf >> 8;
-			CValue[1] = buf;
+//		for (j = 0; j < 3; j++) {
+		debugTemp1[9] = '0' + i;
+		HAL_UART_Transmit(&huart1, debugTemp1, 14, USARTSENDTIME);
+		//Fre_To_Hex(hz + 10000 * ((5 - i) / 5), SValue);
+		Fre_To_Hex(hz, SValue);
+		Fre_To_Hex(1, IValue);
+		NValue[0] = 0;
+		NValue[1] = 1;
+		buf =
+		AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
+		CValue[0] = buf >> 8;
+		CValue[1] = buf;
 
-			ma1 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
-
-			Fre_To_Hex(hz + 500, SValue);
-			Fre_To_Hex(1, IValue);
-			NValue[0] = 0;
-			NValue[1] = 8;
-			buf = AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP
-					| AD5933_OUT_MCLK;
-			CValue[0] = buf >> 8;
-			CValue[1] = buf;
-
-			ma2 += (1 / R_Ref[i]) / Scale_imp(SValue, IValue, NValue, CValue);
+		res_j = 0;
+		AD5933_Complete_Flag = 0;
+		Scale_imp();
+		while (!AD5933_Complete_Flag) {
+			temp = check_AD5933();
 		}
+		ma1 += (1 / R_Ref[i]) / temp;
+
+		//Fre_To_Hex(hz + 800 + 10000 * ((5 - i) / 5), SValue);
+		Fre_To_Hex(hz + 800, SValue);
+		Fre_To_Hex(1, IValue);
+		NValue[0] = 0;
+		NValue[1] = 1;
+		buf =
+		AD5933_OUTPUT_2V | AD5933_Gain_1 | AD5933_Fre_UP | AD5933_OUT_MCLK;
+		CValue[0] = buf >> 8;
+		CValue[1] = buf;
+
+		res_j = 0;
+		AD5933_Complete_Flag = 0;
+		Scale_imp();
+		while (!AD5933_Complete_Flag) {
+			temp = check_AD5933();
+		}
+		ma2 += (1 / R_Ref[i]) / temp;
+//		}
 		temp = 1
 				/ ((ma1 / j)
 						+ ((1 / 100) / (ma2 / j) - (1 / 100) / (ma1 / j)) / 2);
@@ -1064,6 +1093,9 @@ void startCalc(void) {
 			rads_Correction[i] = rads[0];
 		}
 	}
+	res_j = 0;
+	AD5933_Complete_Flag = 0;
+	RangeSelect(1);
 }
 
 /**
@@ -1300,6 +1332,35 @@ void factoryConfig(uint8_t conf) {
  * @历史版本 : V0.0.1 - Ethan - 2018/01/03
  */
 void application(void) {
+	float m1;
+	/* 获取阻抗 */
+	if (!AD5933_Complete_Flag) {
+		m1 = check_AD5933();
+		/* 突变快速逼近，稳定长时间确保精度 */
+		if (m1 != 1 && startup_flag >= 3) {
+			if (((old_Rs - resistance[res_j - 1] * R_Correction[range]) / old_Rs
+					> 0.2)
+					|| ((old_Rs - resistance[res_j - 1] * R_Correction[range])
+							/ old_Rs < -0.2)) {
+				old_Rs = resistance[res_j - 1] * R_Correction[range];
+				AD5933_Conv_Num = 1;
+				AD5933_Sweep(hz, 800 / AD5933_Conv_Num, AD5933_Conv_Num,
+				AD5933_OUTPUT_2V,
+				AD5933_Gain_1, AD5933_Fre_UP);
+				res_j = 0;
+				AD5933_Complete_Flag = 0;
+			}
+		}
+	} else {
+		/* AD5933开始转换 */
+		getRs();
+		/* 扫描按键 */
+		Button_Scan();
+		/* 处理数据 */
+		ProcessData();
+		/* 扫描按键 */
+		Button_Scan();
+	}
 	/* 正常刷新数据 */
 	if (refreshFlag == 1) {
 #ifdef DEBUG
@@ -1309,8 +1370,7 @@ void application(void) {
 #endif
 		refreshFlag = 0;
 		Sensor_Status = 0;
-		/* 刷新界面 */
-		LCD_Update();
+
 		/* 扫描按键 */
 		Button_Scan();
 		/* 刷新4-20mA电流 */
@@ -1323,7 +1383,7 @@ void application(void) {
 		Button_Scan();
 	}
 	/* 获取传感器数据 */
-	if (refreshFlag == 0 && configFlag == 0 && Sensor_Time == 100000) {
+	if (configFlag == 0 && Sensor_Time == 1000) {
 #ifdef DEBUG
 		uint8_t debugTemp2[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01,
 				0x02, 0x30, 0x32, 0xFF, 0xFC, 0xFF, 0xFF };
@@ -1333,41 +1393,35 @@ void application(void) {
 		RTC_Update();
 		/* 扫描按键 */
 		Button_Scan();
-		/* 获取阻抗 */
-		getRs();
-		/* 扫描按键 */
-		Button_Scan();
 		/* 获取温度 */
 		getTemp();
 		/* 扫描按键 */
 		Button_Scan();
-		/* 处理数据 */
-		ProcessData();
-		/* 扫描按键 */
-		Button_Scan();
+		/* 刷新界面 */
+		LCD_Update();
 	}
 
 	/* 电极未接 */
-	if (Sensor_Status >= 600000) {
-#ifdef DEBUG
-		uint8_t debugTemp3[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01,
-				0x02, 0x34, 0x33, 0xFF, 0xFC, 0xFF, 0xFF };
-		HAL_UART_Transmit(&huart1, debugTemp3, 14, USARTSENDTIME);
-#endif
-		Sensor_Status = 1;
-		ShowElectrodeStatusCMD[7] = 46;
-		HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD, 13,
-		USARTSENDTIME);
-		f_Rs_filter = 0;
-		f_Temp = 0;
-		filterCNT = 0;
-		/* 刷新界面 */
-		LCD_Update();
-		/* 刷新4-20mA电流 */
-		ImA_Update();
-		/* 刷新继电器 */
-		Relay_Update();
-	}
+//	if (Sensor_Status >= 600000) {
+//#ifdef DEBUG
+//		uint8_t debugTemp3[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01,
+//				0x02, 0x34, 0x33, 0xFF, 0xFC, 0xFF, 0xFF };
+//		HAL_UART_Transmit(&huart1, debugTemp3, 14, USARTSENDTIME);
+//#endif
+//		Sensor_Status = 1;
+//		ShowElectrodeStatusCMD[7] = 46;
+//		HAL_UART_Transmit(&huart1, ShowElectrodeStatusCMD, 13,
+//		USARTSENDTIME);
+//		f_Rs_filter = 0;
+//		f_Temp = 0;
+//		filterCNT = 0;
+//		/* 刷新界面 */
+//		LCD_Update();
+//		/* 刷新4-20mA电流 */
+//		ImA_Update();
+//		/* 刷新继电器 */
+//		Relay_Update();
+//	}
 	/* 扫描按键 */
 	Button_Scan();
 	/* 备份时间 */
@@ -1481,11 +1535,11 @@ void application(void) {
 	}
 
 	/* 传感器状态判断 */
-	if (Sensor_Time > 300000) {
+	if (Sensor_Time > 1000) {
 		Sensor_Time = 0;
 	}
 	Sensor_Time++;
-	Sensor_Status++;
+//	Sensor_Status++;
 	/* 扫描按键 */
 	Button_Scan();
 }
@@ -1650,14 +1704,14 @@ void LCD_Update(void) {
 		Relay_Flag_Low = 0;
 		Relay_Flag_Up = 0;
 	} else if ((f_Rs_filter <= savedata.lowlimit) && (Sensor_Status == 0)
-			&& (savedata.lowlimitauto == 1)) {
+			&& (savedata.lowlimitauto == 1) && (startup_flag >= 3)) {
 		index = 11;
 		ShowElectrodeStatusCMD[7] = 47;
 		if (Relay_Flag != 0) {
 			Relay_Flag = 0;
 		}
 	} else if ((f_Rs_filter >= savedata.uplimit) && (Sensor_Status == 0)
-			&& (savedata.uplimitauto == 1)) {
+			&& (savedata.uplimitauto == 1) && (startup_flag >= 3)) {
 		index = 11;
 		ShowElectrodeStatusCMD[7] = 48;
 		if (Relay_Flag != 2) {
@@ -2078,108 +2132,55 @@ void getTemp(void) {
  * @历史版本 : V0.0.1 - Ethan - 2020/02/03
  */
 void getRs(void) {
-	float A = 1, B = 1, C = 1, D = 1;
-//	float a = 1, b = 1, c = 1, d = 1;
+	float k = 1, b = 0;
+	float Rs_temp = f_Rs;
 	uint8_t rangetemp = range;
-	if (f_Rs < 100) {
-		A = 1069.06077999153;
-		B = -1.21500650935111;
-		C = 188.86854728134;
-		D = -349.365716618024;
-//		a = 12287229.0190371;
-//
-//		b = 0.985335349515177;
-//
-//		c = 1.24681615949208E-06;
-//
-//		d = -0.199477864893327;
-		range = 0;
-	} else if (f_Rs >= 100 && f_Rs < 900) {
-		A = 212018852620660;
-		B = -0.935003561330031;
-		C = 793523686715824;
-		D = -145.13268534197;
-//		a = 2439204772055.68;
-//
-//		b = 1.00174357800465;
-//
-//		c = 1.73064809114887E-11;
-//
-//		d = -0.200396799185461;
-		range = 1;
-	} else if (f_Rs >= 900 && f_Rs < 9900) {
-		A = 271833862407165;
-		B = -0.999312554371451;
-		C = 254185065805555;
-		D = -92.5678587879467;
-//		a = 84.9395207010786;
-//
-//		b = 1.00697772531956;
-//
-//		c = 2.02504981693157;
-//
-//		d = -0.164707256538432;
-		range = 2;
-	} else if (f_Rs >= 9900 && f_Rs < 99900) {
-		A = 5283589107343.12;
-		B = -1.00058966452611;
-		C = 5134133495927.26;
-		D = -90.0947907729795;
-//		a = 163.498807145464;
-//
-//		b = 1.006400626512;
-//
-//		c = 9.48035457726195;
-//
-//		d = -0.14821772590625;
-		range = 3;
-	} else if (f_Rs >= 99900 && f_Rs < 399900) {
-		A = 346057097013129;
-		B = -1.02515983111702;
-		C = 207142683868656;
-		D = 2762.32996006807;
-//		a = 330536321.660332;
-//
-//		b = 1.00381401715703;
-//
-//		c = 4.80854345249882E-05;
-//
-//		d = -0.146606718046701;
-		range = 4;
-	} else if (f_Rs >= 399900) {
-		A = 1.20212753386793E+16;
-		B = -0.233848476671557;
-		C = 3.83002076962508E+46;
-		D = -2866457.78827296;
-//		a = 7781860378.55522;
-//
-//		b = 1.05011021118064;
-//
-//		c = 5.77481428330007E-05;
-//
-//		d = -0.13500812913517;
-		range = 5;
-//	} else if (f_Rs >= 2099900) {
-//		A = 7.69791680089553E+18;
-//		B = -4.78014060660571;
-//		C = 2194691212.60418;
-//		D = 1817224.06021675;
-////		a = 2384539846.26623;
-////
-////		b = 0.4150541007826;
-////
-////		c = 5.45082965902506E-18;
-////
-////		d = -0.19136479286779;
-//		range = 6;
-	}
-	if (rangetemp != range) {
-		RangeSelect(range);
-	}
-//	rads_Correction_B = (a - d) / (1 + pow(((f_Rs + 100) / c), b)) + d;
-	f_Rs = (A - D) / (1 + pow((DA5933_Get_Rs() / C), B)) + D - 100;
-	if (f_Rs <= 0) {
-		f_Rs = 0.001;
+	uint8_t debugTemp1[14] = { 0xEE, 0x20, 0x00, 0x0A, 0x00, 0x0A, 0x01, 0x02,
+			0x30, 0x31, 0xFF, 0xFC, 0xFF, 0xFF };
+	if (AD5933_Complete_Flag) {
+		DA5933_Get_Rs();
+		old_Rs = DA5933_Get_Rs();
+		if (old_Rs < 200) {
+			k = 2.5;
+			b = -150;
+		}
+		f_Rs = k * (old_Rs - 100) + b;
+		if (f_Rs <= 0) {
+			f_Rs = 5;
+		}
+		debugTemp1[9] = '0' + range;
+		HAL_UART_Transmit(&huart1, debugTemp1, 14, USARTSENDTIME);
+		if (f_Rs < 600) {
+			range = 1;
+		} else if (f_Rs >= 600 && f_Rs < 5900) {
+
+			range = 2;
+		} else if (f_Rs >= 5900 && f_Rs < 79900) {
+
+			range = 3;
+		} else if (f_Rs >= 79900) {
+
+			range = 4;
+		}
+		if (rangetemp != range || ((f_Rs - Rs_temp) / Rs_temp > 0.2)
+				|| ((f_Rs - Rs_temp) / Rs_temp < -0.2)) {
+			RangeSelect(range);
+			AD5933_Conv_Num = 1;
+		} else {
+			AD5933_Conv_Num++;
+			if (AD5933_Conv_Num > 40) {
+				AD5933_Conv_Num = 40;
+			}
+		}
+
+		AD5933_Sweep(hz, 800 / AD5933_Conv_Num, AD5933_Conv_Num,
+		AD5933_OUTPUT_2V,
+		AD5933_Gain_1, AD5933_Fre_UP);
+		res_j = 0;
+		AD5933_Complete_Flag = 0;
+		if (startup_flag < 3) {
+			startup_flag++;
+		}
 	}
 }
 
@@ -2204,41 +2205,41 @@ void ProcessData(void) {
 //		} else {
 		/* change to μS/cm */
 		f_Rs_fixed[filterCNT] = 1000000 / f_Rs;
-		if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
-				- rads_Correction[range]) > 0.2) {
-			if (f_Rs_fixed[filterCNT] <= 120) {
-				f_Rs_fixed[filterCNT] = 3.26395698638032
-						- 1.48887534671519 * f_Rs_fixed[filterCNT]
-						+ 0.160306062414613 * pow(f_Rs_fixed[filterCNT], 2)
-						- 0.000704321334485904 * pow(f_Rs_fixed[filterCNT], 3);
-			} else if (f_Rs_fixed[filterCNT] > 120
-					&& f_Rs_fixed[filterCNT] <= 1600) {
-				f_Rs_fixed[filterCNT] = 62.4352272004598
-						+ 5.92530728270914 * f_Rs_fixed[filterCNT]
-						+ 0.0043899431949001 * pow(f_Rs_fixed[filterCNT], 2)
-						- 4.01818764385882E-06 * pow(f_Rs_fixed[filterCNT], 3)
-						+ 1.35675934681257E-09 * pow(f_Rs_fixed[filterCNT], 4);
-			} else {
-				f_Rs_fixed[filterCNT] = 18022.6080632257
-						- 16.5653258051419 * f_Rs_fixed[filterCNT]
-						+ 0.0113321428062606 * pow(f_Rs_fixed[filterCNT], 2)
-						- 1.92889111526266E-06 * pow(f_Rs_fixed[filterCNT], 3)
-						+ 1.31722634757075E-10 * pow(f_Rs_fixed[filterCNT], 4);
-			}
-			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
-					+ savedata.bdo) * savedata.fixedcell;
-			/* 温度补偿 */
-			if (f_Temp != 0) {
-				f_Rs_fixed[filterCNT] = f_Rs_fixed[filterCNT]
-						- (f_Temp_fixed - 25) * f_Rs_fixed[filterCNT]
-								* (savedata.tempfactor / 100
-										- (f_Temp_fixed - 25)
-												* savedata.tempfactor / 5000);
-			}
-		} else {
-			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
-					+ savedata.bdo) * savedata.fixedcell;
+//		if (((rads[0] + rads[1] + rads[2] + rads[3]) / 4
+//				- rads_Correction[range]) > 0.2) {
+//			if (f_Rs_fixed[filterCNT] <= 120) {
+//				f_Rs_fixed[filterCNT] = 3.26395698638032
+//						- 1.48887534671519 * f_Rs_fixed[filterCNT]
+//						+ 0.160306062414613 * pow(f_Rs_fixed[filterCNT], 2)
+//						- 0.000704321334485904 * pow(f_Rs_fixed[filterCNT], 3);
+//			} else if (f_Rs_fixed[filterCNT] > 120
+//					&& f_Rs_fixed[filterCNT] <= 1600) {
+//				f_Rs_fixed[filterCNT] = 62.4352272004598
+//						+ 5.92530728270914 * f_Rs_fixed[filterCNT]
+//						+ 0.0043899431949001 * pow(f_Rs_fixed[filterCNT], 2)
+//						- 4.01818764385882E-06 * pow(f_Rs_fixed[filterCNT], 3)
+//						+ 1.35675934681257E-09 * pow(f_Rs_fixed[filterCNT], 4);
+//			} else {
+//				f_Rs_fixed[filterCNT] = 18022.6080632257
+//						- 16.5653258051419 * f_Rs_fixed[filterCNT]
+//						+ 0.0113321428062606 * pow(f_Rs_fixed[filterCNT], 2)
+//						- 1.92889111526266E-06 * pow(f_Rs_fixed[filterCNT], 3)
+//						+ 1.31722634757075E-10 * pow(f_Rs_fixed[filterCNT], 4);
+//			}
+		f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
+				+ savedata.bdo) * savedata.fixedcell;
+		/* 温度补偿 */
+		if (f_Temp != 0) {
+			f_Rs_fixed[filterCNT] = f_Rs_fixed[filterCNT]
+					- (f_Temp_fixed - 25) * f_Rs_fixed[filterCNT]
+							* (savedata.tempfactor / 100
+									- (f_Temp_fixed - 25) * savedata.tempfactor
+											/ 5000);
 		}
+//		} else {
+//			f_Rs_fixed[filterCNT] = (savedata.kdo * f_Rs_fixed[filterCNT]
+//					+ savedata.bdo) * savedata.fixedcell;
+//		}
 //		}
 //		if (f_Rs_fixed[filterCNT] > 250000 * savedata.fixedcell) {
 //			f_Rs_fixed[filterCNT] = 0;
